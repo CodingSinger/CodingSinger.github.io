@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Tomcat," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="类加载器类加载器是 Java 语言的一个创新，也是 Java 语言流行的重要原因之一。它使得 Java 类可以被动态加载到 Java 虚拟机中并执行。类加载器从 JDK 1.0 就出现了，最初是为了满足 Java Applet 的需要而开发出来的。Java Applet 需要从远程下载 Java 类文件到浏览器中并执行。现在类加载器在 Web 容器和 OSGi 中得到了广泛的使用。一般来说，Jav">
+<meta name="keywords" content="Tomcat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="学习Tomcat-十一-Tomcat热加载机制和类加载器">
+<meta property="og:url" content="http://yoursite.com/2018/03/20/学习Tomcat-十一-Tomcat热加载机制和类加载器/index.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="类加载器类加载器是 Java 语言的一个创新，也是 Java 语言流行的重要原因之一。它使得 Java 类可以被动态加载到 Java 虚拟机中并执行。类加载器从 JDK 1.0 就出现了，最初是为了满足 Java Applet 的需要而开发出来的。Java Applet 需要从远程下载 Java 类文件到浏览器中并执行。现在类加载器在 Web 容器和 OSGi 中得到了广泛的使用。一般来说，Jav">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/20160102154038185.jpg">
+<meta property="og:updated_time" content="2018-08-14T00:44:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="学习Tomcat-十一-Tomcat热加载机制和类加载器">
+<meta name="twitter:description" content="类加载器类加载器是 Java 语言的一个创新，也是 Java 语言流行的重要原因之一。它使得 Java 类可以被动态加载到 Java 虚拟机中并执行。类加载器从 JDK 1.0 就出现了，最初是为了满足 Java Applet 的需要而开发出来的。Java Applet 需要从远程下载 Java 类文件到浏览器中并执行。现在类加载器在 Web 容器和 OSGi 中得到了广泛的使用。一般来说，Jav">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/20160102154038185.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/20/学习Tomcat-十一-Tomcat热加载机制和类加载器/"/>
+
+
+
+
+
+  <title>学习Tomcat-十一-Tomcat热加载机制和类加载器 | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/20/学习Tomcat-十一-Tomcat热加载机制和类加载器/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">学习Tomcat-十一-Tomcat热加载机制和类加载器</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-20T12:50:27+08:00">
+                2018-03-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h1><p>类加载器是 Java 语言的一个创新，也是 Java 语言流行的重要原因之一。它使得 Java 类可以被动态加载到 Java 虚拟机中并执行。类加载器从 JDK 1.0 就出现了，最初是为了满足 Java Applet 的需要而开发出来的。Java Applet 需要从远程下载 Java 类文件到浏览器中并执行。现在类加载器在 Web 容器和 OSGi 中得到了广泛的使用。一般来说，Java 应用的开发人员不需要直接同类加载器进行交互。Java 虚拟机默认的行为就已经足够满足大多数情况的需求了。不过如果遇到了需要与类加载器进行交互的情况，而对类加载器的机制又不是很了解的话，就很容易花大量的时间去调试 ClassNotFoundException和NoClassDefFoundError等异常。本文将详细介绍 Java 的类加载器，帮助读者深刻理解 Java 语言中的这个重要概念。下面首先介绍一些相关的基本概念。</p>
+<p>顾名思义，类加载器（class loader）用来加载 Java 类到 Java 虚拟机中。一般来说，Java 虚拟机使用 Java 类的方式如下：Java 源程序（.java 文件）在经过 Java 编译器编译之后就被转换成 Java 字节代码（.class 文件）。类加载器负责读取 Java 字节代码，并转换成java.lang.Class类的一个实例。每个这样的实例用来表示一个 Java 类。通过此实例的 newInstance()方法就可以创建出该类的一个对象。实际的情况可能更加复杂，比如 Java 字节代码可能是通过工具动态生成的，也可能是通过网络下载的。</p>
+<p>基本上所有的类加载器都是 java.lang.ClassLoader类的一个实例。</p>
+<a id="more"></a>
+<blockquote>
+<p>&lt;&lt;深入java虚拟机&gt;&gt;中将类加载器理解为”通过一个类的全限定名来获取描述此类的二进制字节流”的动作实现者。</p>
+</blockquote>
+<blockquote>
+<p>百度百科-Java类加载器(Java Classloader)是Java运行时环境(Java Runtime Environment)的一部分，负责动态加载Java类到Java虚拟机的内存空间中。</p>
+</blockquote>
+<hr>
+<h1 id="类与类加载器"><a href="#类与类加载器" class="headerlink" title="类与类加载器"></a>类与类加载器</h1><p>比较两个类是否相等，只有在这两个类是由同一个类加载器加载的前提下才有意义。也就是说 即使这两个类都来源于同一个类文件，但加载他们的类加载器不同，那这两个类就必定不相同。这里所指的相等，包括代表类的Class对象的equals()方法，isAssignableFrom()以及isInstance()方法的返回结果，也包括使用instanceof关键字做对象所属关系判定等情况。</p>
+<p>这里借用&lt;&lt;深入java虚拟机&gt;&gt;上的一段代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">test1</span> </span>&#123;</span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ClassNotFoundException, InstantiationException, IllegalAccessException</span>&#123;</span><br><span class="line">  <span class="meta">@SuppressWarnings</span>(<span class="string">"unused"</span>)</span><br><span class="line">  ClassLoader loader = <span class="keyword">new</span> ClassLoader()&#123;</span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Class&lt;?&gt; loadClass(String name) <span class="keyword">throws</span> ClassNotFoundException &#123;</span><br><span class="line">    <span class="keyword">try</span></span><br><span class="line">    &#123;</span><br><span class="line">     String fileName =name.substring(name.lastIndexOf(<span class="string">"."</span>)+<span class="number">1</span>)+<span class="string">".class"</span>;</span><br><span class="line">     InputStream  is = getClass().getResourceAsStream(fileName);</span><br><span class="line">     <span class="keyword">if</span>(is==<span class="keyword">null</span>)</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">super</span>.loadClass(name);</span><br><span class="line">     <span class="keyword">byte</span>[] b = <span class="keyword">new</span> <span class="keyword">byte</span>[is.available()];</span><br><span class="line">     is.read(b);</span><br><span class="line">     <span class="keyword">return</span> defineClass(name,b,<span class="number">0</span>,b.length);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e)</span><br><span class="line">    &#123;</span><br><span class="line"></span><br><span class="line">     e.printStackTrace();</span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">   &#125;</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  Object obj = loader.loadClass(<span class="string">"com.ss.test1"</span>).newInstance();</span><br><span class="line">  System.out.println(obj.getClass());</span><br><span class="line">  System.out.println(obj <span class="keyword">instanceof</span> com.ss.test1);</span><br><span class="line"></span><br><span class="line">  System.out.println(test1.class.getClassLoader());</span><br><span class="line">  System.out.println(obj.getClass().getClassLoader());</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果</p>
+<p>···</p>
+<p>class com.ss.test1<br>false</p>
+<p>sun.misc.Launcher$AppClassLoader@3125fe1<br>com.ss.test1$1@65d174f</p>
+<p>···</p>
+<p>原因很简单，因为虚拟机中存在着两个test1类，一个是系统应用程序类加载器加载的，因为一个是由我们自定义的类加载器加载的。test1$1就是我们自己定义的加载器</p>
+<hr>
+<p><strong>不同的类加载器为相同名称的类创建了额外的名称空间</strong>。相同名称的类可以并存在 Java 虚拟机中，只需要用不同的类加载器来加载它们即可。不同类加载器加载的类之间是不兼容的，这就相当于在 Java 虚拟机内部创建了一个个相互隔离的 Java 类空间。这种技术在许多框架中都被用到，后面会详细介绍。<br>下面具体介绍类加载器加载类的详细过程。</p>
+<h2 id="加载类的过程"><a href="#加载类的过程" class="headerlink" title="加载类的过程"></a>加载类的过程</h2><p>在前面介绍类加载器的代理模式的时候，提到过类加载器会首先代理给其它类加载器来尝试加载某个类。这就意味着真正完成类的加载工作的类加载器和启动这个加载过程的类加载器，有可能不是同一个。真正完成类的加载工作是通过调用 defineClass来实现的；而启动类的加载过程是通过调用 loadClass来实现的。前者称为一个类的定义加载器（defining loader），后者称为初始加载器（initiating loader）。<strong>在 Java 虚拟机判断两个类是否相同的时候，使用的是类的定义加载器。</strong>也就是说，哪个类加载器启动类的加载过程并不重要，重要的是最终定义这个类的加载器。两种类加载器的关联之处在于：一个类的定义加载器是它引用的其它类的初始加载器。<br>如类 com.example.Outer引用了类 com.example.Inner，则由类 com.example.Outer的定义加载器负责启动类 com.example.Inner的加载过程。<br>方法 loadClass()抛出的是 java.lang.ClassNotFoundException异常；方法 defineClass()抛出的是 java.lang.NoClassDefFoundError异常。<br>类加载器在成功加载某个类之后，会把得到的 java.lang.Class类的实例缓存起来。下次再请求加载该类的时候，类加载器会直接使用缓存的类的实例，而不会尝试再次加载。也就是说，对于一个类加载器实例来说，相同全名的类只加载一次，即 loadClass方法不会被重复调用。</p>
+<hr>
+<h2 id="双亲委派机制"><a href="#双亲委派机制" class="headerlink" title="双亲委派机制"></a>双亲委派机制</h2><p>什么是双亲委派机制：<br>如果一个类加载器收到类加载的请求，它首先不会自己去尝试加载这个类，而是把这个请求委派给父类加载器完成。每个类加载器都是如此，只有当父加载器在自己的搜索范围内找不到指定的类<br>时（即ClassNotFoundException），子加载器才会尝试自己去加载。</p>
+<p><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/20160102154038185.jpg" alt="fd"></p>
+<p>引导类加载器（bootstrap class loader）：它用来加载 Java 的核心库&lt;JAVA_HOME&gt;/lib目录，并且是特定文件名的，是用原生代码来实现的，并不继承自 java.lang.ClassLoader。<br>我们用Class.getClassLoader()方法返回null的都是由该引导类加载器加载的。</p>
+<p>扩展类加载器（extensions class loader）：它用来加载 Java 的扩展库,&lt;JAVA_HOME&gt;/lib/ext目录下。Java 虚拟机的实现会提供一个扩展库目录。该类加载器在此目录里面查找并加载 Java 类。</p>
+<p>应用程序类加载器（Application class loader）：ClassLoader.getSystemClassLoader()方法返回的就是该类加载器，所以也叫系统类加载器,它根据 Java 应用的类路径（CLASSPATH）来加载 Java 类。一般来说，Java 应用的类都是由它来完成加载的。可以通过 ClassLoader.getSystemClassLoader()来获取它。</p>
+<p>Java类随着加载它的类加载器一起具备了一种带有优先级的层次关系。比如，Java中的Object类，它存放在rt.jar之中,无论哪一个类加载器要加载这个类，最终都是委派给处于模型最顶端的启动类加载器进行加载，因此Object在各种类加载环境中都是同一个类。如果不采用双亲委派模型，那么由各个类加载器自己取加载的话，那么系统中会存在多种不同的Object类。</p>
+<p>如何构建双亲加载机制的体系的。<br>所有的自定义类加载器继承抽象类ClassLoader或其的子类ClassLoader,ClassLoader构造器都会对parent进行注入。</p>
+<hr>
+<ul>
+<li>一道面试题<br>能不能自己写个类叫java.lang.System？</li>
+</ul>
+<p>答案：通常不可以，但可以采取另类方法达到这个需求。<br>解释：为了不让我们写System类，类加载采用委托机制，这样可以保证爸爸们优先，爸爸们能找到的类，儿子就没有机会加载。而System类是Bootstrap加载器加载的，就算自己重写，也总是使用Java系统提供的System，自己写的System类根本没有机会得到加载。</p>
+<p>但是，我们可以自己定义一个类加载器来达到这个目的，为了避免双亲委托机制，这个类加载器也必须是特殊的。由于系统自带的三个类加载器都加载特定目录下的类，如果我们自己的System类放在一个特殊的目录，那么系统的加载器就无法加载，也就是最终还是由我们自己的加载器加载。</p>
+<h2 id="类加载器与Web容器–Tomcat"><a href="#类加载器与Web容器–Tomcat" class="headerlink" title="类加载器与Web容器–Tomcat"></a>类加载器与Web容器–Tomcat</h2><p>对于运行在 Java EE™容器中的 Web 应用来说，类加载器的实现方式与一般的 Java 应用有所不同。不同的 Web 容器的实现方式也会有所不同。以 Apache Tomcat 来说，每个 Web 应用都有一个对应的类加载器实例。该类加载器也使用代理模式，所不同的是它是首先尝试去加载某个类，如果找不到再代理给父类加载器。这与一般类加载器的顺序是相反的。这是 Java Servlet 规范中的推荐做法，其目的是使得 Web 应用自己的类的优先级高于 Web 容器提供的类。这种代理模式的一个例外是：Java 核心库的类是不在查找范围之内的。这也是为了保证 Java 核心库的类型安全。<br>绝大多数情况下，Web 应用的开发人员不需要考虑与类加载器相关的细节。下面给出几条简单的原则：<br>每个 Web 应用自己的 Java 类文件和使用的库的 jar 包，分别放在 WEB-INF/classes和 WEB-INF/lib目录下面。<br>多个应用共享的 Java 类文件和 jar 包，分别放在 Web 容器指定的由所有 Web 应用共享的目录下面。<br>当出现找不到类的错误时，检查当前类的类加载器和当前线程的上下文类加载器是否正确。</p>
+<h2 id="类加载器和Tomcat的热加载机制"><a href="#类加载器和Tomcat的热加载机制" class="headerlink" title="类加载器和Tomcat的热加载机制"></a>类加载器和Tomcat的热加载机制</h2><p>在<strong>ContainerBase</strong>这个类中定义了<strong>ContainerBackgroundProcessor</strong>这个内部类，在tomcat启动的时候，在后台开启一个线程定时轮询各个web项目中是否有更改的迹象，并随时准备重新加载。</p>
+<blockquote>
+<p>WebappLoader#backgroundProcess()</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">backgroundProcess</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (reloadable &amp;&amp; modified()) &#123;</span><br><span class="line"></span><br><span class="line">          <span class="comment">//如果xml设置为reloadable=true 并且 modified()返回true</span></span><br><span class="line">          <span class="keyword">try</span> &#123;</span><br><span class="line">              Thread.currentThread().setContextClassLoader</span><br><span class="line">                  (WebappLoader.class.getClassLoader());</span><br><span class="line">              <span class="keyword">if</span> (context != <span class="keyword">null</span>) &#123;</span><br><span class="line">                  context.reload();<span class="comment">//对应context进行重新加载</span></span><br><span class="line">              &#125;</span><br><span class="line">          &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">              <span class="keyword">if</span> (context != <span class="keyword">null</span> &amp;&amp; context.getLoader() != <span class="keyword">null</span>) &#123;</span><br><span class="line">                  Thread.currentThread().setContextClassLoader</span><br><span class="line">                      (context.getLoader().getClassLoader());</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>modified()方法也比较简单，其实就是将WEB-INF/classes和WEB-INF/lib遍历 查看文件的修改日期和缓存中的修改日期是否相同 如果不同 则说明已经修改过了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">modified</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (log.isDebugEnabled())</span><br><span class="line">          log.debug(<span class="string">"modified()"</span>);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">for</span> (Entry&lt;String,ResourceEntry&gt; entry : resourceEntries.entrySet()) &#123;</span><br><span class="line">          <span class="keyword">long</span> cachedLastModified = entry.getValue().lastModified;</span><br><span class="line">          <span class="keyword">long</span> lastModified = resources.getClassLoaderResource(</span><br><span class="line">                  entry.getKey()).getLastModified();</span><br><span class="line">          <span class="keyword">if</span> (lastModified != cachedLastModified) &#123;</span><br><span class="line">              <span class="keyword">if</span>( log.isDebugEnabled() )</span><br><span class="line">                  log.debug(sm.getString(<span class="string">"webappClassLoader.resourceModified"</span>,</span><br><span class="line">                          entry.getKey(),</span><br><span class="line">                          <span class="keyword">new</span> Date(cachedLastModified),</span><br><span class="line">                          <span class="keyword">new</span> Date(lastModified)));</span><br><span class="line">              <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// Check if JARs have been added or removed</span></span><br><span class="line">      WebResource[] jars = resources.listResources(<span class="string">"/WEB-INF/lib"</span>);</span><br><span class="line">      <span class="comment">// Filter out non-JAR resources</span></span><br><span class="line"></span><br><span class="line">      <span class="keyword">int</span> jarCount = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">for</span> (WebResource jar : jars) &#123;</span><br><span class="line">          <span class="keyword">if</span> (jar.getName().endsWith(<span class="string">".jar"</span>) &amp;&amp; jar.isFile() &amp;&amp; jar.canRead()) &#123;</span><br><span class="line">              jarCount++;</span><br><span class="line">              Long recordedLastModified = jarModificationTimes.get(jar.getName());</span><br><span class="line">              <span class="keyword">if</span> (recordedLastModified == <span class="keyword">null</span>) &#123;</span><br><span class="line">                  <span class="comment">// Jar has been added</span></span><br><span class="line">                  log.info(sm.getString(<span class="string">"webappClassLoader.jarsAdded"</span>,</span><br><span class="line">                          resources.getContext().getName()));</span><br><span class="line">                  <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">              &#125;</span><br><span class="line">              <span class="keyword">if</span> (recordedLastModified.longValue() != jar.getLastModified()) &#123;</span><br><span class="line">                  <span class="comment">// Jar has been changed</span></span><br><span class="line">                  log.info(sm.getString(<span class="string">"webappClassLoader.jarsModified"</span>,</span><br><span class="line">                          resources.getContext().getName()));</span><br><span class="line">                  <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (jarCount &lt; jarModificationTimes.size())&#123;</span><br><span class="line">          log.info(sm.getString(<span class="string">"webappClassLoader.jarsRemoved"</span>,</span><br><span class="line">                  resources.getContext().getName()));</span><br><span class="line">          <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      <span class="comment">// No classes have been modified</span></span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>研究到这里，我突然想到如果在一个context重新加载的时候，恰好有一个对应该context的请求到来，那tomcat是该如何处理的呢？当然,tomcat对这个肯定是有处理的，在没有进入源码之前，我猜想tomcat的处理可能是搁置对该context的请求，阻塞在请求过程，并等待重新加载完成之后再唤醒该请求，以完成请求。实际上，tomcat并没有如此复杂的处理，可能是出于代码的复杂性以及性能的考虑，tomcat处理如下:</p>
+<p>在StandardContext类中有如下变量</p>
+<p><code>private volatile boolean paused = false;</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">reload</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">      <span class="comment">// Validate our current component state</span></span><br><span class="line">      <span class="keyword">if</span> (!getState().isAvailable())</span><br><span class="line">          <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException</span><br><span class="line">              (sm.getString(<span class="string">"standardContext.notStarted"</span>, getName()));</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span>(log.isInfoEnabled())</span><br><span class="line">          log.info(sm.getString(<span class="string">"standardContext.reloadingStarted"</span>,</span><br><span class="line">                  getName()));</span><br><span class="line"></span><br><span class="line">      <span class="comment">// Stop accepting requests temporarily.</span></span><br><span class="line">      <span class="comment">//临时停止request请求</span></span><br><span class="line">      setPaused(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">          stop();</span><br><span class="line">      &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">          log.error(</span><br><span class="line">              sm.getString(<span class="string">"standardContext.stoppingContext"</span>, getName()), e);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">          start();</span><br><span class="line">      &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">          log.error(</span><br><span class="line">              sm.getString(<span class="string">"standardContext.startingContext"</span>, getName()), e);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      setPaused(<span class="keyword">false</span>);<span class="comment">//重新启动该请求通道</span></span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span>(log.isInfoEnabled())</span><br><span class="line">          log.info(sm.getString(<span class="string">"standardContext.reloadingCompleted"</span>,</span><br><span class="line">                  getName()));</span><br><span class="line"></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>由此可见在context.reload()方法调用的时候通过设置paused属性的值，来标识该context的请求是否立马可达。对于请求是否可达的判断以及tomcat对请求的”搁置”的代码如下</p>
+<blockquote>
+<p>CoyoteAdapter##postParseRequest()</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">while</span>(mapRequired)&#123;</span><br><span class="line"></span><br><span class="line">            ......<span class="comment">//此处省略部分代码</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (!mapRequired &amp;&amp; request.getContext().getPaused()) &#123;</span><br><span class="line">             <span class="comment">//检查context的状态 是否允许请求 在reload的情况下 不允许请求</span></span><br><span class="line">                <span class="comment">// Found a matching context but it is paused. Mapping data will</span></span><br><span class="line">                <span class="comment">// be wrong since some Wrappers may not be registered at this</span></span><br><span class="line">                <span class="comment">// point.</span></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Thread.sleep(<span class="number">1000</span>);<span class="comment">//请求休眠1S</span></span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    <span class="comment">// Should never happen</span></span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// Reset mapping</span></span><br><span class="line">                request.getMappingData().recycle();</span><br><span class="line">                mapRequired = <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure>
+<p>参考自:<a href="https://www.ibm.com/developerworks/cn/java/j-lo-classloader/" target="_blank" rel="noopener">深入探讨 Java 类加载器</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Tomcat/" rel="tag"># Tomcat</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/20/学习Tomcat-十-session和Cookie机制源码解读/" rel="next" title="学习Tomcat-十-session和Cookie机制源码解读">
+                <i class="fa fa-chevron-left"></i> 学习Tomcat-十-session和Cookie机制源码解读
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/20/2018-03-14再读-深入Java虚拟机-一小时/" rel="prev" title="2018/03/14再读<<深入Java虚拟机>>一小时">
+                2018/03/14再读<<深入Java虚拟机>>一小时 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Ooo0oO0o0oO" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#类加载器"><span class="nav-number">1.</span> <span class="nav-text">类加载器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#类与类加载器"><span class="nav-number">2.</span> <span class="nav-text">类与类加载器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#加载类的过程"><span class="nav-number">2.1.</span> <span class="nav-text">加载类的过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#双亲委派机制"><span class="nav-number">2.2.</span> <span class="nav-text">双亲委派机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类加载器与Web容器–Tomcat"><span class="nav-number">2.3.</span> <span class="nav-text">类加载器与Web容器–Tomcat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类加载器和Tomcat的热加载机制"><span class="nav-number">2.4.</span> <span class="nav-text">类加载器和Tomcat的热加载机制</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

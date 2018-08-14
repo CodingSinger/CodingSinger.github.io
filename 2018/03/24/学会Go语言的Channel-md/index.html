@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Golang," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="channel的声明和初始化123456789//declare a channelvar c chan int// initializec = make(chan int,0)//c := make(chan int)">
+<meta name="keywords" content="Golang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="学会Go语言的Channel">
+<meta property="og:url" content="http://yoursite.com/2018/03/24/学会Go语言的Channel-md/index.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="channel的声明和初始化123456789//declare a channelvar c chan int// initializec = make(chan int,0)//c := make(chan int)">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-08-14T00:44:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="学会Go语言的Channel">
+<meta name="twitter:description" content="channel的声明和初始化123456789//declare a channelvar c chan int// initializec = make(chan int,0)//c := make(chan int)">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/24/学会Go语言的Channel-md/"/>
+
+
+
+
+
+  <title>学会Go语言的Channel | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/24/学会Go语言的Channel-md/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">学会Go语言的Channel</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-24T14:55:15+08:00">
+                2018-03-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="channel的声明和初始化"><a href="#channel的声明和初始化" class="headerlink" title="channel的声明和初始化"></a>channel的声明和初始化</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">//declare a channel</span><br><span class="line">var c chan int</span><br><span class="line"></span><br><span class="line">// initialize</span><br><span class="line">c = make(chan int,0)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//c := make(chan int)</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>Channel类型的定义格式如下：<br>ChannelType = ( “chan” | “chan” “&lt;-“ | “&lt;-“ “chan” ) ElementType .<br>它包括三种类型的定义。可选的&lt;-代表channel的方向。如果没有指定方向，那么Channel就是双向的，既可以接收数据，也可以发送数据。</p>
+<h1 id="认识make-Type-IntegerType-size-IntegerType"><a href="#认识make-Type-IntegerType-size-IntegerType" class="headerlink" title="认识make(Type IntegerType,size IntegerType)"></a>认识make(Type IntegerType,size IntegerType)</h1><p>没有缓冲的channel （size 为0）可以用来处理某些同步问题，因为sender阻塞直到该channel有人接收，同理，recevier也阻塞直到sender发送</p>
+<p>如果size不为0，则当channel满时，sender会阻塞直到有一个接受者从channel中取走数据。总的来说,channel就是满时发送者阻塞，空时接受者阻塞。</p>
+<p>因此，channel可以做信号量和互斥量使用</p>
+<ul>
+<li>当size = 0时，我们可以让一个线程等待另一个线程完成工作再继续运行，相当于通知的作用。如下：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">func Test_8(t *testing.T) &#123;</span><br><span class="line">   c := make(chan int)  // Allocate a channel.</span><br><span class="line">   // Start the work in a goroutine; when it completes, signal on the channel.</span><br><span class="line">   go func() &#123;</span><br><span class="line"></span><br><span class="line">      time.Sleep(time.Second*5)</span><br><span class="line">      fmt.Println(&quot;finish&quot;)</span><br><span class="line">      c &lt;- 1  // Send a signal; value does not matter.</span><br><span class="line">   &#125;()</span><br><span class="line"></span><br><span class="line">   &lt;-c   // Wait for work to finish; discard sent value.</span><br><span class="line">   fmt.Println(&quot;finish all&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>当size = 1时，channel可以当做互斥量来用，如下：</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">var c chan int</span><br><span class="line">var a sync.WaitGroup</span><br><span class="line">func add(i *int)&#123;</span><br><span class="line">   for j := 0;j &lt; 10000;j++&#123;</span><br><span class="line"></span><br><span class="line">      c &lt;- 1</span><br><span class="line"></span><br><span class="line">      (*i)++</span><br><span class="line"></span><br><span class="line">      &lt;- c</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line">   a.Done()</span><br><span class="line">&#125;</span><br><span class="line">func Test_9(t *testing.T) &#123;</span><br><span class="line"></span><br><span class="line">   i := 100</span><br><span class="line"></span><br><span class="line">   c = make(chan int,1)</span><br><span class="line">   a.Add(3)</span><br><span class="line">   go add(&amp;i)</span><br><span class="line">   go add(&amp;i)</span><br><span class="line">   go add(&amp;i)</span><br><span class="line">   a.Wait()</span><br><span class="line"></span><br><span class="line">   fmt.Printf(&quot;all finish.result %d\n&quot;,i)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>当size &gt; 1时，我们可以当做信号量来使用，如下,利用channel限制吞吐量，限制同时process(r)的协程。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">var sem = make(chan int, MaxOutstanding)</span><br><span class="line"></span><br><span class="line">func handle(r *Request) &#123;</span><br><span class="line">    sem &lt;- 1    // Wait for active queue to drain.</span><br><span class="line">    process(r)  // May take a long time.</span><br><span class="line">    &lt;-sem       // Done; enable next request to run.</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func Serve(queue chan *Request) &#123;</span><br><span class="line">    for &#123;</span><br><span class="line">        req := &lt;-queue</span><br><span class="line">        go handle(req)  // Don&apos;t wait for handle to finish.</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="close-channel"><a href="#close-channel" class="headerlink" title="close channel"></a>close channel</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">go func() &#123;</span><br><span class="line">   time.Sleep(time.Second * 5)</span><br><span class="line"></span><br><span class="line">   fmt.Println(&quot;关闭channel&quot;)</span><br><span class="line"></span><br><span class="line">   close(c)</span><br><span class="line"></span><br><span class="line">&#125;()</span><br><span class="line"></span><br><span class="line">&lt;-c //close之后不再阻塞</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">fmt.Println(&quot;接受到关闭信号，退出&quot;)</span><br></pre></td></tr></table></figure>
+<hr>
+<hr>
+<font color="red">用close关闭channel之后，将无法再进行发送数据到此channel否则将会报错，但是能继续接受数据，就像官方对该API的介绍用close关闭channel之后，将无法再进行发送数据到此channel否则将会报错，但是能继续接受数据，就像官方对该API的介绍</font>
+
+<blockquote>
+</blockquote>
+<p>// The close built-in function closes a channel, which must be either<br>// bidirectional or send-only. It should be executed only by the sender,<br>// never the receiver, and has the effect of shutting down the channel after<br>// the last sent value is received. After the last value has been received<br>// from a closed channel c, any receive from c will succeed without<br>// blocking, returning the zero value for the channel element. The form<br>// x, ok := &lt;-c<br>// will also set ok to false for a closed channel.<br>主要意思就是close方法应该被sender调用，并且channel关闭之后不能再发送数据到该channel,关闭之后能继续接受数据从该channel中，并且即使该channel没有数据，也会无阻塞地从该channel中取出对应类型的零值。</p>
+<h1 id="用range遍历channel"><a href="#用range遍历channel" class="headerlink" title="用range遍历channel"></a>用range遍历channel</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">c := make(chan int)</span><br><span class="line"></span><br><span class="line">go func() &#123;</span><br><span class="line">   for i := 0; i &lt; 10; i++ &#123;</span><br><span class="line"></span><br><span class="line">      time.Sleep(time.Second*2)</span><br><span class="line">      fmt.Println(&quot;放入&quot;,i)</span><br><span class="line"></span><br><span class="line">      c &lt;- i</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   fmt.Println(&quot;结束放入&quot;)</span><br><span class="line">&#125;()</span><br><span class="line"></span><br><span class="line">//range循环如果channel已经关闭则自动退出循环 否则将阻塞到有数据进入</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">for data := range c &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   fmt.Println(&quot;取出&quot;,data)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>range遍历阻塞直到channel中有数据。</p>
+<p>在结束放入的同时，立刻发生了panic:fatal error: all goroutines are asleep - deadlock!</p>
+<p>因为range遍历channel会一直尝试接受数据直到该channel关闭。因此此处for range将无限制的阻塞下去，造成死锁</p>
+<h1 id="close-channel-等于-channel-nil-吗"><a href="#close-channel-等于-channel-nil-吗" class="headerlink" title="close channel 等于 channel = nil 吗"></a>close channel 等于 channel = nil 吗</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">c := make(chan int)</span><br><span class="line">c1 := make(chan int)</span><br><span class="line"></span><br><span class="line">close(c)</span><br><span class="line">val,ok := &lt;-c</span><br><span class="line">fmt.Println(val,ok)</span><br><span class="line">//输出 0 false</span><br><span class="line">c1 = nil</span><br><span class="line">val1,ok1:= &lt;- c1 //阻塞在这</span><br><span class="line">fmt.Println(val1,ok1)</span><br></pre></td></tr></table></figure>
+<p>这里我们记住两个性质：</p>
+<ul>
+<li><p>已经关闭了的channel在无数据可取后会无阻塞地返回对应类型的零值，并且用<code>val,ok := &lt;-c</code>来接受,ok会被置为false</p>
+</li>
+<li><p>对一个赋值为空的channel引用进行操作将会阻塞。这个性质在下面将有用处。</p>
+</li>
+</ul>
+<h1 id="for、select-来提取数据"><a href="#for、select-来提取数据" class="headerlink" title="for、select 来提取数据"></a>for、select 来提取数据</h1><p>select语句如果没有default case,则阻塞直到其中之一的通道有数据能提取。</p>
+<p>一起来看一个程序,程序很简单，两个协程不同频率地发送数据，在主线程中用 for select进行接受</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">c := make(chan int, 20)</span><br><span class="line">s := make(chan string, 20)</span><br><span class="line"></span><br><span class="line">go func() &#123;</span><br><span class="line"></span><br><span class="line">   for i := 0; i &lt; 10; i++ &#123;</span><br><span class="line">      time.Sleep(time.Second * 1)</span><br><span class="line">      c &lt;- i</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   //关闭</span><br><span class="line"></span><br><span class="line">   close(c)</span><br><span class="line"></span><br><span class="line">&#125;()</span><br><span class="line"></span><br><span class="line">go func() &#123;</span><br><span class="line"></span><br><span class="line">   for i := 0; i &lt; 10; i++ &#123;</span><br><span class="line">      time.Sleep(time.Second * 2)</span><br><span class="line"></span><br><span class="line">      s &lt;- fmt.Sprintf(&quot;time %d&quot;, i)</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   //关闭</span><br><span class="line"></span><br><span class="line">   close(s)</span><br><span class="line"></span><br><span class="line">&#125;()</span><br><span class="line"></span><br><span class="line">//提取数据</span><br><span class="line"></span><br><span class="line">adone := false</span><br><span class="line">bdone := false</span><br><span class="line"></span><br><span class="line">for !adone || !bdone &#123;</span><br><span class="line">   select &#123;</span><br><span class="line"></span><br><span class="line">   case val, ok := &lt;-c:</span><br><span class="line"></span><br><span class="line">      _ = ok</span><br><span class="line">      fmt.Printf(&quot;接受数据从c %d\n&quot;, val)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   case val, ok := &lt;-s:</span><br><span class="line"></span><br><span class="line">      _ = ok</span><br><span class="line">      fmt.Printf(&quot;接受数据从s %s\n&quot;, val)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行程序发现，因为close的原因，但是for循环一直没被取消，所以在原先发送的数据都被取出来之后，但是close的channel依旧在无阻塞地返回对应类型的零值，for select结构还在不断地运行。</p>
+<p>那如何退出for呢，在不知道select的次数的时候，我们无法给for加一个次数限制，但是我们可以有别的办法告知接受线程：发送线程已经不发送了，你取完所有的数据就退出吧。</p>
+<p>因为close之后，ok会返回false，所以我们可以根据该值判断该channel是否关闭，然后设置个变量，以作为for循环是否终止的标志。篇幅原因，只修改for select语句部分：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">adone := false</span><br><span class="line">bdone := false</span><br><span class="line"></span><br><span class="line">for !adone || !bdone &#123;</span><br><span class="line">   select &#123;</span><br><span class="line"></span><br><span class="line">   case val, ok := &lt;-c:</span><br><span class="line"></span><br><span class="line">      if !ok &#123;</span><br><span class="line">         adone = true</span><br><span class="line">         fmt.Println(&quot;hh&quot;)</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">         fmt.Printf(&quot;接受数据从c %d\n&quot;, val)</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">   case val, ok := &lt;-s:</span><br><span class="line"></span><br><span class="line">      if !ok &#123;</span><br><span class="line">         bdone = true</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">         fmt.Printf(&quot;接受数据从s %s\n&quot;, val)</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行程序发现，在接受完所有的发送数据之后，程序完美退出。</p>
+<p>但是，请注意，这并不是最完美的方法，因为我们知道如上程序，在c中数据全部取出来之后关闭c之后，s通道依旧还有数据在发送，故无法退出for循环，而此时c通道返回的零值导致程序依旧需要花费大量不必要的时间和资源在处理c通道的case情况上。</p>
+<p>因此，我们可以使用赋值通道为nil来避免程序不必要的cpu时间花费，上面说过对值为空的通道引用的操作将会阻塞。</p>
+<p>篇幅原因，我们依旧只给出for select部分代码，其他不变：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">adone := false</span><br><span class="line">bdone := false</span><br><span class="line"></span><br><span class="line">for !adone || !bdone &#123;</span><br><span class="line">   select &#123;</span><br><span class="line"></span><br><span class="line">   case val, ok := &lt;-c:</span><br><span class="line"></span><br><span class="line">      if !ok &#123;</span><br><span class="line">         c =nil</span><br><span class="line">         adone = true</span><br><span class="line">         fmt.Println(&quot;hh&quot;)</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">         fmt.Printf(&quot;接受数据从c %d\n&quot;, val)</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   case val, ok := &lt;-s:</span><br><span class="line"></span><br><span class="line">      if !ok &#123;</span><br><span class="line">         s = nil</span><br><span class="line">         bdone = true</span><br><span class="line">      &#125; else &#123;</span><br><span class="line">         fmt.Printf(&quot;接受数据从s %s\n&quot;, val)</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在学习中，发现一个错误需要大家注意：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">c := make(chan int)</span><br><span class="line"></span><br><span class="line">finish := 10</span><br><span class="line">go send(finish,c)</span><br><span class="line"></span><br><span class="line">for&#123;</span><br><span class="line">   val := &lt;- c //接受一次 并不是永久接受</span><br><span class="line">   fmt.Printf(&quot;recv data %d \n&quot;,val)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   //这一步检查是必须的</span><br><span class="line">   //否则报错fatal error: all goroutines are asleep - deadlock!</span><br><span class="line">   if val == finish&#123;</span><br><span class="line">      break</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>为什么说这个检查是必须的，因为在main goroutine线，期望从管道中获得一个数据，而这个数据必须是其他goroutine线放入管道的<br>但是其他goroutine线程都已经执行完了(all goroutines are asleep)，那么就永远不会有数据放入管道。<br>所以，main goroutine线在等一个永远不会来的数据，那整个程序就永远等下去了。<br>这显然是没有结果的，所以这个程序就说“算了吧，不坚持了，我自己自杀掉，报一个错给代码作者，我被deadlock了”</p>
+<p>详情可见<a href="http://www.cnblogs.com/ghj1976/p/4295013.html" target="_blank" rel="noopener">我在这里</a></p>
+<p><a href="https://mikespook.com/2013/05/%E7%BF%BB%E8%AF%91%E7%BB%9D%E5%A6%99%E7%9A%84-channel/" target="_blank" rel="noopener">https://mikespook.com/2013/05/%E7%BF%BB%E8%AF%91%E7%BB%9D%E5%A6%99%E7%9A%84-channel/</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Golang/" rel="tag"># Golang</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/23/java并发-CyclicBarrier/" rel="next" title="Java并发-CyclicBarrier">
+                <i class="fa fa-chevron-left"></i> Java并发-CyclicBarrier
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/25/学习Tomcat-五-Connector组件介绍/" rel="prev" title="学习Tomcat-五-Tomcat Connector组件">
+                学习Tomcat-五-Tomcat Connector组件 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Ooo0oO0o0oO" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#channel的声明和初始化"><span class="nav-number">1.</span> <span class="nav-text">channel的声明和初始化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#认识make-Type-IntegerType-size-IntegerType"><span class="nav-number">2.</span> <span class="nav-text">认识make(Type IntegerType,size IntegerType)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#close-channel"><span class="nav-number">3.</span> <span class="nav-text">close channel</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#用range遍历channel"><span class="nav-number">4.</span> <span class="nav-text">用range遍历channel</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#close-channel-等于-channel-nil-吗"><span class="nav-number">5.</span> <span class="nav-text">close channel 等于 channel = nil 吗</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#for、select-来提取数据"><span class="nav-number">6.</span> <span class="nav-text">for、select 来提取数据</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

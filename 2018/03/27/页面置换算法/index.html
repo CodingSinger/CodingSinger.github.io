@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="操作系统," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="常见的置换算法最佳置换算法 (OPT)这是一种理想情况下的页面置换算法，但实际上是不可能实现的。该算法的基本思想是：发生缺页时，有些页面在内存中，其中有一页将很快被访问（也包含紧接着的下一条指令的那页），而其他页面则可能要到10、100或者1000条指令后才会被访问，每个页面都可[ 以用在该页面首次被访问前所要执行的指令数进行标记。最佳页面置换算法只是简单地规定：标记最大的页应该被置换。这个算法唯">
+<meta name="keywords" content="操作系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="页面置换算法">
+<meta property="og:url" content="http://yoursite.com/2018/03/27/页面置换算法/index.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="常见的置换算法最佳置换算法 (OPT)这是一种理想情况下的页面置换算法，但实际上是不可能实现的。该算法的基本思想是：发生缺页时，有些页面在内存中，其中有一页将很快被访问（也包含紧接着的下一条指令的那页），而其他页面则可能要到10、100或者1000条指令后才会被访问，每个页面都可[ 以用在该页面首次被访问前所要执行的指令数进行标记。最佳页面置换算法只是简单地规定：标记最大的页应该被置换。这个算法唯">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-08-14T00:44:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="页面置换算法">
+<meta name="twitter:description" content="常见的置换算法最佳置换算法 (OPT)这是一种理想情况下的页面置换算法，但实际上是不可能实现的。该算法的基本思想是：发生缺页时，有些页面在内存中，其中有一页将很快被访问（也包含紧接着的下一条指令的那页），而其他页面则可能要到10、100或者1000条指令后才会被访问，每个页面都可[ 以用在该页面首次被访问前所要执行的指令数进行标记。最佳页面置换算法只是简单地规定：标记最大的页应该被置换。这个算法唯">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/27/页面置换算法/"/>
+
+
+
+
+
+  <title>页面置换算法 | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/27/页面置换算法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">页面置换算法</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-27T14:17:51+08:00">
+                2018-03-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/操作系统/" itemprop="url" rel="index">
+                    <span itemprop="name">操作系统</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="常见的置换算法"><a href="#常见的置换算法" class="headerlink" title="常见的置换算法"></a>常见的置换算法</h1><h2 id="最佳置换算法-OPT"><a href="#最佳置换算法-OPT" class="headerlink" title="最佳置换算法 (OPT)"></a>最佳置换算法 (OPT)</h2><p>这是一种理想情况下的页面置换算法，但实际上是不可能实现的。该算法的基本思想是：发生缺页时，有些页面在内存中，其中有一页将很快被访问<br>（也包含紧接着的下一条指令的那页），而其他页面则可能要到10、100或者1000条指令后才会被访问，每个页面都可[ 以用在该页面首次被访问<br>前所要执行的指令数进行标记。最佳页面置换算法只是简单地规定：标记最大的页应该被置换。这个算法唯一的一个问题就是它无法实现。当缺页发<br>生时，操作系统无法知道各个页面下一次是在什么时候被访问。虽然这个算法不可能实现，但是最佳页面置换算法可以用于对可实现算法的性能进行<br>衡量比较。</p>
+<h2 id="先进先出置换算法（FIFO"><a href="#先进先出置换算法（FIFO" class="headerlink" title="先进先出置换算法（FIFO)"></a>先进先出置换算法（FIFO)</h2><p>最简单的页面置换算法是先入先出（FIFO）法。这种算法的实质是，总是选择在主存中停留时间最长（即最老）的一页置换，即先进入内存的页，先<br>退出内存。理由是：最早调入内存的页，其不再被使用的可能性比刚调入内存的可能性大。建立一个FIFO队列，收容所有在内存中的页。被置换页面<br>总是在队列头上进行。当一个页面被放入内存时，就把它插在队尾上。[1]<br>这种算法只是在按线性顺序访问地址空间[1]  时才是理想的，否则效率不高。因为那些常被访问的页，往往在主存中也停留得最久，结果它们因变“<br>老”而不得不被置换出去。<br>FIFO的另一个缺点是，它有一种异常现象，即在增加存储块的情况下，反而使缺页中断率增加了。当然，导致这种异常现象的页面走向实际上是很少<br>见的。</p>
+<a id="more"></a>
+<h2 id="最近最久未使用（LRU）算法"><a href="#最近最久未使用（LRU）算法" class="headerlink" title="最近最久未使用（LRU）算法"></a>最近最久未使用（LRU）算法</h2><p>如果以最近的过去作为不久将来的近似，那么就可以把过去最长一段时间里不曾被使用的页面置换掉。它的实质是，当需要置换一页时，选择在之前<br>一段时间里最久没有使用过的页面予以置换。这种算法就称为最久未使用算法（Least Recently Used，LRU）。<br>LRU算法是与每个页面最后使用的时间有关的。当必须置换一个页面时，LRU算法选择过去一段时间里最久未被使用的页面。</p>
+<h2 id="最少使用（LFU）置换算法"><a href="#最少使用（LFU）置换算法" class="headerlink" title="最少使用（LFU）置换算法"></a>最少使用（LFU）置换算法</h2><p>在采用最少使用置换算法时，应为在内存中的每个页面设置一个移位寄存器，用来记录该页面被访问的频率。该置换算法选择在之前时期使用最少的<br>页面作为淘汰页。由于存储器具有较高的访问速度，例如100 ns，在1 ms时间内可能对某页面连续访 问成千上万次，因此，通常不能直接利用计<br>数器来记录某页被访问的次数，而是采用移位寄存器方式。每次访问某页时，便将该移位寄存器的最高位置1，再每隔一定时间(例如100 ns)右移一次。<br>这样，在最近一段时间使用最少的页面将是∑Ri最小的页。<br>加入时间衰减是为了避免之前的大量访问而导致之后几乎不访问却不容易被换出的污染页面产生。可以每隔一段时间，将访问次数衰减。将访问次数衰减</p>
+<h2 id="最近未使用算法（Not-Recently-Used，NUR）"><a href="#最近未使用算法（Not-Recently-Used，NUR）" class="headerlink" title="最近未使用算法（Not Recently Used，NUR）"></a>最近未使用算法（Not Recently Used，NUR）</h2><p>它在存储分块表的每一表项中增加一个引用位，操作系统定期地将它们置为0。当某一页被访问时，由硬件将该位置1。过一段时间后，通过检查这些位<br>可以确定哪些页使用过，哪些页自上次置0后还未使用过。就可把该位是0的页淘汰出去，因为在之前最近一段时间里它未被访问过。</p>
+<h1 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br><span class="line">428</span><br><span class="line">429</span><br><span class="line">430</span><br><span class="line">431</span><br><span class="line">432</span><br><span class="line">433</span><br><span class="line">434</span><br><span class="line">435</span><br><span class="line">436</span><br><span class="line">437</span><br><span class="line">438</span><br><span class="line">439</span><br><span class="line">440</span><br><span class="line">441</span><br><span class="line">442</span><br><span class="line">443</span><br><span class="line">444</span><br><span class="line">445</span><br><span class="line">446</span><br><span class="line">447</span><br><span class="line">448</span><br><span class="line">449</span><br><span class="line">450</span><br><span class="line">451</span><br><span class="line">452</span><br><span class="line">453</span><br><span class="line">454</span><br><span class="line">455</span><br><span class="line">456</span><br><span class="line">457</span><br><span class="line">458</span><br><span class="line">459</span><br><span class="line">460</span><br><span class="line">461</span><br><span class="line">462</span><br><span class="line">463</span><br><span class="line">464</span><br><span class="line">465</span><br><span class="line">466</span><br><span class="line">467</span><br><span class="line">468</span><br><span class="line">469</span><br><span class="line">470</span><br><span class="line">471</span><br><span class="line">472</span><br><span class="line">473</span><br><span class="line">474</span><br><span class="line">475</span><br><span class="line">476</span><br><span class="line">477</span><br><span class="line">478</span><br><span class="line">479</span><br><span class="line">480</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> INVALID -1</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> total_vp 50 <span class="comment">/*总页数*/</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> INSTRU 300</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> INTEGER_MAX 2147483647</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span>&#123;</span></span><br><span class="line">    <span class="keyword">int</span> pgn; <span class="comment">/*与mem_pages的pfn位对应，如果有效则指向mps数组的下标*/</span></span><br><span class="line">    <span class="keyword">int</span> count;</span><br><span class="line">    <span class="keyword">int</span> pid;<span class="comment">//页编号</span></span><br><span class="line">    <span class="keyword">int</span> time;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;page_stru;<span class="comment">//页表项</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*对应内存页的结构*/</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">mem_pages</span>&#123;</span></span><br><span class="line">    <span class="keyword">int</span> pfn;</span><br><span class="line">    <span class="keyword">int</span> pid; <span class="comment">// 如果不空闲，则指向页编号</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">mem_pages</span> *<span class="title">next</span>;</span> <span class="comment">//关联下一页的指针</span></span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> access_pages[INSTRU],a[INSTRU],offset[INSTRU]; <span class="comment">// 访问页面集合</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">page_stru  pgs[total_vp]; <span class="comment">//总的页面集合 可以理解为页表</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">mem_pages</span>  <span class="title">mps</span>[<span class="title">total_vp</span>];</span><span class="comment">//内存页表集合</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">mem_pages</span>* <span class="title">freepg_head</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">mem_pages</span> *<span class="title">busypg_head</span>,*<span class="title">busypg_tail</span>;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">arrayCopy</span><span class="params">(<span class="keyword">int</span>* is,<span class="keyword">int</span> value,<span class="keyword">int</span> length)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span> ;i&lt;length;i++)&#123;</span><br><span class="line">        is[i] = value;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">initPages</span><span class="params">(<span class="keyword">int</span> total_np)</span></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i&lt;total_vp;i++)&#123;</span><br><span class="line">        pgs[i].pgn = INVALID;</span><br><span class="line">        pgs[i].count = <span class="number">-1</span>;</span><br><span class="line">        pgs[i].time = <span class="number">-1</span>;</span><br><span class="line">        pgs[i].pid = i;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/*初始化指定数目的内存页*/</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i&lt;total_np;i++)&#123;</span><br><span class="line">        mps[i].pfn = i;</span><br><span class="line">        mps[i].pid = <span class="number">-1</span>;</span><br><span class="line">        mps[i].next = &amp;mps[i+<span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    mps[total_np<span class="number">-1</span>].next = <span class="literal">NULL</span>;</span><br><span class="line">    mps[total_np<span class="number">-1</span>].pfn = total_np<span class="number">-1</span>;</span><br><span class="line">    mps[total_np<span class="number">-1</span>].pid = <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">    freepg_head = &amp;mps[<span class="number">0</span>]; <span class="comment">//刚开始所有内存页都是空闲的</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> *最近未使用算法 每次访问命中，则将访问位置为1，每20次访问则进行将在内存中页的页表项的访问位清零。每次缺页中断，选择最近未使用即访问位为0的页进行置换</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * */</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">NUR</span><span class="params">(<span class="keyword">int</span> total_np)</span></span>&#123;</span><br><span class="line">    initPages(total_np);</span><br><span class="line">    <span class="keyword">int</span> i,noHit=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(i= <span class="number">0</span>;i&lt;INSTRU;i++)&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">//每20次页面访问 就清空访问位</span></span><br><span class="line">        <span class="keyword">if</span> (i != <span class="number">0</span>&amp;&amp;i %<span class="number">20</span> == <span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> k =<span class="number">0</span>;k&lt;total_np;k++)&#123;</span><br><span class="line">                pgs[mps[k].pid].count = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">//不在内存中</span></span><br><span class="line">        <span class="keyword">if</span>(pgs[access_pages[i]].pgn == INVALID)&#123;</span><br><span class="line"></span><br><span class="line">            noHit++;</span><br><span class="line">            <span class="keyword">if</span>(freepg_head == <span class="literal">NULL</span>)&#123;</span><br><span class="line"></span><br><span class="line">                <span class="comment">//找到自从上次清零之后没被访问过的 即访问位count =0</span></span><br><span class="line"></span><br><span class="line">                <span class="keyword">int</span> mps_index = <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">for</span>(<span class="keyword">int</span> k =<span class="number">0</span>;k&lt;total_np;k++)&#123;</span><br><span class="line">                    <span class="keyword">if</span>(pgs[mps[k].pid].count == <span class="number">0</span>)&#123;</span><br><span class="line">                        mps_index = k;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                pgs[access_pages[i]].pgn = mps[mps_index].pfn;</span><br><span class="line">                pgs[mps[mps_index].pid].pgn = INVALID;</span><br><span class="line">                mps[mps_index].pid = access_pages[i];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line"></span><br><span class="line">                <span class="comment">//建立页表项和内存页结构的映射关系 并后移freepg_head指针</span></span><br><span class="line">                freepg_head-&gt;pid = access_pages[i];</span><br><span class="line">                pgs[access_pages[i]].pgn = freepg_head-&gt;pfn;</span><br><span class="line">                freepg_head = freepg_head-&gt;next;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//访问命中 访问标志置为1</span></span><br><span class="line">            pgs[access_pages[i]].count = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"NUR 的缺页率为 %6.4f\n"</span>,(<span class="keyword">float</span>)noHit/INSTRU);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> *LFU表示最近最不常用算法，用页表项的time表示上次访问的事件，用count表示总访问次数，如果一段时间不访问，总访问次数会定期衰减，当缺页时，筛选处count最少的进行置换</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * */</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">LFU</span><span class="params">(<span class="keyword">int</span> total_np)</span></span>&#123;</span><br><span class="line">    initPages(total_np);</span><br><span class="line">    <span class="keyword">int</span> noHit = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> i;</span><br><span class="line">    <span class="keyword">int</span> pasttime = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> decay_time = <span class="number">10</span>;</span><br><span class="line">    <span class="keyword">for</span>(i = <span class="number">0</span>;i&lt;INSTRU;i++)&#123;</span><br><span class="line"></span><br><span class="line">         <span class="keyword">for</span>(<span class="keyword">int</span> k = <span class="number">0</span>;k&lt;total_np;k++)&#123;</span><br><span class="line"></span><br><span class="line">                    <span class="comment">//首先判断需不需要衰减</span></span><br><span class="line">                    <span class="comment">//如果该页在内存并且上一次访问时间距离现在已经达到了一个衰减周期</span></span><br><span class="line">             <span class="keyword">if</span>(mps[k].pid != <span class="number">-1</span> &amp;&amp;pasttime - pgs[mps[k].pid].time &gt;= decay_time)&#123;</span><br><span class="line">                 <span class="comment">//衰减</span></span><br><span class="line"></span><br><span class="line">                 pgs[mps[k].pid].count&gt;&gt;=<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">             &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            <span class="comment">//不在内存中</span></span><br><span class="line">        <span class="keyword">if</span>(pgs[access_pages[i]].pgn == INVALID)&#123;</span><br><span class="line">            noHit ++;</span><br><span class="line">            <span class="comment">//没有空闲页</span></span><br><span class="line">            <span class="keyword">if</span>(freepg_head == <span class="literal">NULL</span>)&#123;</span><br><span class="line"></span><br><span class="line">                <span class="comment">//筛选处count最少的内存页进行置换</span></span><br><span class="line">                <span class="keyword">int</span> mincount = INTEGER_MAX;</span><br><span class="line">                <span class="keyword">int</span> mps_index;</span><br><span class="line">                <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>;j&lt;total_np;j++)&#123;</span><br><span class="line">                    <span class="keyword">if</span>(pgs[mps[j].pid].count&lt;mincount)&#123;</span><br><span class="line">                        mps_index = j;</span><br><span class="line">                        mincount = pgs[mps[j].pid].count;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//                 printf("换入页%d 换出页%d\n",access_pages[i],mps[mps_index].pid);</span></span><br><span class="line">                pgs[mps[mps_index].pid].pgn = INVALID;</span><br><span class="line">                mps[mps_index].pid = access_pages[i];</span><br><span class="line">                pgs[access_pages[i]].pgn = mps[mps_index].pfn;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                freepg_head-&gt;pid = access_pages[i];</span><br><span class="line">                pgs[access_pages[i]].pgn = freepg_head-&gt;pfn;</span><br><span class="line">                freepg_head = freepg_head-&gt;next;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">            pgs[access_pages[i]].count = <span class="number">1</span>;</span><br><span class="line">            pgs[access_pages[i]].time = pasttime;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="comment">//命中 更新count和time</span></span><br><span class="line"></span><br><span class="line">            pgs[access_pages[i]].count++;</span><br><span class="line">            pgs[access_pages[i]].time = pasttime;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        pasttime++;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"LFU 的缺页率为 %6.4f\n"</span>,(<span class="keyword">float</span>)noHit/INSTRU);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> *最近最久未使用 使用time字段来记录上一次访问的事件跨度,pasttime从0递增模拟时间递增，time越小则说明距离现在经过的时间越长，这样的页面需要被置换</span></span><br><span class="line"><span class="comment"> * */</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">LRU</span><span class="params">(<span class="keyword">int</span> total_np)</span></span>&#123;</span><br><span class="line">    initPages(total_np);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> i,noHit = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> pasttime = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(i = <span class="number">0</span>;i&lt;INSTRU;i++)&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/*不在内存*/</span></span><br><span class="line">        <span class="keyword">if</span>(pgs[access_pages[i]].pgn == INVALID)&#123;</span><br><span class="line"></span><br><span class="line">            noHit++;</span><br><span class="line">            <span class="comment">/*没有空闲页*/</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span>(freepg_head == <span class="literal">NULL</span>)&#123;</span><br><span class="line"></span><br><span class="line">                <span class="comment">//需要置换</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                <span class="comment">//找到内存中需要被置换的页</span></span><br><span class="line">                <span class="keyword">int</span> swap_page = <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">int</span> mintime = INTEGER_MAX;</span><br><span class="line">                <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>;j&lt;total_np;j++)&#123;</span><br><span class="line">                    <span class="keyword">int</span> pageid = mps[j].pid;</span><br><span class="line">                    <span class="keyword">if</span> (pgs[pageid].time &lt; mintime)&#123;</span><br><span class="line">                        swap_page = j;</span><br><span class="line">                        mintime = pgs[pageid].time;</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line">        <span class="comment">//        printf("换入页%d 换出页%d\n",access_pages[i],mps[swap_page].pid);</span></span><br><span class="line">                pgs[mps[swap_page].pid].pgn = INVALID;</span><br><span class="line">                pgs[mps[swap_page].pid].time = <span class="number">-1</span>;</span><br><span class="line">                mps[swap_page].pid = access_pages[i];</span><br><span class="line">                pgs[access_pages[i]].pgn = swap_page;</span><br><span class="line">           <span class="comment">//     pgs[access_pages[i]].time = pasttime;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line"></span><br><span class="line">                freepg_head-&gt;pid = pgs[access_pages[i]].pid;</span><br><span class="line">                pgs[access_pages[i]].pgn = freepg_head-&gt;pfn;</span><br><span class="line">           <span class="comment">//     pgs[access_pages[i]].time = pasttime;</span></span><br><span class="line">                freepg_head = freepg_head-&gt;next;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        pgs[access_pages[i]].time = pasttime;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       <span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line">        pasttime++;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"LRU 的缺页率为 %6.4f\n"</span>,(<span class="keyword">float</span>)noHit/INSTRU);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*先进先出 当空闲页面为空 从忙页面置换 置换规则为先进先出 因此需要维护一个busypg_head和busypg_tail来记录忙页面的首尾部分*/</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">FIFO</span><span class="params">(<span class="keyword">int</span> total_np)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    initPages(total_np);</span><br><span class="line"></span><br><span class="line">    busypg_head = busypg_tail = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">int</span> i,noHit = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>;i&lt;INSTRU;i++)&#123;</span><br><span class="line">        <span class="comment">//不在内存</span></span><br><span class="line">        <span class="keyword">if</span>(pgs[access_pages[i]].pgn == INVALID)&#123;</span><br><span class="line">            noHit++;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//如果没有空闲页</span></span><br><span class="line">            <span class="keyword">if</span>(freepg_head == <span class="literal">NULL</span>)&#123;</span><br><span class="line">                 <span class="comment">//从忙页面置换 需要把被置换的页的有效位置位INVALID,并且将新的页pgn置位有效</span></span><br><span class="line"></span><br><span class="line">                pgs[busypg_head-&gt;pid].pgn = INVALID;</span><br><span class="line">           <span class="comment">//     printf("换入页%d 换出页%d\n",access_pages[i],busypg_head-&gt;pid);</span></span><br><span class="line"></span><br><span class="line">                busypg_head-&gt;pid = access_pages[i];</span><br><span class="line"></span><br><span class="line">                pgs[access_pages[i]].pgn = busypg_head-&gt;pfn;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                <span class="comment">//忙页尾连接新的置换页 忙页尾后移</span></span><br><span class="line">                <span class="comment">//</span></span><br><span class="line">                busypg_tail-&gt;next = busypg_head;</span><br><span class="line">                busypg_tail = busypg_tail-&gt;next;</span><br><span class="line">                <span class="comment">//忙页头后移</span></span><br><span class="line">                busypg_head = busypg_head-&gt;next;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="comment">//空闲页头后移</span></span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span>(busypg_head ==<span class="literal">NULL</span>)&#123;</span><br><span class="line">                    busypg_head = freepg_head;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                freepg_head-&gt;pid = access_pages[i];</span><br><span class="line">                pgs[access_pages[i]].pgn = freepg_head-&gt;pfn;</span><br><span class="line"></span><br><span class="line">                busypg_tail = freepg_head;</span><br><span class="line">                freepg_head = freepg_head-&gt;next;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"FIFO 的缺页率为 %6.4f\n"</span>,(<span class="keyword">float</span>)noHit/INSTRU);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> *最佳置换算法 理想算法 因为需要知道未来的访问，故实际实现不可能。使用dist数组记录每个内存页在未来访问的事件跨度，dist越大说明未来越久不需要访问，这样的页面需要被置换出去</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * */</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">OPT</span><span class="params">(<span class="keyword">int</span> total_np)</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> dist[total_vp]; <span class="comment">//用来保存所有内存中页面的距离下次访问时间的跨度  实际只需要total_np个长度</span></span><br><span class="line">    <span class="keyword">int</span> noHit = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> i ;</span><br><span class="line">    initPages(total_np);</span><br><span class="line">    <span class="comment">/*依次访问指令*/</span></span><br><span class="line">    <span class="keyword">for</span>( i = <span class="number">0</span>;i&lt;INSTRU;i++)&#123;</span><br><span class="line">        <span class="keyword">if</span> (pgs[access_pages[i]].pgn == INVALID)&#123;</span><br><span class="line">            noHit++;</span><br><span class="line">            <span class="keyword">if</span>(freepg_head != <span class="literal">NULL</span>)&#123;</span><br><span class="line">                    <span class="comment">//有空闲页面</span></span><br><span class="line">                pgs[access_pages[i]].pgn = freepg_head-&gt;pfn; <span class="comment">/*置存在内存标志为有效 并使该空闲页pid字段指向页编号 将freepg_head后移*/</span></span><br><span class="line">                freepg_head-&gt;pid = pgs[access_pages[i]].pid;</span><br><span class="line">                freepg_head = freepg_head-&gt;next;</span><br><span class="line"></span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="comment">//没有空闲页面 需要进行置换</span></span><br><span class="line"></span><br><span class="line">                <span class="comment">//找到未来的页面中最久不使用的</span></span><br><span class="line">                <span class="comment">//</span></span><br><span class="line">                <span class="comment">//</span></span><br><span class="line"></span><br><span class="line">                arrayCopy(dist,INTEGER_MAX,total_vp);</span><br><span class="line">                <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">int</span> pgn;</span><br><span class="line">                <span class="keyword">for</span>(<span class="keyword">int</span> j = i+<span class="number">1</span>;j&lt;INSTRU;j++)&#123;</span><br><span class="line">                    <span class="comment">/*如果该次访问命中 &amp;&amp; 该页面之前没有更新过dist值*/</span></span><br><span class="line">                     pgn =  pgs[access_pages[j]].pgn;</span><br><span class="line">                    <span class="keyword">if</span>(pgn!= INVALID&amp;&amp;dist[pgn] == INTEGER_MAX )&#123;</span><br><span class="line">                        dist[pgn] = count;</span><br><span class="line">                    &#125;</span><br><span class="line">                    count++;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                <span class="comment">/*找出最久不访问的页 即dist最大的页*/</span></span><br><span class="line"></span><br><span class="line">                <span class="keyword">int</span> max = <span class="number">-1</span>;</span><br><span class="line">                <span class="keyword">int</span> mps_index; <span class="comment">//被置换的内存页数组下标</span></span><br><span class="line">                <span class="keyword">int</span> swap_page = <span class="number">0</span>; <span class="comment">//被置换的页编号</span></span><br><span class="line">                <span class="keyword">for</span>(<span class="keyword">int</span> k = <span class="number">0</span>;k&lt;total_np;k++)&#123;</span><br><span class="line">                    <span class="comment">//int pageid = mps[k].pid;</span></span><br><span class="line">                    <span class="keyword">if</span>(dist[k]&gt;max)&#123;</span><br><span class="line">                        mps_index = k;</span><br><span class="line">                        max = dist[k];</span><br><span class="line">                        swap_page = mps[k].pid;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">              <span class="comment">//   printf("换入页%d 换出页%d\n",access_pages[i],swap_page);</span></span><br><span class="line"></span><br><span class="line">                pgs[swap_page].pgn = INVALID; <span class="comment">//被置换的页在内存中标志置位无效</span></span><br><span class="line">                pgs[access_pages[i]].pgn = mps_index;<span class="comment">//建立内存页和pgs的映射</span></span><br><span class="line">                mps[mps_index].pid = access_pages[i];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"OPT 的缺页率为 %6.4f\n"</span>,(<span class="keyword">float</span>)noHit/INSTRU);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">generatePages</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> s,i,j;</span><br><span class="line">  srand(<span class="number">10</span>*getpid()); <span class="comment">/*每次运行时进程号不同，用来作为初始化随机数队列的“种子”*/</span></span><br><span class="line">  s=(<span class="keyword">float</span>)<span class="number">299</span>*rand()/<span class="number">32767</span>/<span class="number">32767</span>/<span class="number">2</span>+<span class="number">1</span>;  <span class="comment">//确保s在0-320之间</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*初始化页指令流 将指令流转变为page数组的页面    随机分布将page数组分布在32个页面内*/</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span>(i=<span class="number">0</span>;i&lt;INSTRU;i+=<span class="number">4</span>) <span class="comment">/*产生指令队列*/</span></span><br><span class="line">&#123;</span><br><span class="line">     <span class="keyword">if</span>(s&lt;<span class="number">0</span>||s&gt;<span class="number">299</span>)</span><br><span class="line">     &#123;</span><br><span class="line">       <span class="built_in">printf</span>(<span class="string">"When i==%d,Error,s==%d\n"</span>,i,s);</span><br><span class="line">       <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">     &#125;</span><br><span class="line">     a[i]=s;                            <span class="comment">/*任选一指令访问点m*/</span></span><br><span class="line">     a[i+<span class="number">1</span>]=a[i]+<span class="number">1</span>;                     <span class="comment">/*顺序执行一条指令*/</span></span><br><span class="line">     a[i+<span class="number">2</span>]=(<span class="keyword">float</span>)a[i]*rand( )/<span class="number">32767</span>/<span class="number">32767</span>/<span class="number">2</span>; <span class="comment">/*执行前地址指令m' */</span></span><br><span class="line">     a[i+<span class="number">3</span>]=a[i+<span class="number">2</span>]+<span class="number">1</span>;                   <span class="comment">/*顺序执行一条指令*/</span></span><br><span class="line"></span><br><span class="line">     s=(<span class="keyword">float</span>)(<span class="number">298</span>-a[i+<span class="number">2</span>])*rand( )/<span class="number">32767</span>/<span class="number">32767</span>/<span class="number">2</span>+a[i+<span class="number">2</span>]+<span class="number">2</span>;</span><br><span class="line">     <span class="keyword">if</span>((a[i+<span class="number">2</span>]&gt;<span class="number">298</span>)||(s&gt;<span class="number">298</span>))</span><br><span class="line">       <span class="built_in">printf</span>(<span class="string">"a[%d+2],a number which is :%d and s==%d\n"</span>,i,a[i+<span class="number">2</span>],s);</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">for</span> (i=<span class="number">0</span>;i&lt;INSTRU;i++) <span class="comment">/*将指令序列变换成页地址流*/</span></span><br><span class="line">&#123;</span><br><span class="line">     access_pages[i]=a[i]/<span class="number">10</span>;</span><br><span class="line">     offset[i]=a[i]%<span class="number">10</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    generatePages();</span><br><span class="line">   <span class="comment">// srand((unsigned)time(NULL));</span></span><br><span class="line">   <span class="comment">// for(int i = 0;i&lt;300;i++)&#123;</span></span><br><span class="line">   <span class="comment">//     access_pages[i] = rand()%50;</span></span><br><span class="line"></span><br><span class="line">   <span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">5</span>;</span><br><span class="line">    <span class="keyword">for</span>(i = <span class="number">4</span>;i&lt;=<span class="number">32</span>;i+=<span class="number">4</span>)&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"内存页为%d-=------\n"</span>,i);</span><br><span class="line">        LRU(i);</span><br><span class="line">        FIFO(i);</span><br><span class="line">        LFU(i);</span><br><span class="line">        OPT(i);</span><br><span class="line">        NUR(i);</span><br><span class="line">    &#125;</span><br><span class="line">     <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/操作系统/" rel="tag"># 操作系统</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/25/学习Tomcat-五-Connector组件介绍/" rel="next" title="学习Tomcat-五-Tomcat Connector组件">
+                <i class="fa fa-chevron-left"></i> 学习Tomcat-五-Tomcat Connector组件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/31/适配器模式/" rel="prev" title="学习设计模式之适配器模式">
+                学习设计模式之适配器模式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Ooo0oO0o0oO" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#常见的置换算法"><span class="nav-number">1.</span> <span class="nav-text">常见的置换算法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#最佳置换算法-OPT"><span class="nav-number">1.1.</span> <span class="nav-text">最佳置换算法 (OPT)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#先进先出置换算法（FIFO"><span class="nav-number">1.2.</span> <span class="nav-text">先进先出置换算法（FIFO)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最近最久未使用（LRU）算法"><span class="nav-number">1.3.</span> <span class="nav-text">最近最久未使用（LRU）算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最少使用（LFU）置换算法"><span class="nav-number">1.4.</span> <span class="nav-text">最少使用（LFU）置换算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最近未使用算法（Not-Recently-Used，NUR）"><span class="nav-number">1.5.</span> <span class="nav-text">最近未使用算法（Not Recently Used，NUR）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#代码实现"><span class="nav-number">2.</span> <span class="nav-text">代码实现</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

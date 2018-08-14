@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="操作系统," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="逻辑地址：每个逻辑地址由一个段(segment)和偏移量(offset)组成。 线性地址：32位无符号整数，可表示4G大小的地址空间。 物理地址：芯片级内存单元寻址。它们与从CPU的地址引脚发送到内存总线上的电信号相对应。分段机制              分页机制 逻辑地址————》线性地址————》物理地址">
+<meta name="keywords" content="操作系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统分页机制">
+<meta property="og:url" content="http://yoursite.com/2018/03/14/操作系统分页机制/index.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="逻辑地址：每个逻辑地址由一个段(segment)和偏移量(offset)组成。 线性地址：32位无符号整数，可表示4G大小的地址空间。 物理地址：芯片级内存单元寻址。它们与从CPU的地址引脚发送到内存总线上的电信号相对应。分段机制              分页机制 逻辑地址————》线性地址————》物理地址">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/BB0FFCBC-9684-4A68-8569-230313FA6A8E.png">
+<meta property="og:updated_time" content="2018-08-14T00:44:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统分页机制">
+<meta name="twitter:description" content="逻辑地址：每个逻辑地址由一个段(segment)和偏移量(offset)组成。 线性地址：32位无符号整数，可表示4G大小的地址空间。 物理地址：芯片级内存单元寻址。它们与从CPU的地址引脚发送到内存总线上的电信号相对应。分段机制              分页机制 逻辑地址————》线性地址————》物理地址">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/BB0FFCBC-9684-4A68-8569-230313FA6A8E.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/14/操作系统分页机制/"/>
+
+
+
+
+
+  <title>操作系统分页机制 | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/14/操作系统分页机制/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">操作系统分页机制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-14T16:22:38+08:00">
+                2018-03-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/操作系统/" itemprop="url" rel="index">
+                    <span itemprop="name">操作系统</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <ul>
+<li>逻辑地址：每个逻辑地址由一个段(segment)和偏移量(offset)组成。</li>
+<li>线性地址：32位无符号整数，可表示4G大小的地址空间。</li>
+<li>物理地址：芯片级内存单元寻址。它们与从CPU的地址引脚发送到内存总线上的电信号相对应。<pre><code>分段机制              分页机制
+</code></pre>逻辑地址————》线性地址————》物理地址</li>
+</ul>
+<a id="more"></a>
+<h1 id="分段"><a href="#分段" class="headerlink" title="分段"></a>分段</h1><p>在Intel的架构中，逻辑地址表示为—段标识符:偏移地址，故汇编中call 0x1200 这个0x1200其实是偏移地址。</p>
+<h1 id="分页"><a href="#分页" class="headerlink" title="分页"></a>分页</h1><blockquote>
+<p>内存分页管理机制</p>
+</blockquote>
+<p>在Intel 80x86系统中，内存分页管理是通过页目录表和内存页表所组成的二级表进行的。<br>其中页目录表和页表的结构一样，表项结构也相同。页目录表中的每个页目录表项用来寻址一个页表，每个页表项<br>用来指定一页物理内存页。因此，当指定了一个页目录项和一个页表项，我们就可以唯一地确定所对应的物理内存页。<br>页目录表占用一页内存，每个页目录项占用4个字节长，则最多可以寻址1024个页表，同理每个页表也最多寻址1024个物理页，<br>这样一个页目录所寻址的所有页表共可以寻址1024<em>**</em>1024*4096 = 4GB内存空间。</p>
+<p>如图，转换使用了两级页表，第一级叫做页目录，大小为4kb,存储在一个物理页中，每个表项4字节长，<br>具有2^10（1K）个表项，每个表项对应第二级的一个页表，第二级的每一个页表也有2^10个表项，每个4B<br>表项含有相关页面的20位物理基地址。二级页表使用线性地址中间10位（位21～12）作为表项索引值，以<br>获取含有页面20位物理基地址的表项。该20位页面物理基地址和线性地址中的低12位（页内偏移）组合在一起就得到了分页转换过程的输出值，即对应的最终物理地址。</p>
+<p><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/BB0FFCBC-9684-4A68-8569-230313FA6A8E.png" alt="sd"></p>
+<p>转换过程如上图，用文字解释就是:</p>
+<p>32位线性地址表示</p>
+<p>  10    　　　 　    10    　　　　　  12</p>
+<hr>
+<h2 id="PT1-PT2-OFFEST"><a href="#PT1-PT2-OFFEST" class="headerlink" title="|  PT1    |    PT2  |    OFFEST    |"></a>|  PT1    |    PT2  |    OFFEST    |</h2><p>传入的32位线性地址，MMU首先用PT1为索引访问页目录，得到表项1从而获取二级页表首地址Base1，然后找到该二级页表的页，<br>在二级页表中用PT2索引找到页表项2，该页表项2中存储了物理页首地址Base2,Base2+OFFEST就是物理地址。</p>
+<p>关于页目录表：<br>每个进程有一个属于自己的页目标表，所以一个系统中可以同时存在多个页目录表，当前的页目录表用CPU的寄存器CR3来确定。<br>但是在某些以前的系统如Linux0.11，则所有进程共享同一个页目录表。</p>
+<p>分页机制开启条件，将页目录首地址存入cr3寄存去，并且将cr0的最高位置1</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">PageDirBase  equ 200000h ; 页目录开始地址: 2M</span><br><span class="line">PageTblBase  equ 201000h ; 页表开始地址:  2M + 4K</span><br><span class="line">.....</span><br><span class="line">LABEL_DESC_PAGE_DIR: Descriptor   PageDirBase,              4095, DA_DRW  ; Page Directory, 4K</span><br><span class="line">LABEL_DESC_PAGE_TBL: Descriptor   PageTblBase,              1023, DA_DRW  | DA_LIMIT_4K ; Page Tables, 4M</span><br><span class="line">......</span><br><span class="line"></span><br><span class="line">SelectorPageDir  equ LABEL_DESC_PAGE_DIR - LABEL_GDT ;页目录选择子</span><br><span class="line">SelectorPageTbl  equ LABEL_DESC_PAGE_TBL - LABEL_GDT ;页表选择子</span><br><span class="line"></span><br><span class="line">......</span><br><span class="line"></span><br><span class="line">;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;启动分页机制;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;</span><br><span class="line">SetupPaging:</span><br><span class="line"> ; 为简化处理, 所有线性地址对应相等的物理地址.</span><br><span class="line"> ; 首先初始化页目录</span><br><span class="line"> mov ax, SelectorPageDir ; 此段首地址为 PageDirBase</span><br><span class="line"> mov es, ax</span><br><span class="line"> mov ecx, 1024  ; 共 1K 个表项</span><br><span class="line"> xor edi, edi</span><br><span class="line"> xor eax, eax</span><br><span class="line"> mov eax, PageTblBase | PG_P  | PG_USU | PG_RWW</span><br><span class="line">.1:</span><br><span class="line"> stosd   ;将eax寄存器的数据传送到es:edi并且 edi=edi+4</span><br><span class="line"> add eax, 4096  ; 为了简化, 所有页表在内存中是连续的.</span><br><span class="line"> loop .1</span><br><span class="line"> ; 再初始化所有页表 (1K 个, 4M 内存空间)</span><br><span class="line"> mov ax, SelectorPageTbl ; 此段首地址为 PageTblBase</span><br><span class="line"> mov es, ax</span><br><span class="line"> mov ecx, 1024 * 1024 ; 共 1M 个页表项, 也即有 1M 个页</span><br><span class="line"> xor edi, edi</span><br><span class="line"> xor eax, eax</span><br><span class="line"> mov eax, PG_P  | PG_USU | PG_RWW</span><br><span class="line">.2:</span><br><span class="line"> stosd</span><br><span class="line"> add eax, 4096  ; 每一页指向 4K 的空间</span><br><span class="line"> loop .2</span><br><span class="line">; 看到了吗？上面的代码实现了分页机制的物质基础，是你可以看得见的。然而难点并不在于建立它的物理基础，而是</span><br><span class="line">; 理解开启分页机制后，线性地址到物理地址的转换，它在代码中可是看不到的哦</span><br><span class="line">; 分段机制将我们的世界变得清澈，分页机制又将世界变得混沌了</span><br><span class="line">;;;;;;;;;;;;;;;;;;;;;;;;;数据结构填充完毕，准备启动分页机制;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;</span><br><span class="line"> mov eax, PageDirBase</span><br><span class="line"> mov cr3, eax</span><br><span class="line"> mov eax, cr0</span><br><span class="line"> or eax, 80000000h</span><br><span class="line"> mov cr0, eax</span><br><span class="line">;    注意啦：页目录表和页表都在物理地址中，为什么呢？因为在此之前执行的代码没有开启分页机制！</span><br><span class="line">;    在此之后的代码地址都要经过分页机制的转换，就不一定对应相应的物理地址了！！（这个程序是个例外^_^）</span><br><span class="line"> jmp short .3</span><br><span class="line">.3:</span><br><span class="line"> nop   ;为什么有这个nop?延时？</span><br><span class="line"> ret</span><br><span class="line">; ----------------------分页机制启动完毕 ----------------------------</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">`</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/操作系统/" rel="tag"># 操作系统</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/13/CGLIB代理-1/" rel="next" title="CGLIB代理">
+                <i class="fa fa-chevron-left"></i> CGLIB代理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/14/文件系统/" rel="prev" title="文件系统">
+                文件系统 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Ooo0oO0o0oO" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#分段"><span class="nav-number">1.</span> <span class="nav-text">分段</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#分页"><span class="nav-number">2.</span> <span class="nav-text">分页</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#PT1-PT2-OFFEST"><span class="nav-number">2.1.</span> <span class="nav-text">|  PT1    |    PT2  |    OFFEST    |</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

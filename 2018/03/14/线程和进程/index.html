@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="操作系统," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="内核级线程:就是直接由操作系统内核支持，这种线程由内核来完成线程切换，以及由内核通过调度器来调度，并将线程的任务映射到各个处理器上。内核每个线程在核心空间设置一个线程控制块，设置了内核线程的系统，其调度是以线程为单位进行的。用户一般不会直接使用内核级线程，而是去使用内核线程的一种高级接口—-轻量级进程，就是我们通常意义所讲的线程，它需要内核线程支持，所以通常内核级线程和轻量级进程都是一对一模型。">
+<meta name="keywords" content="操作系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线程和进程">
+<meta property="og:url" content="http://yoursite.com/2018/03/14/线程和进程/index.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="内核级线程:就是直接由操作系统内核支持，这种线程由内核来完成线程切换，以及由内核通过调度器来调度，并将线程的任务映射到各个处理器上。内核每个线程在核心空间设置一个线程控制块，设置了内核线程的系统，其调度是以线程为单位进行的。用户一般不会直接使用内核级线程，而是去使用内核线程的一种高级接口—-轻量级进程，就是我们通常意义所讲的线程，它需要内核线程支持，所以通常内核级线程和轻量级进程都是一对一模型。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171214-140618@2x.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171214-140729@2x.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171212-142614@2x.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171213-152354@2x.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171213-201730@2x.png">
+<meta property="og:updated_time" content="2018-08-14T00:44:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="线程和进程">
+<meta name="twitter:description" content="内核级线程:就是直接由操作系统内核支持，这种线程由内核来完成线程切换，以及由内核通过调度器来调度，并将线程的任务映射到各个处理器上。内核每个线程在核心空间设置一个线程控制块，设置了内核线程的系统，其调度是以线程为单位进行的。用户一般不会直接使用内核级线程，而是去使用内核线程的一种高级接口—-轻量级进程，就是我们通常意义所讲的线程，它需要内核线程支持，所以通常内核级线程和轻量级进程都是一对一模型。">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171214-140618@2x.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/14/线程和进程/"/>
+
+
+
+
+
+  <title>线程和进程 | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/14/线程和进程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">线程和进程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-14T16:28:46+08:00">
+                2018-03-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/操作系统/" itemprop="url" rel="index">
+                    <span itemprop="name">操作系统</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>内核级线程:<br>就是直接由操作系统内核支持，这种线程由内核来完成线程切换，以及由内核通过调度器来调度，并<br>将线程的任务映射到各个处理器上。内核每个线程在核心空间设置一个线程控制块，设置了内核线程的系统，其调度是以线程为单位进行的。<br>用户一般不会直接使用内核级线程，而是去使用内核线程的一种高级接口—-轻量级进程，就是我们通常意义所讲的线程，它需要内核线程支持，所以<br>通常内核级线程和轻量级进程都是一对一模型。</p>
+<p>优点:在多处理器或者多核处理器系统中，内核能通过调度同一进程中多个线程并行执行到多个处理器核心中，如果进程的一个线程阻塞，不会影响该进程其他线程，系统内核会调度<br>另一个线程运行。<br>缺点:正因为把工作交给了操作系统内核，所以几乎所有工作包括线程的创建，切换等都需要进行系统调用，在用户态和内核态切换会影响效率。</p>
+<a id="more"></a>
+<p>用户级线程：<br>顾名思义，用户级线程存在于用户空间，内核并不知道线程的存在，所以系统调用的基本单位还是进程。所以线程的调度等管理都在用户空间实现。新建和切换线程无需陷入内核，开销较小。<br>因此该模式通常都是一个内核线程支持整个用户空间的所有用户级线程，称为一对多模型。<br>缺点：一个用户系统调用而陷入阻塞，会导致该进程的所有线程无法使用，内核无法进行调度。并且该进程里没有时钟信号，<br>无法使用轮流调度。</p>
+<p>混合实现方式：<br>该方式既存在用户线程，也存在轻量级进程，用户线程完全建立在用户空间，创建切换等操作在用户态进行，但是将轻量级线程作为<br>用户线程和内核线程之间的桥梁，这样就可以使用内核提供的线程调度功能以及处理器映射，用户线程通过轻量级进程进行系统调用，降低了<br>整个进程被阻塞的风险，在这种情况下用户线程和轻量级进程数量比不定，称为多对多线程模型。</p>
+<p><a href="http://courses.ics.hawaii.edu/ReviewICS332/morea/050_Threads/ics332_threads.pdf" target="_blank" rel="noopener">Java中线程的实现</a></p>
+<h1 id="进程的实现"><a href="#进程的实现" class="headerlink" title="进程的实现"></a>进程的实现</h1><p>初次接触到进程这个概念感到很奇怪，特别是在单核单cpu的电脑上，为什么仅有一个核心的cpu，但是我们平时所有程序都可以好像在同一台电脑上同时工作？<br>而这一切都是通过进程模型来实现的。如下图能让我们更加清楚这种错觉产生的原因：<br><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171214-140618@2x.png" alt="进程"></p>
+<p>Linux进程控制中，每一个程序其实是一个可执行的文件，而进程是一个执行中的程序实例，即在决定某个程序运行时则将把该程序的可执行文件<br>封装成进程中，之后由cpu调度。<br>那在单cpu的机器上，是否真的存在多个程序并行处理呢？<br>其实，只是分时技术所生成的假象，分时技术是把cpu的运行时间划分成一个个规定的时间片，让每个进程在一个时间片运行，当某个进程执行完规定<br>的时间片之后，系统重新调度另一个就绪的进程区运行，由于时间片通常很短，所以在我们的角度来看，系统给了我们一个假象，好像这些程序在同时<br>工作。<br>当然，在进程调度过程中，需要很多其他复杂但是必须的工作，例如保存上一个进程的工作状态，方便下一次运行该程序的时候从上一次运行停止的地方<br>继续运行。</p>
+<p>我们通过Linux0.11的源码来简要说明进程的实现过程。</p>
+<p>首先，进程模型在底层程序上肯定是通过某种抽象数据类型描述的，Linux0.11中进程任务由struct task_struct类型来描述。如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> &#123;</span></span><br><span class="line"><span class="comment">/* these are hardcoded - don't touch */</span></span><br><span class="line">	<span class="keyword">long</span> state;	 <span class="comment">//状态的运行状态</span></span><br><span class="line">	<span class="keyword">long</span> counter; <span class="comment">//任务运行时间计数，即运行时间片</span></span><br><span class="line">	<span class="keyword">long</span> priority; <span class="comment">//优先级</span></span><br><span class="line">	<span class="keyword">long</span> signal; <span class="comment">//信号位图 每个比特表示一种信号 信号值=位偏移值+1</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sigaction</span> <span class="title">sigaction</span>[32];</span>  <span class="comment">//信号执行属性结构 对应信号将要执行的操作和标志信号  信号机制中会提到该结构</span></span><br><span class="line">	<span class="keyword">long</span> blocked;	<span class="comment">/* 进程信号屏蔽码，对应信号位图</span></span><br><span class="line"><span class="comment">/* various fields */</span></span><br><span class="line">	<span class="keyword">int</span> exit_code;<span class="comment">//任务执行停止的退出码，父进程会取</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> start_code,end_code,end_data,brk,start_stack; <span class="comment">/*代码段地址 代码长度 代码长度 数据长度 总长度 栈段地址*/</span></span><br><span class="line">	<span class="keyword">long</span> pid,father,pgrp,session,leader;<span class="comment">//进程标识号，父进程号,父进程组号，会话号,会话首领</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">short</span> uid,euid,suid;<span class="comment">//用户id，有效用户id,保存的用户id</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">short</span> gid,egid,sgid;<span class="comment">//组id,有效组id,保存的组id</span></span><br><span class="line">	<span class="keyword">long</span> alarm;<span class="comment">//报警定时值</span></span><br><span class="line">	<span class="keyword">long</span> utime,stime,cutime,cstime,start_time;<span class="comment">//用户态运行时间 内核态运行时间 子进程用户态运行时间 子进程内核态运行时间 进程开始时间</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">short</span> used_math;<span class="comment">//标志 是否使用了协处理器</span></span><br><span class="line"><span class="comment">/* file system info */</span></span><br><span class="line">	<span class="keyword">int</span> tty;		<span class="comment">/* 是否使用了tty的子设备号 -1表示没有*/</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">short</span> umask;<span class="comment">//文件创建属性屏蔽位</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">m_inode</span> * <span class="title">pwd</span>;</span><span class="comment">//当前工作目录i节点结构</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">m_inode</span> * <span class="title">root</span>;</span><span class="comment">//根目录i节点结构</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">m_inode</span> * <span class="title">executable</span>;</span><span class="comment">//执行文件i节点结构</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> close_on_exec;<span class="comment">//执行时关闭文件句柄位图标志 参见include/fcntl.h</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">file</span> * <span class="title">filp</span>[<span class="title">NR_OPEN</span>];</span><span class="comment">//进程打开文件结构指针表</span></span><br><span class="line"><span class="comment">/* ldt for this task 0 - zero 1 - cs 2 - ds&amp;ss */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">desc_struct</span> <span class="title">ldt</span>[3];</span><span class="comment">//任务局部描述符表</span></span><br><span class="line"><span class="comment">/* tss for this task */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">tss_struct</span> <span class="title">tss</span>;</span> <span class="comment">//进程的任务状态段信息结构</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>由进程的抽象数据模型可以看出结构体口可以保存大部分当前进程的活动信息，当进程在执行时，cpu中所有寄存器的值，进程的状态以及堆栈中的内容<br>被称为该进程的上下文。当内核进行切换进程时，则会将当前进程的上下文信息保存在该抽象数据结构中，以便之后能重新恢复被中断进程的执行。</p>
+<p>进程的切换时在内核态进行的，如图：<br><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171214-140729@2x.png" alt="进程切换"></p>
+<h1 id="Linux进程状态转换"><a href="#Linux进程状态转换" class="headerlink" title="Linux进程状态转换"></a>Linux进程状态转换</h1><p><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171212-142614@2x.png" alt="进程状态转换图"></p>
+<ul>
+<li>运行状态（TASK_RUNNING）<br>当进程正在被CPU执行，或已经准备就绪随时可由调度程序执行，则称该进程为处于运行状态（running）。进程可以在内核态运行，也可以在用户态运行。当系统资源已经可用时，进程就被唤醒而进入准备运行状态，该状态称为就绪态。这些状态（图中中间一列）在内核中表示方法相同，都被成为处于TASK_RUNNING状态。</li>
+<li>可中断睡眠状态（TASK_INTERRUPTIBLE）<br>当进程处于可中断等待状态时，系统不会调度该进程执行。当系统产生一个中断或者释放了进程正在等待的资源，或者进程收到一个信号，都可以唤醒进程转换到就绪状态（运行状态）。</li>
+<li>不可中断睡眠状态（TASK_UNINTERRUPTIBLE）<br>与可中断睡眠状态类似。但处于该状态的进程只有被使用wake_up()函数明确唤醒时才能转换到可运行的就绪状态。</li>
+<li>暂停状态（TASK_STOPPED）<br>当进程收到信号SIGSTOP、SIGTSTP、SIGTTIN或SIGTTOU时就会进入暂停状态。可向其发送SIGCONT信号让进程转换到可运行状态。在Linux 0.11中，还未实现对该状态的转换处理。处于该状态的进程将被作为进程终止来处理。</li>
+<li>僵死状态（TASK_ZOMBIE）</li>
+</ul>
+<p>当进程已停止运行，但其父进程还没有询问其状态时，则称该进程处于僵死状态。<br>当一个进程的运行时间片用完，系统就会使用调度程序强制切换到其它的进程去执行。另外，如果进程在内核态执行时需要等待系统的某个资源，此时该进程就会调用sleep_on()或sleep_on_interruptible()自愿地放弃CPU的使用权，而让调度程序去执行其它进程。进程则进入睡眠状态（TASK_UNINTERRUPTIBLE或TASK_INTERRUPTIBLE）。<br>只有当进程从“内核运行态”转移到“睡眠状态”时，内核才会进行进程切换操作。在内核态下运行的进程不能被其它进程抢占，而且一个进程不能改变另一个进程的状态。为了避免进程切换时造成内核数据错误，内核在执行临界区代码时会禁止一切中断。当一个进程的</p>
+<h1 id="进程调度"><a href="#进程调度" class="headerlink" title="进程调度"></a>进程调度</h1><p>Linux0.11中采用了基于优先级排队的调度策略。<br>Linux0.11中schedule函数源码如下:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">schedule</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> i,next,c;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> ** <span class="title">p</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* check alarm, wake up any interruptible tasks that have got a signal */</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span>(p = &amp;LAST_TASK ; p &gt; &amp;FIRST_TASK ; --p)</span><br><span class="line">		<span class="keyword">if</span> (*p) &#123;</span><br><span class="line">        <span class="comment">//检测alarm值是否过期</span></span><br><span class="line"></span><br><span class="line">			<span class="keyword">if</span> ((*p)-&gt;alarm &amp;&amp; (*p)-&gt;alarm &lt; jiffies) &#123;</span><br><span class="line">					(*p)-&gt;signal |= (<span class="number">1</span>&lt;&lt;(SIGALRM<span class="number">-1</span>));</span><br><span class="line">					(*p)-&gt;alarm = <span class="number">0</span>;</span><br><span class="line">				&#125;</span><br><span class="line">                <span class="comment">//检测除了阻塞信号外是否还有其他信号</span></span><br><span class="line">                <span class="keyword">if</span> (((*p)-&gt;signal &amp; (_BLOCKABLE &amp; ~(*p)-&gt;blocked)) &amp;&amp;</span><br><span class="line">			(*p)-&gt;state==TASK_INTERRUPTIBLE)</span><br><span class="line">				(*p)-&gt;state=TASK_RUNNING;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">		c = <span class="number">-1</span>;</span><br><span class="line">		next = <span class="number">0</span>;</span><br><span class="line">		i = NR_TASKS;</span><br><span class="line">		p = &amp;task[NR_TASKS];</span><br><span class="line"></span><br><span class="line">        <span class="comment">//挑选出counter最大的就绪进程</span></span><br><span class="line">		<span class="keyword">while</span> (--i) &#123;</span><br><span class="line">			<span class="keyword">if</span> (!*--p)</span><br><span class="line">				<span class="keyword">continue</span>;</span><br><span class="line">			<span class="keyword">if</span> ((*p)-&gt;state == TASK_RUNNING &amp;&amp; (*p)-&gt;counter &gt; c)</span><br><span class="line">				c = (*p)-&gt;counter, next = i;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (c) <span class="keyword">break</span>;</span><br><span class="line">        <span class="comment">//如果counter=0，则进行重新计算每个任务的counter值 然后从新进行挑选进程以进行调度</span></span><br><span class="line">		<span class="keyword">for</span>(p = &amp;LAST_TASK ; p &gt; &amp;FIRST_TASK ; --p)</span><br><span class="line">			<span class="keyword">if</span> (*p)</span><br><span class="line">				(*p)-&gt;counter = ((*p)-&gt;counter &gt;&gt; <span class="number">1</span>) +</span><br><span class="line">						(*p)-&gt;priority;</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="comment">//运行该进程</span></span><br><span class="line">	switch_to(next);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>schedule函数并不难理解，首先对所有任务进行检测，唤醒任何一个已经得到信号的任务。<br>具体方法是针对任务数组中的每个任务，检查其报警定时值alarm，如果任务的alarm时间已经过期，则在<br>它的信号位图中设置SIGALRM值，即发送SIGALARM信号，然后清alarm值。如果进程的信号位图除去被阻塞的信号外还有其他信号，并且任务处于<br>可中断睡眠状态，则置任务为就绪状态。<br>然后扫描任务数组，比较每个就绪态任务的运行时间递减滴答计数counter的值来确定<br>当前哪个进程运行的时间最少，哪一个值大，就表示运行时间还长，于是就选中该进程，并使用任务切换宏函数切换到该进程运行。<br>如果所有就绪态状态进程的时间片都用完了，则会根据进程的优先级重新计算每个任务需要运行的时间片值。然后schedule函数重新扫描就绪态任务，重复上述工作，<br>选出一个进程，调用switch__to函数进行切换进程。</p>
+<p>与进程相关的还有两个比较重要的函数sleep_on和wake_up函数，这两个函数比较难以理解。<br>sleep_on函数的主要作用是当一个进程所请求的资源(例如I/O资源)正忙或不在内存中时则暂时切换出去，放在等待队列中。</p>
+<p>函数如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">void sleep_on(struct task_struct **p)</span><br><span class="line">&#123;</span><br><span class="line">	struct task_struct *tmp;</span><br><span class="line"></span><br><span class="line">	if (!p)</span><br><span class="line">		return;</span><br><span class="line">	if (current == &amp;(init_task.task))</span><br><span class="line">		panic(&quot;task[0] trying to sleep&quot;);</span><br><span class="line">	tmp = *p;</span><br><span class="line">	*p = current;</span><br><span class="line">	current-&gt;state = TASK_UNINTERRUPTIBLE;</span><br><span class="line">	schedule();     //1</span><br><span class="line">	*p = tmp;      //2</span><br><span class="line">	if (tmp)</span><br><span class="line">		tmp-&gt;state=TASK_RUNNING;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>需要理解的是1之后的代码将在进程被重新唤醒之后才会继续执行，比如当进程A调用sleep__on，执行1处的schedule()之后，<br>系统将当前控制权交给另外一个进程，即当前运行的进程已经切换到别的进程了，系统将进程A的栈信息等运行状态<br>保存下来等到下次切换到该进程时继续运行，所以上述代码中的2处将在该进程A下次被唤醒时才会继续执行，理解这一点很重要。</p>
+<p>我们先来简单看看进程切换的<br><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171213-152354@2x.png" alt="进程切换"><br>TSS中保存了多个特权级的堆栈段，最高特权级就是我们所称的内核态，最低特权级就是用户态。</p>
+<p>理解了上面这一点，我们再来理一理sleep_on的流程。</p>
+<p><strong>*sleep_on的函数参数struct task_struct </strong>p，则<em>p表示指向等待队列头部的指针(二级指针理解可以看我之前的那篇文章)。current表示当前进程的指针。<br>首先检验p是否无效，如果无效则直接返回。如果当前任务是任务0，则报错。<br>否则将tmp指向原等待队列头，然后将</em>p指向当前进程指针current,即把当前进程设置为等待队列头，并将当前调用sleep_on的进程状态设置为不可中断睡眠,这样就相当于<br>把当前进程加入了等待队列<br>当前进程睡眠当然系统要选出另外一个进程来运行，所以在这之后就是调用schedule()函数,进行重新调度。该当前进程的所有运行状态<br>都将保存下来，以备后续该进程被唤醒时继续运行。所以，当该进程再次被唤醒时，将从schedule之后返回到2处继续运行，<code>*p = tmp ;tmp-&gt;state = TASK_RUNNING</code>这句话<br>首先将等待队列头设置为刚开始由tmp保存的原始队列头，然后将当前被唤醒的进程的前一个等待队列中的进程唤醒，因为tmp之前指向了*p，即传进来的原队列头。</p>
+<p>当多个进程等待同一个资源时，程序就会调用sleep_on函数隐士地构筑出一个等待队列，下图更容易让我们理解sleep_on的等待队列幸存过程，<br>图中展示了当向队列头部插入第3个任务，即第3个进程在等待该资源而调用sleep_on时：</p>
+<p><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171213-201730@2x.png" alt="asas"></p>
+<p>我们再来看wake_up函数,wake_up函数用来唤醒睡眠的进程。<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">wake_up</span><span class="params">(struct task_struct **p)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (p &amp;&amp; *p) &#123;</span><br><span class="line">		(*p)-&gt;state = TASK_RUNNING;</span><br><span class="line">		*p = <span class="literal">NULL</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>很简单，将等待队列的队列头唤醒。至于这里为什么要将*p置为NULl，我还没有搞懂。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/操作系统/" rel="tag"># 操作系统</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/14/文件系统/" rel="next" title="文件系统">
+                <i class="fa fa-chevron-left"></i> 文件系统
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/15/java-notify和notifyAll区别/" rel="prev" title="java notify和notifyAll区别">
+                java notify和notifyAll区别 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Ooo0oO0o0oO" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#进程的实现"><span class="nav-number">1.</span> <span class="nav-text">进程的实现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux进程状态转换"><span class="nav-number">2.</span> <span class="nav-text">Linux进程状态转换</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#进程调度"><span class="nav-number">3.</span> <span class="nav-text">进程调度</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

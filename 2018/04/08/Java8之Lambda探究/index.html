@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Java8中新推出的Lambda表达式真的是很好用，碰巧前些天面试中被问到，来一起探究探究吧。函数接口指的是只有一个函数的接口，这样的接口可以隐式转换为Lambda表达式。java.lang.Runnable和java.util.concurrent.Callable是函数式接口的最佳例子。 Lambda表达式只能出现在目标类型为函数式接口的上下文中。 当然，lambda表达式对目标类型也是有要求">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java8之Lambda探究">
+<meta property="og:url" content="http://yoursite.com/2018/04/08/Java8之Lambda探究/index.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="Java8中新推出的Lambda表达式真的是很好用，碰巧前些天面试中被问到，来一起探究探究吧。函数接口指的是只有一个函数的接口，这样的接口可以隐式转换为Lambda表达式。java.lang.Runnable和java.util.concurrent.Callable是函数式接口的最佳例子。 Lambda表达式只能出现在目标类型为函数式接口的上下文中。 当然，lambda表达式对目标类型也是有要求">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20180409-192836@2x.png">
+<meta property="og:updated_time" content="2018-08-14T00:44:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java8之Lambda探究">
+<meta name="twitter:description" content="Java8中新推出的Lambda表达式真的是很好用，碰巧前些天面试中被问到，来一起探究探究吧。函数接口指的是只有一个函数的接口，这样的接口可以隐式转换为Lambda表达式。java.lang.Runnable和java.util.concurrent.Callable是函数式接口的最佳例子。 Lambda表达式只能出现在目标类型为函数式接口的上下文中。 当然，lambda表达式对目标类型也是有要求">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20180409-192836@2x.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/04/08/Java8之Lambda探究/"/>
+
+
+
+
+
+  <title>Java8之Lambda探究 | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/08/Java8之Lambda探究/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java8之Lambda探究</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-08T20:15:48+08:00">
+                2018-04-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Java8中新推出的Lambda表达式真的是很好用，碰巧前些天面试中被问到，来一起探究探究吧。<br>函数接口指的是只有一个函数的接口，这样的接口可以隐式转换为Lambda表达式。java.lang.Runnable和java.util.concurrent.Callable是函数式接口的最佳例子。</p>
+<p>Lambda表达式只能出现在目标类型为函数式接口的上下文中。</p>
+<p>当然，lambda表达式对目标类型也是有要求的。编译器会检查lambda表达式的类型和目标类型的方法签名（method signature）是否一致。当且仅当下面所有条件均满足时，lambda表达式才可以被赋给目标类型T：</p>
+<ul>
+<li>T是一个函数式接口</li>
+<li>lambda表达式的参数和T的方法参数在数量和类型上一一对应</li>
+<li>lambda表达式的返回值和T的方法返回值相兼容（Compatible）</li>
+<li>lambda表达式内所抛出的异常和T的方法throws类型相兼容</li>
+</ul>
+<hr>
+<p>本文使用的例子<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Lambda</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        System.setProperty(<span class="string">"jdk.internal.lambda.dumpProxyClasses"</span>, <span class="string">"/Users/zhengzechao/Downloads"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Runnable r = ()-&gt; System.out.println(<span class="string">"hello world"</span>);</span><br><span class="line"></span><br><span class="line">        System.out.println(r.getClass().getName());</span><br><span class="line">        r.run();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">输出：</span><br><span class="line">mytest.A.Lambda$$Lambda$1/885284298</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>如上的代码，猜想实现方式是利用字节码生成技术生成一个Runnable的类并且用Lambda表达式的内容去重写该方法，并且赋值给r。然后调用该类重写方法。<br>首先我们来看字节码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br></pre></td><td class="code"><pre><span class="line">Constant pool:</span><br><span class="line">   #1 = Methodref          #13.#31        // java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">   #2 = InvokeDynamic      #0:#36         // #0:run:()Ljava/lang/Runnable;</span><br><span class="line">   #3 = Fieldref           #37.#38        // java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">   #4 = Methodref          #13.#39        // java/lang/Object.getClass:()Ljava/lang/Class;</span><br><span class="line">   #5 = Methodref          #40.#41        // java/lang/Class.getName:()Ljava/lang/String;</span><br><span class="line">   #6 = Methodref          #42.#43        // java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">   #7 = InterfaceMethodref #44.#45        // java/lang/Runnable.run:()V</span><br><span class="line">   #8 = String             #46            // hello world</span><br><span class="line">   #9 = String             #47            // jdk.internal.lambda.dumpProxyClasses</span><br><span class="line">  #10 = String             #48            // /Users/zhengzechao/Downloads</span><br><span class="line">  #11 = Methodref          #37.#49        // java/lang/System.setProperty:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;</span><br><span class="line">  #12 = Class              #50            // mytest/A/Lambda</span><br><span class="line">  #13 = Class              #51            // java/lang/Object</span><br><span class="line">  #14 = Utf8               &lt;init&gt;</span><br><span class="line">  #15 = Utf8               ()V</span><br><span class="line">  #16 = Utf8               Code</span><br><span class="line">  #17 = Utf8               LineNumberTable</span><br><span class="line">  #18 = Utf8               LocalVariableTable</span><br><span class="line">  #19 = Utf8               this</span><br><span class="line">  #20 = Utf8               Lmytest/A/Lambda;</span><br><span class="line">  #21 = Utf8               main</span><br><span class="line">  #22 = Utf8               ([Ljava/lang/String;)V</span><br><span class="line">  #23 = Utf8               args</span><br><span class="line">  #24 = Utf8               [Ljava/lang/String;</span><br><span class="line">  #25 = Utf8               r</span><br><span class="line">  #26 = Utf8               Ljava/lang/Runnable;</span><br><span class="line">  #27 = Utf8               lambda$main$0</span><br><span class="line">  #28 = Utf8               &lt;clinit&gt;</span><br><span class="line">  #29 = Utf8               SourceFile</span><br><span class="line">  #30 = Utf8               Lambda.java</span><br><span class="line">  #31 = NameAndType        #14:#15        // &quot;&lt;init&gt;&quot;:()V</span><br><span class="line">  #32 = Utf8               BootstrapMethods</span><br><span class="line">  #33 = MethodHandle       #6:#52         // invokestatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;</span><br><span class="line">  #34 = MethodType         #15            //  ()V</span><br><span class="line">  #35 = MethodHandle       #6:#53         // invokestatic mytest/A/Lambda.lambda$main$0:()V</span><br><span class="line">  #36 = NameAndType        #54:#55        // run:()Ljava/lang/Runnable;</span><br><span class="line">  #37 = Class              #56            // java/lang/System</span><br><span class="line">  #38 = NameAndType        #57:#58        // out:Ljava/io/PrintStream;</span><br><span class="line">  #39 = NameAndType        #59:#60        // getClass:()Ljava/lang/Class;</span><br><span class="line">  #40 = Class              #61            // java/lang/Class</span><br><span class="line">  #41 = NameAndType        #62:#63        // getName:()Ljava/lang/String;</span><br><span class="line">  #42 = Class              #64            // java/io/PrintStream</span><br><span class="line">  #43 = NameAndType        #65:#66        // println:(Ljava/lang/String;)V</span><br><span class="line">  #44 = Class              #67            // java/lang/Runnable</span><br><span class="line">  #45 = NameAndType        #54:#15        // run:()V</span><br><span class="line">  #46 = Utf8               hello world</span><br><span class="line">  #47 = Utf8               jdk.internal.lambda.dumpProxyClasses</span><br><span class="line">  #48 = Utf8               /Users/zhengzechao/Downloads</span><br><span class="line">  #49 = NameAndType        #68:#69        // setProperty:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;</span><br><span class="line">  #50 = Utf8               mytest/A/Lambda</span><br><span class="line">  #51 = Utf8               java/lang/Object</span><br><span class="line">  #52 = Methodref          #70.#71        // java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;</span><br><span class="line">  #53 = Methodref          #12.#72        // mytest/A/Lambda.lambda$main$0:()V</span><br><span class="line">  #54 = Utf8               run</span><br><span class="line">  #55 = Utf8               ()Ljava/lang/Runnable;</span><br><span class="line">  #56 = Utf8               java/lang/System</span><br><span class="line">  #57 = Utf8               out</span><br><span class="line">  #58 = Utf8               Ljava/io/PrintStream;</span><br><span class="line">  #59 = Utf8               getClass</span><br><span class="line">  #60 = Utf8               ()Ljava/lang/Class;</span><br><span class="line">  #61 = Utf8               java/lang/Class</span><br><span class="line">  #62 = Utf8               getName</span><br><span class="line">  #63 = Utf8               ()Ljava/lang/String;</span><br><span class="line">  #64 = Utf8               java/io/PrintStream</span><br><span class="line">  #65 = Utf8               println</span><br><span class="line">  #66 = Utf8               (Ljava/lang/String;)V</span><br><span class="line">  #67 = Utf8               java/lang/Runnable</span><br><span class="line">  #68 = Utf8               setProperty</span><br><span class="line">  #69 = Utf8               (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;</span><br><span class="line">  #70 = Class              #73            // java/lang/invoke/LambdaMetafactory</span><br><span class="line">  #71 = NameAndType        #74:#78        // metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;</span><br><span class="line">  #72 = NameAndType        #27:#15        // lambda$main$0:()V</span><br><span class="line">  #73 = Utf8               java/lang/invoke/LambdaMetafactory</span><br><span class="line">  #74 = Utf8               metafactory</span><br><span class="line">  #75 = Class              #80            // java/lang/invoke/MethodHandles$Lookup</span><br><span class="line">  #76 = Utf8               Lookup</span><br><span class="line">  #77 = Utf8               InnerClasses</span><br><span class="line">  #78 = Utf8               (Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;</span><br><span class="line">  #79 = Class              #81            // java/lang/invoke/MethodHandles</span><br><span class="line">  #80 = Utf8               java/lang/invoke/MethodHandles$Lookup</span><br><span class="line">  #81 = Utf8               java/lang/invoke/MethodHandles</span><br><span class="line">&#123;</span><br><span class="line">  public mytest.A.Lambda();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=1, locals=1, args_size=1</span><br><span class="line">         0: aload_0</span><br><span class="line">         1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">         4: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 7: 0</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">            0       5     0  this   Lmytest/A/Lambda;</span><br><span class="line"></span><br><span class="line">  public static void main(java.lang.String[]);</span><br><span class="line">    descriptor: ([Ljava/lang/String;)V</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=2, args_size=1</span><br><span class="line">         0: invokedynamic #2,  0              // InvokeDynamic #0:run:()Ljava/lang/Runnable;</span><br><span class="line">         5: astore_1</span><br><span class="line">         6: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">         9: aload_1</span><br><span class="line">        10: invokevirtual #4                  // Method java/lang/Object.getClass:()Ljava/lang/Class;</span><br><span class="line">        13: invokevirtual #5                  // Method java/lang/Class.getName:()Ljava/lang/String;</span><br><span class="line">        16: invokevirtual #6                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">        19: aload_1</span><br><span class="line">        20: invokeinterface #7,  1            // InterfaceMethod java/lang/Runnable.run:()V</span><br><span class="line">        25: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 12: 0</span><br><span class="line">        line 14: 6</span><br><span class="line">        line 15: 19</span><br><span class="line">        line 16: 25</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">            0      26     0  args   [Ljava/lang/String;</span><br><span class="line">            6      20     1     r   Ljava/lang/Runnable;</span><br><span class="line"></span><br><span class="line">  private static void lambda$main$0();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=0, args_size=0</span><br><span class="line">         0: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">         3: ldc           #8                  // String hello world</span><br><span class="line">         5: invokevirtual #6                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">         8: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 12: 0</span><br><span class="line"></span><br><span class="line">  static &#123;&#125;;</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=0, args_size=0</span><br><span class="line">         0: ldc           #9                  // String jdk.internal.lambda.dumpProxyClasses</span><br><span class="line">         2: ldc           #10                 // String /Users/zhengzechao/Downloads</span><br><span class="line">         4: invokestatic  #11                 // Method java/lang/System.setProperty:(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;</span><br><span class="line">         7: pop</span><br><span class="line">         8: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 9: 0</span><br><span class="line">        line 10: 8</span><br><span class="line">&#125;</span><br><span class="line">SourceFile: &quot;Lambda.java&quot;</span><br><span class="line">InnerClasses:</span><br><span class="line">     public static final #76= #75 of #79; //Lookup=class java/lang/invoke/MethodHandles$Lookup of class java/lang/invoke/MethodHandles</span><br><span class="line">BootstrapMethods:</span><br><span class="line">  0: #33 invokestatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;</span><br><span class="line">    Method arguments:</span><br><span class="line">      #34 ()V</span><br><span class="line">      #35 invokestatic mytest/A/Lambda.lambda$main$0:()V</span><br><span class="line">      #34 ()V</span><br></pre></td></tr></table></figure>
+<p>可以看到奇怪的两个部分是多了个静态方法<code>private static void lambda$main$0();</code>以及最下面的<code>InnerClasses</code>。<br>除此之外我们可以看到静态方法中的<code>private static void lambda$main$0()</code>方法就是我们Lambda表达式式的逻辑。<br>那照理说应该由Main方法的字节码中调用该静态方法啊，但是好像并不是这样实现的。但是你会发现Main方法中有个之前很少见的<br>指令<code>InvokeDynamic</code>。<br>先去查查该指令的用处，我们去看看<a href="https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-6.html#jvms-6.5.invokedynamic" target="_blank" rel="noopener">InvokeDynamic</a></p>
+<p>指令格式如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">invokedynamic</span><br><span class="line">indexbyte1</span><br><span class="line">indexbyte2</span><br><span class="line"><span class="number">0</span></span><br><span class="line"><span class="number">0</span></span><br></pre></td></tr></table></figure></p>
+<p>其索引值（indexbyte1 &lt;&lt; 8）| indexbyte2。该索引指向当前运行时常量池CONSTANT_InvokeDynamic_info。第三个和第四个操作数字节的值必须始终为零。</p>
+<p>CONSTANT_InvokeDynamic_info的结构如下：<a href="https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4.10" target="_blank" rel="noopener">CONSTANT_InvokeDynamic_info</a><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CONSTANT_InvokeDynamic_info &#123;</span><br><span class="line">    u1 tag; <span class="comment">//该常量项的标识</span></span><br><span class="line">    u2 bootstrap_method_attr_index;<span class="comment">////BootstrapMethods_attribute中的坐标</span></span><br><span class="line">    u2 name_and_type_index;<span class="comment">//指向对应的CONSTANT_NameAndType_info在常量池中的下标</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在本文的例子中，bootstrap_method_attr_index指向BootstrapMethods中的0项，name_and_type_index为36。</p>
+<p>BootstrapMethods_attribute又是什么呢？这是属性表中的属性。具体结构如下,<a href="https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7.21" target="_blank" rel="noopener">BootstrapMethods_attribute</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">BootstrapMethods_attribute &#123;</span><br><span class="line">    u2 attribute_name_index;</span><br><span class="line">    u4 attribute_length;</span><br><span class="line">    u2 num_bootstrap_methods;</span><br><span class="line">    &#123;   u2 bootstrap_method_ref;<span class="comment">//引导方法引用</span></span><br><span class="line">        u2 num_bootstrap_arguments;<span class="comment">//参数数量</span></span><br><span class="line">        u2 bootstrap_arguments[num_bootstrap_arguments];<span class="comment">//方法参数</span></span><br><span class="line">    &#125; bootstrap_methods[num_bootstrap_methods];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里面最重要的是方法引用这个内容，bootstrap_method_ref指向常量池中的CONSTANT_MethodHandle_info常量。<a href="https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.4.8" target="_blank" rel="noopener">CONSTANT_MethodHandle_info</a><br>在本文的例子中该方法引用指向的是常量池中的第33项。<br><code>#33 = MethodHandle       #6:#52         // invokestatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CONSTANT_MethodHandle_info &#123;</span><br><span class="line">    u1 tag; <span class="comment">//标识符</span></span><br><span class="line">    u1 reference_kind; <span class="comment">//该方法句柄的字节码行为 1到9</span></span><br><span class="line">    u2 reference_index; <span class="comment">//方法引用在常量池中的下标</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到本文的例子中该方法句柄的字节码行为为invokestatic,并且方法的引用指向为常量池第52项。<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#52 = Methodref          #70.#71        // java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;</span><br></pre></td></tr></table></figure></p>
+<p>这个就是编译器为我们生成的BootstrapMethod，该方法有什么用呢?<br>当JVM第一次碰到这条invokedynamic时, 会调用对应的Bootstrap方法.主要有两种BootstrapMethod:metafactory()和altMetafactory()。</p>
+<p>但是我们到现在为止却没看到之前打印的那个字节码生成类<code>Lambda$$Lambda$1</code>的出现。</p>
+<p>我们利用如下代码下载运行时生成的字节码到本地文件中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">System.setProperty(<span class="string">"jdk.internal.lambda.dumpProxyClasses"</span>, <span class="string">"/Users/zhengzechao/Downloads"</span>);</span><br></pre></td></tr></table></figure>
+<p>反编译得到的Lambda$$Lambda$1.class。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">package</span> mytest.A;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.invoke.LambdaForm;</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Lambda</span>$$<span class="title">Lambda</span>$1 <span class="keyword">implements</span> <span class="title">Runnable</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="meta">@LambdaForm</span>.Hidden</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Lambda.lambda$main$<span class="number">0</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在可以看到该类就是基础了Runnable接口并且重写了run方法。</p>
+<p>现在我们探究一下该Lambda$$Lambda$1的类的实例时何时产生的。再来看一下main方法的字节码。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(java.lang.String[])</span></span>;</span><br><span class="line">    descriptor: ([Ljava/lang/String;)V</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=<span class="number">2</span>, locals=<span class="number">2</span>, args_size=<span class="number">1</span></span><br><span class="line">         0: invokedynamic #2,  0              // InvokeDynamic #0:run:()Ljava/lang/Runnable;</span><br><span class="line">         <span class="number">5</span>: astore_1</span><br><span class="line">         6: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">         <span class="number">9</span>: aload_1</span><br><span class="line">        10: invokevirtual #4                  // Method java/lang/Object.getClass:()Ljava/lang/Class;</span><br><span class="line">        13: invokevirtual #5                  // Method java/lang/Class.getName:()Ljava/lang/String;</span><br><span class="line">        16: invokevirtual #6                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">        <span class="number">19</span>: aload_1</span><br><span class="line">        20: invokeinterface #7,  1            // InterfaceMethod java/lang/Runnable.run:()V</span><br><span class="line">        <span class="number">25</span>: <span class="keyword">return</span></span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line <span class="number">12</span>: <span class="number">0</span></span><br><span class="line">        line <span class="number">14</span>: <span class="number">6</span></span><br><span class="line">        line <span class="number">15</span>: <span class="number">19</span></span><br><span class="line">        line <span class="number">16</span>: <span class="number">25</span></span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">            <span class="number">0</span>      <span class="number">26</span>     <span class="number">0</span>  args   [Ljava/lang/String;</span><br><span class="line">            <span class="number">6</span>      <span class="number">20</span>     <span class="number">1</span>     r   Ljava/lang/Runnable;</span><br></pre></td></tr></table></figure></p>
+<p>在InvokeDynamic指令之后，紧跟着<code>astore_1</code>指令，该指令是将本地变量表中索引为1的对象引用指向栈顶元素引用的对象。<br>这说明在InvokeDynamic的执行过程中，产生了个Runnable对象并放入了操作数栈顶。但是我查看InvokeDynamic的指令并没有<br>生成元素放入栈顶，那就是说，该Runnable对象很有可能是在本地方法中产生并压入栈顶的。ok，我们断点到BootstrapMethod看看。</p>
+<p>我们首先来看调用栈：<br><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20180409-192836@2x.png" alt="调用栈"><br>果然，其中涉及到了大部分的本地代码。我们看一些比较重要的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> CallSite <span class="title">metafactory</span><span class="params">(MethodHandles.Lookup caller,</span></span></span><br><span class="line"><span class="function"><span class="params">                                     String invokedName,</span></span></span><br><span class="line"><span class="function"><span class="params">                                     MethodType invokedType,</span></span></span><br><span class="line"><span class="function"><span class="params">                                     MethodType samMethodType,</span></span></span><br><span class="line"><span class="function"><span class="params">                                     MethodHandle implMethod,</span></span></span><br><span class="line"><span class="function"><span class="params">                                     MethodType instantiatedMethodType)</span></span></span><br><span class="line"><span class="function">          <span class="keyword">throws</span> LambdaConversionException </span>&#123;</span><br><span class="line">      AbstractValidatingLambdaMetafactory mf;</span><br><span class="line">      mf = <span class="keyword">new</span> InnerClassLambdaMetafactory(caller, invokedType,</span><br><span class="line">                                           invokedName, samMethodType,</span><br><span class="line">                                           implMethod, instantiatedMethodType,</span><br><span class="line">                                           <span class="keyword">false</span>, EMPTY_CLASS_ARRAY, EMPTY_MT_ARRAY);</span><br><span class="line">      mf.validateMetafactoryArgs();</span><br><span class="line">      <span class="keyword">return</span> mf.buildCallSite();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>终于我们在buildCallSite方法中找到了利用反射获取构造器来生成的Lambda$$Lambda$1的类的实例的代码。虽然在这里被包装到了<br>ConstantCallSite这个对象中。但由调用栈大致可以猜想该实例最终会被获取并压入栈顶。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function">CallSite <span class="title">buildCallSite</span><span class="params">()</span> <span class="keyword">throws</span> LambdaConversionException </span>&#123;</span><br><span class="line">       <span class="keyword">final</span> Class&lt;?&gt; innerClass = spinInnerClass();</span><br><span class="line">       <span class="keyword">if</span> (invokedType.parameterCount() == <span class="number">0</span>) &#123;</span><br><span class="line">           <span class="keyword">final</span> Constructor&lt;?&gt;[] ctrs = AccessController.doPrivileged(</span><br><span class="line">                   <span class="keyword">new</span> PrivilegedAction&lt;Constructor&lt;?&gt;[]&gt;() &#123;</span><br><span class="line">               <span class="meta">@Override</span></span><br><span class="line">               <span class="keyword">public</span> Constructor&lt;?&gt;[] run() &#123;</span><br><span class="line">                   Constructor&lt;?&gt;[] ctrs = innerClass.getDeclaredConstructors();</span><br><span class="line">                   <span class="keyword">if</span> (ctrs.length == <span class="number">1</span>) &#123;</span><br><span class="line">                       <span class="comment">// The lambda implementing inner class constructor is private, set</span></span><br><span class="line">                       <span class="comment">// it accessible (by us) before creating the constant sole instance</span></span><br><span class="line">                       ctrs[<span class="number">0</span>].setAccessible(<span class="keyword">true</span>);</span><br><span class="line">                   &#125;</span><br><span class="line">                   <span class="keyword">return</span> ctrs;</span><br><span class="line">               &#125;</span><br><span class="line">                   &#125;);</span><br><span class="line">           <span class="keyword">if</span> (ctrs.length != <span class="number">1</span>) &#123;</span><br><span class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> LambdaConversionException(<span class="string">"Expected one lambda constructor for "</span></span><br><span class="line">                       + innerClass.getCanonicalName() + <span class="string">", got "</span> + ctrs.length);</span><br><span class="line">           &#125;</span><br><span class="line"></span><br><span class="line">           <span class="keyword">try</span> &#123;</span><br><span class="line">               Object inst = ctrs[<span class="number">0</span>].newInstance();</span><br><span class="line">               <span class="keyword">return</span> <span class="keyword">new</span> ConstantCallSite(MethodHandles.constant(samBase, inst)); <span class="comment">//构造CallSite</span></span><br><span class="line">           &#125;</span><br><span class="line"></span><br><span class="line">           .....省略后序代码</span><br></pre></td></tr></table></figure></p>
+<p>Ok，今天的分析就到这里了，我们在<code>JDK8中Lambda表达式底层实现浅析</code>这文章的基础上梳理一下：*(以下不分先后顺序)</p>
+<ul>
+<li>Lambda表达的实际内容被编译成了当前类的一个静态或实例方法.</li>
+<li>Lambda表达式所在处会产生一条invokedynamic指令调用, 同时编译器会生成一个对应的Bootstrap Method.</li>
+<li>当JVM第一次碰到这条invokedynamic时, 会调用对应的Bootstrap方法。该方法会压入一个内部类实例到栈顶。<br>该内部类就继承或者实现了传入Lambda表达式处的函数式接口，例如上文例子中的<code>Runnable r = ()-&gt; System.out.println(&quot;hello world&quot;);</code>，编译器<br>会为该Lambda表达式生成一个继承了Runnable并实现了方法的内部类。</li>
+<li>由Lambda表达式产生的invokedynamic指令的引导方法是调用LambdaMetafactory.metafactory()方法.</li>
+<li>调用引导方法会返回一个CallSite对象实例, 该实例target引用一个MethodHandle实例.</li>
+<li>之后调用Lambda表达式,就是通过生成的内部类的方法去调用步骤1中编译出来的方法。</li>
+</ul>
+<h1 id="Java-方法引用"><a href="#Java-方法引用" class="headerlink" title="Java 方法引用"></a>Java 方法引用</h1><p>关于方法引用的使用方法和注意事项请看我之前的文章<a href="http://www.zzcblogs.top/2017/10/08/jdk1-8%E6%96%B9%E6%B3%95%E5%BC%95%E7%94%A8%E8%A7%A3%E6%9E%90/" target="_blank" rel="noopener">JDK8方法引用解析</a></p>
+<p>如下例子：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Consumer c = System.out::println;</span><br><span class="line">c.accept(<span class="string">"hi"</span>);</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span>$$<span class="title">Lambda</span>$1 <span class="keyword">implements</span> <span class="title">Consumer</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> PrintStream arg$<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Main$$Lambda$<span class="number">1</span>(<span class="keyword">final</span> PrintStream arg$<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">this</span>.arg$<span class="number">1</span> = arg$<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Consumer get$Lambda(<span class="keyword">final</span> PrintStream printStream) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Main$$Lambda$<span class="number">1</span>(printStream);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@LambdaForm</span>.Hidden</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">accept</span><span class="params">(<span class="keyword">final</span> Object o)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.arg$<span class="number">1</span>.println(o);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到方法引用中生成的内部类是直接将方法引用的逻辑去实现了接口。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://docs.oracle.com/javase/specs" target="_blank" rel="noopener">Java虚拟机规范</a></p>
+<p><a href="https://www.cnblogs.com/figure9/p/java-8-lambdas-insideout-language-features.html" target="_blank" rel="noopener">深入理解Java 8 Lambda（语言篇——lambda，方法引用，目标类型和默认方法</a></p>
+<p><a href="https://StackOverflow.com/questions/26257266/are-java-8-lambdas-compiled-as-inner-classes-methods-or-something-else?utm_medium=organic&amp;utm_source=google_rich_qa&amp;utm_campaign=google_rich_qa" target="_blank" rel="noopener">StackOverflow</a></p>
+<p><a href="https://my.oschina.net/haogrgr/blog/367391" target="_blank" rel="noopener">JDK8中Lambda表达式底层实现浅析(一)</a><br><a href="https://www.oschina.net/translate/hacking-lambda-expressions-in-java?print" target="_blank" rel="noopener">MethodHandle与Lambda</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/31/责任链模式/" rel="next" title="学习设计模式之责任链模式">
+                <i class="fa fa-chevron-left"></i> 学习设计模式之责任链模式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/12/Java8-深入Stream/" rel="prev" title="Java8-深入Stream">
+                Java8-深入Stream <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Ooo0oO0o0oO" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-方法引用"><span class="nav-number">1.</span> <span class="nav-text">Java 方法引用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">1.1.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

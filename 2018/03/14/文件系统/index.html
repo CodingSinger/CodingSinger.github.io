@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="操作系统," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="文件存储方式 顺序存取：进程在这些系统中可以从头顺序读取文件的全部，但是不能跳过某些内容。在存储介质为磁带时，顺序存取是很方便的。顺序存取类似于链表节点的访问，想要获得第n个节点，必须从头节点开始访问前N-1个节点的指针域。  随机存取:以任何次序读取其中字节的记录，类似于数组，可以直接索引访问指定单元。常见的随机存取读取文件方式如read指定开始读文件位置和seek方法设置当前位置。">
+<meta name="keywords" content="操作系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="文件系统">
+<meta property="og:url" content="http://yoursite.com/2018/03/14/文件系统/index.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="文件存储方式 顺序存取：进程在这些系统中可以从头顺序读取文件的全部，但是不能跳过某些内容。在存储介质为磁带时，顺序存取是很方便的。顺序存取类似于链表节点的访问，想要获得第n个节点，必须从头节点开始访问前N-1个节点的指针域。  随机存取:以任何次序读取其中字节的记录，类似于数组，可以直接索引访问指定单元。常见的随机存取读取文件方式如read指定开始读文件位置和seek方法设置当前位置。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/Qxjzb5I.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/5r4YAqd.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/fRf2xjA.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/F4UZxlx.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171130-131138@2x.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171130-125445@2x.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171130-205925@2x.png">
+<meta property="og:updated_time" content="2018-08-14T00:44:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="文件系统">
+<meta name="twitter:description" content="文件存储方式 顺序存取：进程在这些系统中可以从头顺序读取文件的全部，但是不能跳过某些内容。在存储介质为磁带时，顺序存取是很方便的。顺序存取类似于链表节点的访问，想要获得第n个节点，必须从头节点开始访问前N-1个节点的指针域。  随机存取:以任何次序读取其中字节的记录，类似于数组，可以直接索引访问指定单元。常见的随机存取读取文件方式如read指定开始读文件位置和seek方法设置当前位置。">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/Qxjzb5I.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/14/文件系统/"/>
+
+
+
+
+
+  <title>文件系统 | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/14/文件系统/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">文件系统</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-14T16:26:50+08:00">
+                2018-03-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/操作系统/" itemprop="url" rel="index">
+                    <span itemprop="name">操作系统</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="文件存储方式"><a href="#文件存储方式" class="headerlink" title="文件存储方式"></a>文件存储方式</h1><ul>
+<li><p>顺序存取：进程在这些系统中可以从头顺序读取文件的全部，但是不能跳过某些内容。在存储介质为磁带时，顺序存取是很方便的。<br>顺序存取类似于链表节点的访问，想要获得第n个节点，必须从头节点开始访问前N-1个节点的指针域。</p>
+</li>
+<li><p>随机存取:以任何次序读取其中字节的记录，类似于数组，可以直接索引访问指定单元。常见的随机存取读取文件方式如read指定开始读文件位置和<br>seek方法设置当前位置。</p>
+<a id="more"></a>
+<h1 id="文件系统的理论实现"><a href="#文件系统的理论实现" class="headerlink" title="文件系统的理论实现"></a>文件系统的理论实现</h1><h2 id="文件系统的布局"><a href="#文件系统的布局" class="headerlink" title="文件系统的布局"></a>文件系统的布局</h2><p><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/Qxjzb5I.png" alt="wen"></p>
+</li>
+</ul>
+<p>多数磁盘分为一个分区和多个分区，每个分区都有一个独立的文件系统。磁盘的0号扇区称为主引导记录，即MBR.MBR的后面紧跟区表，<br>MBR做的第一件事就是确定活动分区，然后读入它的第一个块，即引导块。引导块中的程序将装载该分区的操作系统。每个分区都有一个引导块，<br>可能改分区没有操作系统，但是以后可能会有。</p>
+<p>之后的磁盘分区的布局随着文件系统的不同而变化。以上是一个可能的布局。</p>
+<ul>
+<li>超级块(superblokc) ，超级块包含文件系统的所有关键参数。计算机启动，或文件系统首次使用时，超级块被读入内存。<br>  确定文件类型用的魔数。<br>  文件系统数据块的数量。<br>  其他重要管理信息。</li>
+</ul>
+<p><em>**</em> 文件系统空闲块的信息。<br>    可以用位图或指针列表给出。</p>
+<ul>
+<li>可能有 i节点，是一个数据结构数组，每个文件一个。<br>  i节点说明了文件的方方面面。</li>
+<li>根目录</li>
+<li>文件和目录</li>
+</ul>
+<h1 id="文件的实现"><a href="#文件的实现" class="headerlink" title="文件的实现"></a>文件的实现</h1><p>文件存储的关键是记录各个文件用了哪些磁盘块。</p>
+<p>主要有以下几种方法：</p>
+<ul>
+<li>连续分配</li>
+</ul>
+<p>把每个文件作为一连串数据块存储在磁盘上。后一个文件紧接着上一个文件。如图：<br><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/5r4YAqd.png" alt="wen"></p>
+<p>该方式存储的优点：</p>
+<ol>
+<li>实现简单</li>
+<li>读取文件方便，性能高，同一个文件数据块都在一起，不需要寻道和选择延迟。<br>缺点：</li>
+<li>删除文件后形成的空洞。磁盘空洞不易于文件扩展，因为文件数据块连续，无法事先知道文件最终的大小，从而造成磁盘空洞无法高效使用。故该方法<br>经常在CD-ROW上使用，因为CD-ROW的文件可读不可写，文件大小始终不变。</li>
+</ol>
+<ul>
+<li>链表分配</li>
+</ul>
+<p>为每个文件构造磁盘块链表，指针域存放下一块的磁盘块。<br>优点：</p>
+<ol>
+<li>这样可以充分使用每个磁盘块，而不会和连续分配一样<br>缺点：</li>
+<li>指针占去了一些字节。</li>
+<li>随机存取缓慢，因为每一次访问都要从头指针开始访问。</li>
+</ol>
+<ul>
+<li>内存中采用表的链表分配</li>
+</ul>
+<p>取出每个磁盘块的指针字（偏移），放在内存中的一个表中(文件分配表)，这样就可以解决链表分配的两个不足。<br><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/fRf2xjA.png" alt="d"></p>
+<p>虽然这样访问某个磁盘块仍旧需要从头指针开始遍历访问，但是因为是在内存中，速度会快很多，例如想获得文件A的第10块，则在内存中从文件A的<br>头索引4开始，依次获得7，2，10物理块的地址。</p>
+<p>缺点：<br>需要在内存中维护文件分配表，当磁盘容量很大时，需要很大的部分来存储这个表，这将造成资源的大量浪费。</p>
+<ul>
+<li>i节点<br>i节点这个数据结构列出了文件属性和文件块的磁盘地址。</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/F4UZxlx.png" alt="2"></p>
+<p>和内存采用表的链表分配不同的是只有当文件打开时，i节点才在内存中。而后者则是将所有文件的块指针都用表存储放在内存。因此i节点不会造成过多地资源占用。<br>为了解决一个i节点不够存储磁盘块时的情况发生，可以在最后一个磁盘块地址的域中替换成指向一个包含磁盘块地址的块。</p>
+<h1 id="目录的实现"><a href="#目录的实现" class="headerlink" title="目录的实现"></a>目录的实现</h1><p>操作系统利用用户给出的路径名找到相应目录项，目录项中提供了查找文件磁盘块所需要的信息。目录系统的主要功能是把ASCLL文件名映射成<br>定位文件数据所需的数据。</p>
+<p>ASCLL—-&gt; 目录项结构(包含了文件信息和所在磁盘块)</p>
+<h1 id="说说i节点"><a href="#说说i节点" class="headerlink" title="说说i节点"></a>说说i节点</h1><ul>
+<li>inode是一个重要的概念，是理解Unix/Linux文件系统和硬盘存储的基础</li>
+</ul>
+<ol>
+<li><p>inode是什么？</p>
+<p> 理解inode，要从文件储存说起。文件储存在硬盘上，硬盘的最小存储单位叫做“扇区”。每个扇区能储存512字节（相当于0.5KB）</p>
+<p> 操作系统在读取硬盘的时候，不会一个个扇区的读取，这样效率太低，而是一次性连续读多个扇区，即一次性读取一个“块”（block）。这种由多个扇区组成的“块”，是文件存取的最小单位。“块”的大小，最常见的是4kb，即连续八个sector组成一个block。</p>
+<p> 文件数据都存放在block中，那么很显然，我们还必须找到一个地方储存文件的元信息，比如文件的创建者、文件的创建日期、文件的大小等等。这种储存文件元信息的区域就叫做inode，中文译名为“索引节点”</p>
+<p> 每一个文件都有对应的inode，里面包含了与该文件有关的一些信息。</p>
+</li>
+</ol>
+<ul>
+<li><p>inode的内容</p>
+<p>  inode包含文件的元信息，具体来说有以下内容：</p>
+<p>  文件的字节数<br>  文件的拥有者uid<br>  文件的所属组gid<br>  文件的r、w、x权限<br>  文件的时间戳<br>  ctime：文件的inode上一次变动的时间<br>  mtime：文件内容上一次变动的时间<br>  atime：文件上一次打开的时间<br>  硬链接数<br>  文件数据block的位置<br>总之，除了文件名以外的所有文件信息，都存在inode之中。至于为什么没有文件名，下文会有详细解释。</p>
+</li>
+<li><p>inode的大小</p>
+<p>  inode也会消耗硬盘空间，所以硬盘格式化的时候，操作系统自动将硬盘分成两个区域。一个是数据区，存放文件数据；另一个是inode区（inode table），存放inode所包含的信息。</p>
+<p>  每个inode节点的大小，一般是128字节或256字节。inode节点的总数，在格式化的时候就给定，一般是每1kb或每2kb就设置一个inode。假定在一块1GB的硬盘上，每个inode节点的大小为128字节，每1kb就设置一个inode，那么inode table的大小就会达到128MB，占整块硬盘的12.8%。</p>
+<p>  查看每个硬盘分区的inode总数和已经使用的数量，可以使用命令：<br>  df -id<br>  查看每个inode节点的大小，可以使用命令：</p>
+<p>  sudo dumpe2fs -h 块设备 | grep “Inode size”</p>
+<p>  由于每个文件都必须有一个inode，因此有可能发生inode已经用光，但是硬盘还未存满的情况。这时，就无法在硬盘上创建新文件。</p>
+</li>
+<li><p>inode号码</p>
+<p>  每个inode都有一个号码，操作系统用inode号码来识别文件。对于系统来说，文件名只是inode号码便于识别的别称或绰号。</p>
+<p>  表面上，用户通过文件名，打开文件。实际上，系统内部这个过程分为三步：<br>  系统找到这个文件名对应的inode号码<br>  通过inode号码，获取inode信息<br>  根据inode信息，找到文件数据所在的block，读出数据<br>  查看文件所对应的inode号码：<br>  ls -i example.txt</p>
+</li>
+</ul>
+<p>Unix/Linux系统中，目录（directory）也是一种文件。打开目录，实际上就是打开目录文件。<br>目录文件的结构非常简单，就是一系列目录项（dirent）的列表。每个目录项，由两部分组成：所包含文件的文件名，该文件名对应的inode号码</p>
+<p>列出整个目录文件，即文件名和inode号码：<br>ls -i file<br>查看文件的详细信息，必须根据inode号码，访问inode节点，读取信息。 ls -l命令列出文件的详细信息。</p>
+<ul>
+<li><p>说到i节点，我们不得不说符号链接<br>*1. 硬链接</p>
+<p>  ln命令创建硬链接<br>  ln 源文件 目标文件<br>  运行这条命令之后，源文件与目标文件的inode号码相同，都指向一个inode。inode信息中有一项叫做“链接数”，记录指向该inode的文件总数，这时就会增加1（没有硬链接时的硬链接数为1）</p>
+</li>
+</ul>
+<p>例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@iZw~]# touch 1</span><br><span class="line">[root@iZw~]# stat 1</span><br><span class="line">  File: `1&apos;</span><br><span class="line">  Size: 0         	Blocks: 0          IO Block: 4096   regular empty file</span><br><span class="line">Device: ca01h/51713d	Inode: 2244613     Links: 1</span><br><span class="line">Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Access: 2017-11-19 15:58:28.000000000 +0800</span><br><span class="line">Modify: 2017-11-19 15:58:28.000000000 +0800</span><br><span class="line">Change: 2017-11-19 15:58:28.000000000 +0800</span><br><span class="line">[root@iZw~]# ln 1 2</span><br><span class="line">[root@iZw~]# stat 2</span><br><span class="line">  File: `2&apos;</span><br><span class="line">  Size: 0         	Blocks: 0          IO Block: 4096   regular empty file</span><br><span class="line">Device: ca01h/51713d	Inode: 2244613     Links: 2</span><br><span class="line">Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Access: 2017-11-19 15:58:28.000000000 +0800</span><br><span class="line">Modify: 2017-11-19 15:58:28.000000000 +0800</span><br><span class="line">Change: 2017-11-19 15:58:36.000000000 +0800</span><br></pre></td></tr></table></figure>
+<pre><code>可以看到1和2两个文件都指向同一个inode。但是Linkes增加了.
+
+一般情况下，文件名和inode号码是“一一对应”关系，每个inode号码对应一个文件名。但是，Unix/Linux系统允许，多个文件指向同一个inode。
+这意味着，可以用不同的文件名访问同样的内容；对其中一个文件内容进行修改，会影响到所有文件；但是，删除一个文件名，不影响另一个文件名的访问。这种情况被称为“硬链接”（hard link）。
+
+
+反过来，删除一个指向该inode的文件，就会使得inode节点的“链接数”减一。当这个值减到0，表明没有文件名指向这个inode，系统就会回收这个inode号码，以及其所对应的block区域。
+
+顺便说一下目录文件的“链接数”。创建目录时，默认会生成两个目录项：&quot;.&quot;和&quot;..&quot;。前者的inode号码，等同于当前目录的“硬链接”；后者的inode号码就是当前目录的父目录的inode号码，等同于父目录的“硬链接”。所以，任何一个目录的“硬链接”总数总是等于2加上它的子目录总数（含隐藏目录）。
+</code></pre><ol start="2">
+<li><p>软链接</p>
+<p> 创建软链接命令<br> ln -s 源文件或目录 目标文件或目录</p>
+</li>
+</ol>
+<p>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@iZw~]# touch 1</span><br><span class="line">[root@iZ~]# stat 1</span><br><span class="line">  File: `1&apos;</span><br><span class="line">  Size: 0         	Blocks: 0          IO Block: 4096   regular empty file</span><br><span class="line">Device: ca01h/51713d	Inode: 2244613     Links: 1</span><br><span class="line">Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Access: 2017-11-19 16:05:11.000000000 +0800</span><br><span class="line">Modify: 2017-11-19 16:05:11.000000000 +0800</span><br><span class="line">Change: 2017-11-19 16:05:11.000000000 +0800</span><br><span class="line">[root@iZw~]# ln -s 1 2</span><br><span class="line">[root@iZw~]# stat 2</span><br><span class="line">  File: `2&apos; -&gt; `1&apos;</span><br><span class="line">  Size: 1         	Blocks: 0          IO Block: 4096   symbolic link</span><br><span class="line">Device: ca01h/51713d	Inode: 2244614     Links: 1</span><br><span class="line">Access: (0777/lrwxrwxrwx)  Uid: (    0/    root)   Gid: (    0/    root)</span><br><span class="line">Access: 2017-11-19 16:05:18.000000000 +0800</span><br><span class="line">Modify: 2017-11-19 16:05:18.000000000 +0800</span><br><span class="line">Change: 2017-11-19 16:05:18.000000000 +0800</span><br></pre></td></tr></table></figure></p>
+<pre><code>文件1和文件2的inode号码虽然不一样，但是文件2的内容是文件1的内容。读取文件2时，系统会自动将访问者导向文件1。因此，无论打开哪一个文件，最终读取的都是文件1。这时，文件2就称为文件1的“软链接”（soft link）或者“符号链接”（symbolic link）
+
+这意味着，文件2依赖于文件1而存在，如果删除了文件1，打开文件2就会报错：“No such file or directory”。这是软链接与硬链接最大的不同。文件2指向文件1的文件名，(利用`ls -l 2`查看)，而不是文件B的inode号码，文件B的inode链接数不会因此而发生改变。
+</code></pre><p>inode的特殊作用</p>
+<pre><code>由于inode号码与文件名分离，这种机制导致了一些Unix/Linux系统特有的现象。
+
+文件名包含特殊字符，无法正常删除。这时，直接删除inode节点，就能起到删除文件的作用
+移动文件或重命名文件，只是改变文件名，不影响inode号码
+打开一个文件以后，系统就以inode号码来识别这个文件，不再考虑文件名。因此，通常来说，系统无法从inode号码得知文件名。
+第三点使得软件更新变得非常简单，可以在不关闭软件的情况下更新，不需要重启。因为系统通过inode号码，识别运行中的文件，不通过文件名。更新的时候，新版文件以同样的文件名，生成一个新的inode，不会影响到运行中的文件，等到下一次运行这个软件的时候，文件名就自动指向新版本，旧版文件的inode则被收回。
+</code></pre><h1 id="阅读Linux0-11源码-如何实现文件系统"><a href="#阅读Linux0-11源码-如何实现文件系统" class="headerlink" title="阅读Linux0.11源码-如何实现文件系统"></a>阅读Linux0.11源码-如何实现文件系统</h1><p>以大部分的Unix系统为例，文件操作的粗略步骤如下：</p>
+<p>用户根据路径从目录中找到符合该路径的目录项，该目录项中包含了该文件的inode索引。然后根据该inode索引从inode表中找到其inode结构，并复制到<br>内存中。以后就直接访问内存中的inode节点。</p>
+<p>我们都知道在unix下，当我们调用open函数打开一个文件夹时如果成功打开则会返回一个整数，之后再对文件进行操作则需要传递这个整数，这个整数其实<br>是文件描述符，索引了该文件在文件描述符表中的位置，每当一个文件被打开，则会在文件描述符表中增加一个表项，文件描述符表项中有一个指针指向了<br>打开文件表中的文件结构体，该结构体包含了文件的读写位置，操作模式以及最重要的inode节点指针，inode节点指针指向之前拷贝到内存中的inode。具体<br>代码open.c中的sys_open函数如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">int sys_open(const char * filename,int flag,int mode)</span><br><span class="line">&#123;</span><br><span class="line">	struct m_inode * inode;</span><br><span class="line">	struct file * f;</span><br><span class="line">	int i,fd;</span><br><span class="line"></span><br><span class="line">	mode &amp;= 0777 &amp; ~current-&gt;umask;</span><br><span class="line">	//// 为了为打开文件建立一个文件句柄，需要搜索进程结构中文件结构指针数组，以查</span><br><span class="line">    // 找一个空闲项。空闲项的索引号fd即是文件句柄值。若已经没有空闲项，则返回出错码。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	for(fd=0 ; fd&lt;NR_OPEN ; fd++)</span><br><span class="line">		if (!current-&gt;filp[fd])</span><br><span class="line">			break;</span><br><span class="line">	if (fd&gt;=NR_OPEN)</span><br><span class="line">		return -EINVAL;</span><br><span class="line">	current-&gt;close_on_exec &amp;= ~(1&lt;&lt;fd);</span><br><span class="line"></span><br><span class="line">	// 查找file_table(打开文件表)中的空闲文件结构体</span><br><span class="line"></span><br><span class="line">	f=0+file_table;</span><br><span class="line">	for (i=0 ; i&lt;NR_FILE ; i++,f++)</span><br><span class="line">		if (!f-&gt;f_count) break;</span><br><span class="line">	if (i&gt;=NR_FILE)</span><br><span class="line">		return -EINVAL;</span><br><span class="line"></span><br><span class="line">	//让进程对应文件句柄fd的文件结构指针指向搜索到的文件结构体，并令文件</span><br><span class="line">    // 引用计数递增1。然后调用函数open_namei()执行打开操作，inode为该文件的内存i节点指针</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	(current-&gt;filp[fd]=f)-&gt;f_count++;</span><br><span class="line">	if ((i=open_namei(filename,flag,mode,&amp;inode))&lt;0) &#123;</span><br><span class="line">		current-&gt;filp[fd]=NULL;</span><br><span class="line">		f-&gt;f_count=0;</span><br><span class="line">		return i;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">//对一些文件进行特殊处理 这里我们不管</span><br><span class="line">/* ttys are somewhat special (ttyxx major==4, tty major==5) */</span><br><span class="line">	if (S_ISCHR(inode-&gt;i_mode)) &#123;</span><br><span class="line">		if (MAJOR(inode-&gt;i_zone[0])==4) &#123;</span><br><span class="line">			if (current-&gt;leader &amp;&amp; current-&gt;tty&lt;0) &#123;</span><br><span class="line">				current-&gt;tty = MINOR(inode-&gt;i_zone[0]);</span><br><span class="line">				tty_table[current-&gt;tty].pgrp = current-&gt;pgrp;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; else if (MAJOR(inode-&gt;i_zone[0])==5)</span><br><span class="line">			if (current-&gt;tty&lt;0) &#123;</span><br><span class="line">				iput(inode);</span><br><span class="line">				current-&gt;filp[fd]=NULL;</span><br><span class="line">				f-&gt;f_count=0;</span><br><span class="line">				return -EPERM;</span><br><span class="line">			&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	if (S_ISBLK(inode-&gt;i_mode))</span><br><span class="line">		check_disk_change(inode-&gt;i_zone[0]);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	 // 初始化打开文件表中的这个文件结构。设置文件结构属性和标志，置句柄引用计数</span><br><span class="line">    // 为1，并设置i节点字段为打开文件的i节点，初始化文件读写指针为0.最后返回文</span><br><span class="line">    // 件句柄号。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	f-&gt;f_mode = inode-&gt;i_mode;</span><br><span class="line">	f-&gt;f_flags = flag;</span><br><span class="line">	f-&gt;f_count = 1;</span><br><span class="line">	f-&gt;f_inode = inode;</span><br><span class="line">	f-&gt;f_pos = 0;</span><br><span class="line">	return (fd);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以Linux0.11版本的文件系统实现为例，列举一些比较重要的数据结构如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">//磁盘i节点</span><br><span class="line"></span><br><span class="line">struct d_inode &#123;</span><br><span class="line">	unsigned short i_mode;</span><br><span class="line">	unsigned short i_uid;</span><br><span class="line">	unsigned long i_size;</span><br><span class="line">	unsigned long i_time;</span><br><span class="line">	unsigned char i_gid;</span><br><span class="line">	unsigned char i_nlinks;</span><br><span class="line">	unsigned short i_zone[9];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">//内存i节点</span><br><span class="line">struct m_inode &#123;</span><br><span class="line">	unsigned short i_mode;</span><br><span class="line">	unsigned short i_uid;</span><br><span class="line">	unsigned long i_size;</span><br><span class="line">	unsigned long i_mtime;</span><br><span class="line">	unsigned char i_gid;</span><br><span class="line">	unsigned char i_nlinks;</span><br><span class="line">	unsigned short i_zone[9];</span><br><span class="line">/* these are in memory also */</span><br><span class="line">	struct task_struct * i_wait;</span><br><span class="line">	unsigned long i_atime;</span><br><span class="line">	unsigned long i_ctime;</span><br><span class="line">	unsigned short i_dev;</span><br><span class="line">	unsigned short i_num;</span><br><span class="line">	unsigned short i_count;</span><br><span class="line">	unsigned char i_lock;</span><br><span class="line">	unsigned char i_dirt;</span><br><span class="line">	unsigned char i_pipe;</span><br><span class="line">	unsigned char i_mount;</span><br><span class="line">	unsigned char i_seek;</span><br><span class="line">	unsigned char i_update;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">//文件</span><br><span class="line">struct file &#123;</span><br><span class="line">	unsigned short f_mode;</span><br><span class="line">	unsigned short f_flags;</span><br><span class="line">	unsigned short f_count;</span><br><span class="line">	struct m_inode * f_inode;</span><br><span class="line">	off_t f_pos;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//目录项结构体</span><br><span class="line"></span><br><span class="line">struct dir_entry &#123;</span><br><span class="line">	unsigned short inode;</span><br><span class="line">	char name[NAME_LEN];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">extern struct m_inode inode_table[NR_INODE]; //内存i节点表</span><br><span class="line">extern struct file file_table[NR_FILE];  //打开文件表 所有进程共有，属于系统</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Unix kernel represents open files using three data structures: Descriptor table, File table, and v-node table.<br>When a process opens a file twice, it gets two different descriptors in the descriptor table, two entries in the file table(so that they have different positions in the same file), and they both point to one entry in the v-node table.</p>
+</blockquote>
+<p>是不是多个进程每次open一个文件都会在打开文件表创建一个表项呢？<br>如果多个进程打开同一个file1.txt文件以不同的操作呢？</p>
+<blockquote>
+</blockquote>
+<p>用<a href="https://stackoverflow.com/questions/14189944/unix-system-file-tables" target="_blank" rel="noopener">Stackoverflow上的解答</a>来说明打开文件表的表项在进程操作文件的表项创建问题:</p>
+<p>So there is neither just one file table entry for an open file nor is there just one per process … there is one per open() call, and it is shared if the file descriptor is dup()ed or fork()ed.<br>并不是每一个进程为每个文件在打开文件表上有一个表项而是每一次open都会创建一个表项，如果使用了dup(2)或者fork()方法则会共享一个打开文件表的表项。</p>
+<p>1) When two or more processes open a file for reading, there’s an entry in the open file table per open. There is even an entry per open if one process opens the file multiple times.</p>
+<p>2) A single entry is not created in the open file table for different processes opening same file (but there is just one entry in the in-memory inode table).</p>
+<p>3) If file1.txt is opened twice, in the same or two different processes, there are two different open file table entries (but just one entry in the in-memory inode table).</p>
+<p>关于文件描述符表，打开文件表，内存i节点表的关系看这篇资料<a href="https://www.usna.edu/Users/cs/aviv/classes/ic221/s16/lec/21/lec.html" target="_blank" rel="noopener">文件系统</a></p>
+<p>参考<a href="http://www.cs.kent.edu/~walker/classes/os.f07/lectures/Walker-11.pdf" target="_blank" rel="noopener">文件系统图解</a></p>
+<h1 id="文件系统的高速缓冲区"><a href="#文件系统的高速缓冲区" class="headerlink" title="文件系统的高速缓冲区"></a>文件系统的高速缓冲区</h1><p>由于CPU 与 I/O 设备间速度不匹配。为了缓和 CPU 与 I/O 设备之间速度不匹配矛盾。文件缓冲区是用以暂时存放读写期间的文件数据而在内存区预留的一定空间.<br>使用文件缓冲区可减少读取硬盘的次数。通俗地讲就是假设读取一个文件某个块则内核可能会将该块附近的几个块一起读入缓冲区，这样的话可能你访问文件的下一个块，<br>不需要从磁盘读取，减少磁盘iO次数。</p>
+<p>Linux0.11中通过buffer.c程序对高速缓冲区进行操作和管理。<br>高速缓冲区在块设备与cpu之间起到一个桥梁的作用，程序访问块设备都需要经过高速缓冲区。如图为缓冲区在整个<br>物理内存中所处的位置。</p>
+<p><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171130-131138@2x.png" alt="23"><br>整个高速缓冲区被划分成1024字节大小的缓冲块，与块设备的磁盘逻辑块大小相同，<br>为了更好地对缓冲块进行程序化管理，程序中需要一个抽象数据结构把缓冲区的各缓冲块进行表示以及管理。<br>源码中的缓冲头结构体buffer_head结构体正是如此。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">struct buffer_head &#123;</span><br><span class="line">	char * b_data;			/*指向缓冲块*/</span><br><span class="line">	unsigned long b_blocknr;	/* 块号 */</span><br><span class="line">	unsigned short b_dev;		/* 块设备号 */</span><br><span class="line">	unsigned char b_uptodate;</span><br><span class="line">	unsigned char b_dirt;		/* 0-clean,1-dirty 是否脏数据 */</span><br><span class="line">	unsigned char b_count;		/* users using this block */</span><br><span class="line">	unsigned char b_lock;		/* 0 - ok, 1 -locked 块锁*/</span><br><span class="line">	struct task_struct * b_wait;</span><br><span class="line">	struct buffer_head * b_prev;</span><br><span class="line">	struct buffer_head * b_next;</span><br><span class="line">	struct buffer_head * b_prev_free;</span><br><span class="line">	struct buffer_head * b_next_free;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>缓冲区的低端用做存放缓冲块头结构体buffer_head，缓冲区高端的内存空间用作存放1024字节大小的缓冲块。<br>缓冲头结构体和缓冲块进行连接，以用缓冲头结构来更好地管理缓冲块。如图：</p>
+<p><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171130-125445@2x.png" alt="as"></p>
+<p>buffer_head结构体被组织成一个双向循环链表,如图：</p>
+<p><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171130-205925@2x.png" alt="aass"></p>
+<p>当程序需要对块设备进行读写时，首先会调用bread函数，传入块设备号和逻辑块号，bread函数调用getblk函数来判断该块设备中的该逻辑块<br>是否在高速缓冲中，如果在则返回绑定该缓冲块的缓冲头，否则寻找一个空闲的缓冲块，然后跟空闲的缓冲头进行绑定，返回该缓冲头，并调用<br>底层函数ll_rw__block函数将块设备中的该逻辑块数据读入高速缓冲区中的该缓冲块。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/操作系统/" rel="tag"># 操作系统</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/14/操作系统分页机制/" rel="next" title="操作系统分页机制">
+                <i class="fa fa-chevron-left"></i> 操作系统分页机制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/14/线程和进程/" rel="prev" title="线程和进程">
+                线程和进程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Ooo0oO0o0oO" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#文件存储方式"><span class="nav-number">1.</span> <span class="nav-text">文件存储方式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#文件系统的理论实现"><span class="nav-number">2.</span> <span class="nav-text">文件系统的理论实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#文件系统的布局"><span class="nav-number">2.1.</span> <span class="nav-text">文件系统的布局</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#文件的实现"><span class="nav-number">3.</span> <span class="nav-text">文件的实现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#目录的实现"><span class="nav-number">4.</span> <span class="nav-text">目录的实现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#说说i节点"><span class="nav-number">5.</span> <span class="nav-text">说说i节点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#阅读Linux0-11源码-如何实现文件系统"><span class="nav-number">6.</span> <span class="nav-text">阅读Linux0.11源码-如何实现文件系统</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#文件系统的高速缓冲区"><span class="nav-number">7.</span> <span class="nav-text">文件系统的高速缓冲区</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Tomcat," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文Tomcat版本为tomcat9 何为Connector?先看一张图:连接器(Connector) 将Service和Container连接起来，首先它需要注册到一个Service，它的作用就是把来自客户端的请求转发到Container(容器)，这就是它为什么称作连接器的原因。">
+<meta name="keywords" content="Tomcat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="学习Tomcat-五-Tomcat Connector组件">
+<meta property="og:url" content="http://yoursite.com/2018/03/25/学习Tomcat-五-Connector组件介绍/index.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="本文Tomcat版本为tomcat9 何为Connector?先看一张图:连接器(Connector) 将Service和Container连接起来，首先它需要注册到一个Service，它的作用就是把来自客户端的请求转发到Container(容器)，这就是它为什么称作连接器的原因。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/tomcat_structure.jpg">
+<meta property="og:updated_time" content="2018-08-14T00:44:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="学习Tomcat-五-Tomcat Connector组件">
+<meta name="twitter:description" content="本文Tomcat版本为tomcat9 何为Connector?先看一张图:连接器(Connector) 将Service和Container连接起来，首先它需要注册到一个Service，它的作用就是把来自客户端的请求转发到Container(容器)，这就是它为什么称作连接器的原因。">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/tomcat_structure.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/25/学习Tomcat-五-Connector组件介绍/"/>
+
+
+
+
+
+  <title>学习Tomcat-五-Tomcat Connector组件 | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/25/学习Tomcat-五-Connector组件介绍/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">学习Tomcat-五-Tomcat Connector组件</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-25T19:20:42+08:00">
+                2018-03-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文Tomcat版本为tomcat9</p>
+<h1 id="何为Connector"><a href="#何为Connector" class="headerlink" title="何为Connector?"></a>何为Connector?</h1><p>先看一张图:<br><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/tomcat_structure.jpg" alt="sd"><br>连接器(Connector) 将Service和Container连接起来，首先它需要注册到一个Service，它的作用就是把来自客户端的请求转发到Container(容器)，这就是它为什么称作连接器的原因。</p>
+<a id="more"></a>
+<h1 id="Connector的种类"><a href="#Connector的种类" class="headerlink" title="Connector的种类"></a>Connector的种类</h1><p>Tomcat源码中与connector相关的类位于org.apache.coyote包中，Connector分为以下几类：</p>
+<ul>
+<li>Http Connector    基于HTTP协议，负责建立HTTP连接。它又分为BIO Http Connector与NIO Http Connector两种，后者提供非阻塞IO与长连接Comet支持。</li>
+<li>AJP Connector    基于AJP协议，AJP是专门设计用来为tomcat与http服务器之间通信专门定制的协议，能提供较高的通信速度和效率。如与Apache服务器集成时，采用这个协议。*</li>
+<li>APR HTTP Connector    用C实现，通过JNI调用的。主要提升对静态资源(如HTML、图片、CSS、JS等)的访问性能。现在这个库已独立出来可用在任何项目中。Tomcat在配置APR之后性能非常强劲。</li>
+</ul>
+<h1 id="Connector的配置"><a href="#Connector的配置" class="headerlink" title="Connector的配置"></a>Connector的配置</h1><p>Connector的配置在$CATALINA_HOME/conf/server.xml文件中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">&lt;Connector port=&quot;8080&quot; protocol=&quot;HTTP/1.1&quot;</span><br><span class="line">               connectionTimeout=&quot;20000&quot;</span><br><span class="line">               redirectPort=&quot;8443&quot;  /&gt;</span><br></pre></td></tr></table></figure></p>
+<p>有关连接器配置的资料请查看<a href="https://tomcat.apache.org/tomcat-9.0-doc/config/http.html" target="_blank" rel="noopener">Tomcat官方文档</a></p>
+<h1 id="Connector是如何作为连接器进行工作"><a href="#Connector是如何作为连接器进行工作" class="headerlink" title="Connector是如何作为连接器进行工作"></a>Connector是如何作为连接器进行工作</h1><p>我们从最常用的连接器Http11NioProtocol连接器来从源码层面讲解。</p>
+<p>首先tomcat启动器从指定目录下加载server.xml，并对其进行解析，Connector信息的解析和初始化在ConnectorCreateRule#begin方法中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">public Connector(String protocol) &#123;</span><br><span class="line">        boolean aprConnector = AprLifecycleListener.isAprAvailable() &amp;&amp;</span><br><span class="line">                AprLifecycleListener.getUseAprConnector();</span><br><span class="line"></span><br><span class="line">        if (&quot;HTTP/1.1&quot;.equals(protocol) || protocol == null) &#123;</span><br><span class="line">            if (aprConnector) &#123;</span><br><span class="line">                protocolHandlerClassName = &quot;org.apache.coyote.http11.Http11AprProtocol&quot;;</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                protocolHandlerClassName = &quot;org.apache.coyote.http11.Http11NioProtocol&quot;;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; else if (&quot;AJP/1.3&quot;.equals(protocol)) &#123;</span><br><span class="line">            if (aprConnector) &#123;</span><br><span class="line">                protocolHandlerClassName = &quot;org.apache.coyote.ajp.AjpAprProtocol&quot;;</span><br><span class="line">            &#125; else &#123;</span><br><span class="line">                protocolHandlerClassName = &quot;org.apache.coyote.ajp.AjpNioProtocol&quot;;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            protocolHandlerClassName = protocol;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        // Instantiate protocol handler</span><br><span class="line">        ProtocolHandler p = null;</span><br><span class="line">        try &#123;</span><br><span class="line">            Class&lt;?&gt; clazz = Class.forName(protocolHandlerClassName);</span><br><span class="line">            p = (ProtocolHandler) clazz.getConstructor().newInstance();</span><br><span class="line">        &#125; catch (Exception e) &#123;</span><br><span class="line">            log.error(sm.getString(</span><br><span class="line">                    &quot;coyoteConnector.protocolHandlerInstantiationFailed&quot;), e);</span><br><span class="line">        &#125; finally &#123;</span><br><span class="line">            this.protocolHandler = p;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        // Default for Connector depends on this system property</span><br><span class="line">        setThrowOnFailure(Boolean.getBoolean(&quot;org.apache.catalina.startup.EXIT_ON_INIT_FAILURE&quot;));</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>Connector的构造方法很简单，就是通过配置文件Connector节点的protocol属性初始化对应的协议处理器。<br>以Http11NioProtocol处理器为例，注入了NioEndPoint。NioEndPoint是一个极其重要的类，我们会在之后的文章里再提到。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public Http11NioProtocol() &#123;</span><br><span class="line">    super(new NioEndpoint());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后<code>this.protocolHandler = p</code>将处理器赋值给protocolHandler变量。</p>
+<p>前面讲过，Connector的启动是通过StandardService#startInternal方法的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">.....</span><br><span class="line"></span><br><span class="line">synchronized (connectorsLock) &#123;</span><br><span class="line">           for (Connector connector: connectors) &#123;</span><br><span class="line">               // If it has already failed, don&apos;t try and start it</span><br><span class="line">               if (connector.getState() != LifecycleState.FAILED) &#123;</span><br><span class="line">                   connector.start();</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br></pre></td></tr></table></figure></p>
+<p>connector通过start方法调用了Connector重写的startInternal方法。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">@Override</span><br><span class="line">   protected void startInternal() throws LifecycleException &#123;</span><br><span class="line"></span><br><span class="line">       // Validate settings before starting</span><br><span class="line">       if (getPort() &lt; 0) &#123;</span><br><span class="line">           throw new LifecycleException(sm.getString(</span><br><span class="line">                   &quot;coyoteConnector.invalidPort&quot;, Integer.valueOf(getPort())));</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       setState(LifecycleState.STARTING);</span><br><span class="line"></span><br><span class="line">       try &#123;</span><br><span class="line">           protocolHandler.start();</span><br><span class="line">       &#125; catch (Exception e) &#123;</span><br><span class="line">           throw new LifecycleException(</span><br><span class="line">                   sm.getString(&quot;coyoteConnector.protocolHandlerStartFailed&quot;), e);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到protocolHandler.start()方法被执行，该方法肯定是启动连接器的核心方法。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">@Override</span><br><span class="line">  public void start() throws Exception &#123;</span><br><span class="line">      if (getLog().isInfoEnabled()) &#123;</span><br><span class="line">          getLog().info(sm.getString(&quot;abstractProtocolHandler.start&quot;, getName()));</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      endpoint.start();</span><br><span class="line"></span><br><span class="line">      // Start async timeout thread</span><br><span class="line">      asyncTimeout = new AsyncTimeout();</span><br><span class="line">      Thread timeoutThread = new Thread(asyncTimeout, getNameInternal() + &quot;-AsyncTimeout&quot;);</span><br><span class="line">      int priority = endpoint.getThreadPriority();</span><br><span class="line">      if (priority &lt; Thread.MIN_PRIORITY || priority &gt; Thread.MAX_PRIORITY) &#123;</span><br><span class="line">          priority = Thread.NORM_PRIORITY;</span><br><span class="line">      &#125;</span><br><span class="line">      timeoutThread.setPriority(priority);</span><br><span class="line">      timeoutThread.setDaemon(true);</span><br><span class="line">      timeoutThread.start();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>endpoint就是我们在初始化协议处理器的时候注入的对象。同样以Http11NioProtocol为例，该类的endpoint类型是NioEndpoint。<br>NioEndpoint通过start方法调用了如下的startInternal方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">public void startInternal() throws Exception &#123;</span><br><span class="line"></span><br><span class="line">      if (!running) &#123;</span><br><span class="line">          running = true;</span><br><span class="line">          paused = false;</span><br><span class="line"></span><br><span class="line">          processorCache = new SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                  socketProperties.getProcessorCache());</span><br><span class="line">          eventCache = new SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                          socketProperties.getEventCache());</span><br><span class="line">          nioChannels = new SynchronizedStack&lt;&gt;(SynchronizedStack.DEFAULT_SIZE,</span><br><span class="line">                  socketProperties.getBufferPool());</span><br><span class="line"></span><br><span class="line">          // Create worker collection</span><br><span class="line">          if ( getExecutor() == null ) &#123;</span><br><span class="line">              createExecutor();</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          initializeConnectionLatch();</span><br><span class="line"></span><br><span class="line">          // Start poller threads</span><br><span class="line">          pollers = new Poller[getPollerThreadCount()];</span><br><span class="line">          for (int i=0; i&lt;pollers.length; i++) &#123;</span><br><span class="line">              pollers[i] = new Poller();</span><br><span class="line">              Thread pollerThread = new Thread(pollers[i], getName() + &quot;-ClientPoller-&quot;+i);</span><br><span class="line">              pollerThread.setPriority(threadPriority);</span><br><span class="line">              pollerThread.setDaemon(true);</span><br><span class="line">              pollerThread.start();</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          startAcceptorThreads();</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p><code>initializeConnectionLatch</code>这句代码实际是初始化一个LimitLatch类来限制连接数，以避免连接过大而导致服务瘫痪，就像一个阀门一样，控制同一时刻的最大连接数并拒绝接受连接直到连接释放有空闲位置。该类我们会在下一节中<br>结合客户端连接过程来详细介绍。</p>
+<p>总的来说上面的<code>startInternal</code>方法完成了多数集合的初始化、工作线程池的初始化、以及Poller线程的启动，Acceptor线程的启动。<br><a href="http://xstarcd.github.io/wiki/Java/tomcat_http_Connector_confs.html" target="_blank" rel="noopener">sdsd</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Tomcat/" rel="tag"># Tomcat</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/24/学会Go语言的Channel-md/" rel="next" title="学会Go语言的Channel">
+                <i class="fa fa-chevron-left"></i> 学会Go语言的Channel
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/27/页面置换算法/" rel="prev" title="页面置换算法">
+                页面置换算法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Ooo0oO0o0oO" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#何为Connector"><span class="nav-number">1.</span> <span class="nav-text">何为Connector?</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Connector的种类"><span class="nav-number">2.</span> <span class="nav-text">Connector的种类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Connector的配置"><span class="nav-number">3.</span> <span class="nav-text">Connector的配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Connector是如何作为连接器进行工作"><span class="nav-number">4.</span> <span class="nav-text">Connector是如何作为连接器进行工作</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

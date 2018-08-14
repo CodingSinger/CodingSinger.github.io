@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="SpringMVC," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="示例代码以如下示例代码为例进行讲解： 1234567891011121314151617181920212223242526public class Person &amp;#123;    private Integer id;    private String name;    public Person() &amp;#123;    &amp;#125;    public Integer getId() &amp;#">
+<meta name="keywords" content="SpringMVC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringMVC-参数解析和绑定">
+<meta property="og:url" content="http://yoursite.com/2018/03/19/SpringMVC-参数解析和绑定-md/index.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="示例代码以如下示例代码为例进行讲解： 1234567891011121314151617181920212223242526public class Person &amp;#123;    private Integer id;    private String name;    public Person() &amp;#123;    &amp;#125;    public Integer getId() &amp;#">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-08-14T00:44:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SpringMVC-参数解析和绑定">
+<meta name="twitter:description" content="示例代码以如下示例代码为例进行讲解： 1234567891011121314151617181920212223242526public class Person &amp;#123;    private Integer id;    private String name;    public Person() &amp;#123;    &amp;#125;    public Integer getId() &amp;#">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/19/SpringMVC-参数解析和绑定-md/"/>
+
+
+
+
+
+  <title>SpringMVC-参数解析和绑定 | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/19/SpringMVC-参数解析和绑定-md/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">SpringMVC-参数解析和绑定</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-19T14:01:06+08:00">
+                2018-03-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h1><p>以如下示例代码为例进行讲解：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Integer id;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">getId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setId</span><span class="params">(Integer id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.id = id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@RequestMapping</span>(value = <span class="string">"/person/&#123;person&#125;"</span>,method = RequestMethod.POST)</span><br><span class="line"><span class="function"><span class="keyword">public</span> Person <span class="title">addPerson</span><span class="params">(Integer age, Person p)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    System.out.println(age);</span><br><span class="line">    <span class="keyword">return</span> p;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过下面方法将请求中的参数转化到请求方法所需的参数t。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">private</span> Object[] getMethodArgumentValues(NativeWebRequest request, <span class="meta">@Nullable</span> ModelAndViewContainer mavContainer,</span><br><span class="line">		Object... providedArgs) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">	MethodParameter[] parameters = getMethodParameters(); <span class="comment">//获取方法参数列表</span></span><br><span class="line">	Object[] args = <span class="keyword">new</span> Object[parameters.length]; <span class="comment">//构造对应长度的Object数组</span></span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; parameters.length; i++) &#123;</span><br><span class="line">		MethodParameter parameter = parameters[i];</span><br><span class="line">		parameter.initParameterNameDiscovery(<span class="keyword">this</span>.parameterNameDiscoverer);</span><br><span class="line">            <span class="comment">//如果之前有预先设置值的话，则取预先设置好的值  </span></span><br><span class="line">		args[i] = resolveProvidedArgument(parameter, providedArgs); </span><br><span class="line">		<span class="keyword">if</span> (args[i] != <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="keyword">continue</span>;</span><br><span class="line">		&#125;</span><br><span class="line">           <span class="comment">//查看是否有支持该参数的参数解析器,有则将该参数解析器缓存在一个以MethodParameter为键的HashMap中，</span></span><br><span class="line">           <span class="comment">//下次先去缓存中看有没有，没有才去遍历所有解析器</span></span><br><span class="line">		<span class="keyword">if</span> (<span class="keyword">this</span>.argumentResolvers.supportsParameter(parameter)) &#123;</span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">                   <span class="comment">//用对应的解析器去请求参数中解析该参数</span></span><br><span class="line">				args[i] = <span class="keyword">this</span>.argumentResolvers.resolveArgument(</span><br><span class="line">						parameter, mavContainer, request, <span class="keyword">this</span>.dataBinderFactory);</span><br><span class="line">				<span class="keyword">continue</span>;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">catch</span> (Exception ex) &#123;</span><br><span class="line">				<span class="keyword">if</span> (logger.isDebugEnabled()) &#123;</span><br><span class="line">					logger.debug(getArgumentResolutionErrorMessage(<span class="string">"Failed to resolve"</span>, i), ex);</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">throw</span> ex;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (args[i] == <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Could not resolve method parameter at index "</span> +</span><br><span class="line">					parameter.getParameterIndex() + <span class="string">" in "</span> + parameter.getExecutable().toGenericString() +</span><br><span class="line">					<span class="string">": "</span> + getArgumentResolutionErrorMessage(<span class="string">"No suitable resolver for"</span>, i));</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> args;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以例子中的int age参数解析来说，对应的解析器解析行为如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Object <span class="title">resolveArgument</span><span class="params">(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,</span></span></span><br><span class="line"><span class="function"><span class="params">			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);</span><br><span class="line">		MethodParameter nestedParameter = parameter.nestedIfOptional();</span><br><span class="line"></span><br><span class="line">		Object resolvedName = resolveStringValue(namedValueInfo.name); <span class="comment">//获取该方法参数要求注入时的参数名 即如果@RequestParam()指定过则提取指定的名</span></span><br><span class="line">		<span class="keyword">if</span> (resolvedName == <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(</span><br><span class="line">					<span class="string">"Specified name must not resolve to null: ["</span> + namedValueInfo.name + <span class="string">"]"</span>);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">		Object arg = resolveName(resolvedName.toString(), nestedParameter, webRequest); <span class="comment">// 获取数据值。其实是个字符串</span></span><br><span class="line"></span><br><span class="line">    </span><br><span class="line">		<span class="keyword">if</span> (arg == <span class="keyword">null</span>) &#123; <span class="comment">//对参数为空的处理</span></span><br><span class="line">			<span class="keyword">if</span> (namedValueInfo.defaultValue != <span class="keyword">null</span>) &#123;</span><br><span class="line">				arg = resolveStringValue(namedValueInfo.defaultValue);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">else</span> <span class="keyword">if</span> (namedValueInfo.required &amp;&amp; !nestedParameter.isOptional()) &#123;</span><br><span class="line">				handleMissingValue(namedValueInfo.name, nestedParameter, webRequest);</span><br><span class="line">			&#125;</span><br><span class="line">			arg = handleNullValue(namedValueInfo.name, arg, nestedParameter.getNestedParameterType());</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">""</span>.equals(arg) &amp;&amp; namedValueInfo.defaultValue != <span class="keyword">null</span>) &#123;</span><br><span class="line">			arg = resolveStringValue(namedValueInfo.defaultValue);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (binderFactory != <span class="keyword">null</span>) &#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 获得对应的参数绑定器</span></span><br><span class="line">			WebDataBinder binder = binderFactory.createBinder(webRequest, <span class="keyword">null</span>, namedValueInfo.name);</span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 如果有必要则进行参数转换</span></span><br><span class="line">				arg = binder.convertIfNecessary(arg, parameter.getParameterType(), parameter);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">catch</span> (ConversionNotSupportedException ex) &#123;</span><br><span class="line">				<span class="keyword">throw</span> <span class="keyword">new</span> MethodArgumentConversionNotSupportedException(arg, ex.getRequiredType(),</span><br><span class="line">						namedValueInfo.name, parameter, ex.getCause());</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">catch</span> (TypeMismatchException ex) &#123;</span><br><span class="line">				<span class="keyword">throw</span> <span class="keyword">new</span> MethodArgumentTypeMismatchException(arg, ex.getRequiredType(),</span><br><span class="line">						namedValueInfo.name, parameter, ex.getCause());</span><br><span class="line"></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//该方法默认是调用AbstractNamedValueMethodArgumentResolver的空实现</span></span><br><span class="line">		handleResolvedValue(arg, namedValueInfo.name, parameter, mavContainer, webRequest);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> arg;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<ol>
+<li>NamedValueInfo对象保存了该参数的名称以及是否必需、默认值,可以在@RequestParam等注解中设置。</li>
+<li>然后根据该参数信息去请求中解析得到本次传递的值。</li>
+<li>如果请求中没有传递该参数的值，则先判断NamedValueInfo中该参数是否有设置过默认值，如果有，则设置为默认值。</li>
+<li>如果没有默认值并且要求传递该参数(NamedValueInfo.requiredtrue)则handleMissingValue方法会扔出一个ServletRequestBindingException异常。</li>
+<li>否则的话就运行handleNullValue方法，该方法为未找到的参数赋值为空，但是如果是基本类型的话就会扔出IllegalStateException异常。</li>
+<li>如果arg不为空，则说明请求包含该参数，则获得对应的参数绑定器并且如果需要类型转化则进行类型转化，最后将转化后的参数返回。</li>
+</ol>
+<hr>
+<p>例子中对Person对象的解析如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line">	<span class="meta">@Nullable</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Object <span class="title">resolveArgument</span><span class="params">(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,</span></span></span><br><span class="line"><span class="function"><span class="params">			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">		Assert.state(mavContainer != <span class="keyword">null</span>, <span class="string">"ModelAttributeMethodProcessor requires ModelAndViewContainer"</span>);</span><br><span class="line">		Assert.state(binderFactory != <span class="keyword">null</span>, <span class="string">"ModelAttributeMethodProcessor requires WebDataBinderFactory"</span>);</span><br><span class="line"></span><br><span class="line">		String name = ModelFactory.getNameForParameter(parameter);<span class="comment">//获取该方法参数的简明 本例子中取类名的简写"person"</span></span><br><span class="line">		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);</span><br><span class="line">		<span class="keyword">if</span> (ann != <span class="keyword">null</span>) &#123;</span><br><span class="line">			mavContainer.setBinding(name, ann.binding());</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		Object attribute = <span class="keyword">null</span>;</span><br><span class="line">		BindingResult bindingResult = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (mavContainer.containsAttribute(name)) &#123; <span class="comment">//如果处理本次请求上下文已经在之前创建过该参数实例，则直接提取</span></span><br><span class="line">			attribute = mavContainer.getModel().get(name);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">//createAttribute方法构造方法参数的类实例，可以根据路径参数构造，如果没有提供则用构造器构造</span></span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				attribute = createAttribute(name, parameter, binderFactory, webRequest); <span class="comment">//获得该参数的类型的实例</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">catch</span> (BindException ex) &#123;</span><br><span class="line">				<span class="keyword">if</span> (isBindExceptionRequired(parameter)) &#123;</span><br><span class="line">					<span class="comment">// No BindingResult parameter -&gt; fail with BindException</span></span><br><span class="line">					<span class="keyword">throw</span> ex;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// Otherwise, expose null/empty value and associated BindingResult</span></span><br><span class="line">				<span class="keyword">if</span> (parameter.getParameterType() == Optional.class) &#123;</span><br><span class="line">					attribute = Optional.empty();</span><br><span class="line">				&#125;</span><br><span class="line">				bindingResult = ex.getBindingResult();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (bindingResult == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">//获取数据绑定器 进行Bean实例的属性绑定和验证 </span></span><br><span class="line">			WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name);</span><br><span class="line">			<span class="keyword">if</span> (binder.getTarget() != <span class="keyword">null</span>) &#123; <span class="comment">//binder.getTarget()获取的就是attribute引用的对象</span></span><br><span class="line">				<span class="keyword">if</span> (!mavContainer.isBindingDisabled(name)) &#123;</span><br><span class="line">					bindRequestParameters(binder, webRequest); <span class="comment">//绑定请求参数到该bean上</span></span><br><span class="line">				&#125;</span><br><span class="line">				validateIfApplicable(binder, parameter);</span><br><span class="line">				<span class="keyword">if</span> (binder.getBindingResult().hasErrors() &amp;&amp; isBindExceptionRequired(binder, parameter)) &#123;</span><br><span class="line">					<span class="keyword">throw</span> <span class="keyword">new</span> BindException(binder.getBindingResult());</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="comment">// Value type adaptation, also covering java.util.Optional</span></span><br><span class="line">			<span class="keyword">if</span> (!parameter.getParameterType().isInstance(attribute)) &#123;</span><br><span class="line">				attribute = binder.convertIfNecessary(binder.getTarget(), parameter.getParameterType(), parameter);</span><br><span class="line">			&#125;</span><br><span class="line">			bindingResult = binder.getBindingResult();</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// Add resolved attribute and BindingResult at the end of the model</span></span><br><span class="line">		Map&lt;String, Object&gt; bindingResultModel = bindingResult.getModel();</span><br><span class="line">		mavContainer.removeAttributes(bindingResultModel);</span><br><span class="line">		mavContainer.addAllAttributes(bindingResultModel);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> attribute;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>我们来看bindRequestParameters方法，其后续会调用下面的bind方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">bind</span><span class="params">(ServletRequest request)</span> </span>&#123;</span><br><span class="line">		MutablePropertyValues mpvs = <span class="keyword">new</span> ServletRequestParameterPropertyValues(request); <span class="comment">//获得请求参数，不包括路径参数</span></span><br><span class="line">		MultipartRequest multipartRequest = WebUtils.getNativeRequest(request, MultipartRequest.class);</span><br><span class="line">		<span class="keyword">if</span> (multipartRequest != <span class="keyword">null</span>) &#123;</span><br><span class="line">			bindMultipart(multipartRequest.getMultiFileMap(), mpvs);</span><br><span class="line">		&#125;</span><br><span class="line">		addBindValues(mpvs, request);<span class="comment">//获取路径参数并添加到mpvs</span></span><br><span class="line">		doBind(mpvs);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>addBindValues方法将@PathVariable的键值对添加到mpvs。<br>如果请求参数集合中已经包含该路径参数的键值，则不添加，否则将路径参数的键值对也添加到mpvs中去。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">addBindValues</span><span class="params">(MutablePropertyValues mpvs, ServletRequest request)</span> </span>&#123;</span><br><span class="line">		String attr = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;</span><br><span class="line">		Map&lt;String, String&gt; uriVars = (Map&lt;String, String&gt;) request.getAttribute(attr);</span><br><span class="line">		<span class="keyword">if</span> (uriVars != <span class="keyword">null</span>) &#123;</span><br><span class="line">			uriVars.forEach((name, value) -&gt; &#123;</span><br><span class="line">				<span class="keyword">if</span> (mpvs.contains(name)) &#123;</span><br><span class="line">					<span class="keyword">if</span> (logger.isWarnEnabled()) &#123;</span><br><span class="line">						logger.warn(<span class="string">"Skipping URI variable '"</span> + name +</span><br><span class="line">								<span class="string">"' since the request contains a bind value with the same name."</span>);</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">else</span> &#123;</span><br><span class="line">					mpvs.addPropertyValue(name, value);</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>doBind方法就是包括对mpvs中的参数进行一些规则检查，最后调用setPropertyValues方法进行最终的属性绑定.<br>以默认的的AbstractPropertyAccessor的setPropertyValues方法为例。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">Override</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setPropertyValues</span><span class="params">(PropertyValues pvs, <span class="keyword">boolean</span> ignoreUnknown, <span class="keyword">boolean</span> ignoreInvalid)</span></span></span><br><span class="line"><span class="function">			<span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line"></span><br><span class="line">		List&lt;PropertyAccessException&gt; propertyAccessExceptions = <span class="keyword">null</span>;</span><br><span class="line">		List&lt;PropertyValue&gt; propertyValues = (pvs <span class="keyword">instanceof</span> MutablePropertyValues ?</span><br><span class="line">				((MutablePropertyValues) pvs).getPropertyValueList() : Arrays.asList(pvs.getPropertyValues()));</span><br><span class="line">		<span class="keyword">for</span> (PropertyValue pv : propertyValues) &#123;</span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				<span class="comment">// This method may throw any BeansException, which won't be caught</span></span><br><span class="line">				<span class="comment">// here, if there is a critical failure such as no matching field.</span></span><br><span class="line">				<span class="comment">// We can attempt to deal only with less serious exceptions.</span></span><br><span class="line">				setPropertyValue(pv);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">catch</span> (NotWritablePropertyException ex) &#123;</span><br><span class="line">				<span class="keyword">if</span> (!ignoreUnknown) &#123;</span><br><span class="line">					<span class="keyword">throw</span> ex;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// Otherwise, just ignore it and continue...</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">catch</span> (NullValueInNestedPathException ex) &#123;</span><br><span class="line">				<span class="keyword">if</span> (!ignoreInvalid) &#123;</span><br><span class="line">					<span class="keyword">throw</span> ex;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="comment">// Otherwise, just ignore it and continue...</span></span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">catch</span> (PropertyAccessException ex) &#123;</span><br><span class="line">				<span class="keyword">if</span> (propertyAccessExceptions == <span class="keyword">null</span>) &#123;</span><br><span class="line">					propertyAccessExceptions = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">				&#125;</span><br><span class="line">				propertyAccessExceptions.add(ex);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// If we encountered individual exceptions, throw the composite exception.</span></span><br><span class="line">		<span class="keyword">if</span> (propertyAccessExceptions != <span class="keyword">null</span>) &#123;</span><br><span class="line">			PropertyAccessException[] paeArray =</span><br><span class="line">					propertyAccessExceptions.toArray(<span class="keyword">new</span> PropertyAccessException[propertyAccessExceptions.size()]);</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> PropertyBatchUpdateException(paeArray);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>绑定的时候可能需要进行参数类型的转换，参数的转化是通过ConversionService和GenericConverter以及Converter接口下的类进行完成的。<br>ConversionService主要是转换前的一些判断(根据目标类型和当前类型判断是否需要转换、是否能够转换等)，以及对本次转<br>换所需转换器的获取等工作，而真正的转换工作是由Converter接口的类完成的。</p>
+<p>以例子中的id=”10”为例子进行解析，因为Person类中id需要Integer类型，所以注入之前需要一次类型转换，<br>核心方法在GenericConversionService调用了如下的convert方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line">	<span class="meta">@Nullable</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">convert</span><span class="params">(@Nullable Object source, @Nullable TypeDescriptor sourceType, TypeDescriptor targetType)</span> </span>&#123;</span><br><span class="line">		Assert.notNull(targetType, <span class="string">"Target type to convert to cannot be null"</span>);</span><br><span class="line">		<span class="keyword">if</span> (sourceType == <span class="keyword">null</span>) &#123;</span><br><span class="line">			Assert.isTrue(source == <span class="keyword">null</span>, <span class="string">"Source must be [null] if source type == [null]"</span>);</span><br><span class="line">			<span class="keyword">return</span> handleResult(<span class="keyword">null</span>, targetType, convertNullSource(<span class="keyword">null</span>, targetType));</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (source != <span class="keyword">null</span> &amp;&amp; !sourceType.getObjectType().isInstance(source)) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Source to convert from must be an instance of ["</span> +</span><br><span class="line">					sourceType + <span class="string">"]; instead it was a ["</span> + source.getClass().getName() + <span class="string">"]"</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		GenericConverter converter = getConverter(sourceType, targetType);</span><br><span class="line">		<span class="keyword">if</span> (converter != <span class="keyword">null</span>) &#123;</span><br><span class="line">			Object result = ConversionUtils.invokeConverter(converter, source, sourceType, targetType);</span><br><span class="line">			<span class="keyword">return</span> handleResult(sourceType, targetType, result);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> handleConverterNotFound(source, sourceType, targetType);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure></p>
+<p>getConverter方法其实如下声明的Hash表中取出对应的缓存的转换器。ConverterCacheKey是以sourceType和targetType为组合的一个标识类。<br>如果缓存中没有，<br><code>private final Map&lt;ConverterCacheKey, GenericConverter&gt; converterCache = new ConcurrentReferenceHashMap&lt;&gt;(64);</code></p>
+<p>代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Nullable</span></span><br><span class="line">	<span class="function"><span class="keyword">protected</span> GenericConverter <span class="title">getConverter</span><span class="params">(TypeDescriptor sourceType, TypeDescriptor targetType)</span> </span>&#123;</span><br><span class="line">		ConverterCacheKey key = <span class="keyword">new</span> ConverterCacheKey(sourceType, targetType);</span><br><span class="line">		GenericConverter converter = <span class="keyword">this</span>.converterCache.get(key);</span><br><span class="line">		<span class="keyword">if</span> (converter != <span class="keyword">null</span>) &#123; <span class="comment">//如果得到的位NO_MATCH，则返回null，否则返回convert。</span></span><br><span class="line">			<span class="keyword">return</span> (converter != NO_MATCH ? converter : <span class="keyword">null</span>);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		converter = <span class="keyword">this</span>.converters.find(sourceType, targetType); <span class="comment">//如果缓存中没有，则从已经注册的转换器中寻找对应的满足类型转换需求的转换器。</span></span><br><span class="line">		<span class="keyword">if</span> (converter == <span class="keyword">null</span>) &#123; <span class="comment">//如果找不到满足需求的，则获得默认转换器，其实是个类型强转器，当然如果不满足能强转的关系，则会返回null</span></span><br><span class="line">            </span><br><span class="line">			converter = getDefaultConverter(sourceType, targetType);</span><br><span class="line">		&#125;</span><br><span class="line">        <span class="comment">//如果convert不为null，则将此组合的ConverterCacheKey放入缓存中，避免下次重新搜索。</span></span><br><span class="line">		<span class="keyword">if</span> (converter != <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="keyword">this</span>.converterCache.put(key, converter);</span><br><span class="line">			<span class="keyword">return</span> converter;</span><br><span class="line">		&#125;</span><br><span class="line">        <span class="comment">//说明convert为null，则标识为NO_MATCH。也放入缓存，由上面代码可知，下次从缓存中取出NO_MATCH，也会返回null,并且返回null.</span></span><br><span class="line">		<span class="keyword">this</span>.converterCache.put(key, NO_MATCH);</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>例子中“10”-&gt;10获取到的是convert其实是GenericConversionService的内部类ConverterFactoryAdapter。该类保持了ConverterFactory引用。<br>ConverterFactory即管理对应的Converter，本例中ConverterFactory是StringToNumberConverterFactory，管理着StringToNumber这个转换器，该转换器<br>能将String转换成对应的Number类型。</p>
+<p>该方法取出经过筛选和验证的PropertyValue集合。然后进行循环判断该PropertyValue需不需要注入以及能不能注入。<br>需不需要注入一般是判断有没有对应的属性，能不能注入则通过BeanPropertyHandler的一些属性包括writable是否为true来判断。<br>如果没有相应属性的set方法则为false,因为属性注入是依靠对应的set方法的，如果没有对应的set方法则该属性不会被注入。</p>
+<ol>
+<li>那么SpringMVC是如何获取对应的set方法的呢？</li>
+</ol>
+<p>Introspector累的getTargetPropertyInfo遍历所有方法，根据名字匹配获得对应属性的set方法并且注入PropertyDescriptor进行保存</p>
+<ol start="2">
+<li>能注入父类属性吗？如果能，bean类型是如何注入父类属性的？</li>
+</ol>
+<p>可以看到在注入时，需要去对应的bean类查找是否有相同name的属性，则会利用反射方法<code>getDeclaredFields()</code>(只会获取自己类中定义的<br> public, protected, default (package) access, and private属性),并且通过<code>getSuperclass</code>方法获得父类进行层层查找。详情请看下面<br> 代码。</p>
+<p><code>ReflectionUtils</code>中的<code>findField</code>方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Field <span class="title">findField</span><span class="params">(Class&lt;?&gt; clazz, @Nullable String name, @Nullable Class&lt;?&gt; type)</span> </span>&#123;</span><br><span class="line">		Assert.notNull(clazz, <span class="string">"Class must not be null"</span>);</span><br><span class="line">		Assert.isTrue(name != <span class="keyword">null</span> || type != <span class="keyword">null</span>, <span class="string">"Either name or type of the field must be specified"</span>);</span><br><span class="line">		Class&lt;?&gt; searchType = clazz;</span><br><span class="line">		<span class="keyword">while</span> (Object.class != searchType &amp;&amp; searchType != <span class="keyword">null</span>) &#123;</span><br><span class="line">			Field[] fields = getDeclaredFields(searchType);</span><br><span class="line">			<span class="keyword">for</span> (Field field : fields) &#123;</span><br><span class="line">				<span class="keyword">if</span> ((name == <span class="keyword">null</span> || name.equals(field.getName())) &amp;&amp;</span><br><span class="line">						(type == <span class="keyword">null</span> || type.equals(field.getType()))) &#123;</span><br><span class="line">					<span class="keyword">return</span> field;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			searchType = searchType.getSuperclass();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure></p>
+<p>关于复杂对象的注入这里就暂时不讨论。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>为了解析请求的参数到对应方法参数，步骤如下：</p>
+<ol>
+<li>SpringMVC初始化时，RequestMappingHandlerAdapter类会把一些默认的参数解析器添加到argumentResolvers中。当SpringMVC接收到请求后首先根据url查找对应的HandlerMethod。</li>
+<li>生成反射调用方法需要的Object数组参数，遍历HandlerMethod的MethodParameter数组(MethodParameter就是方法参数的一些信息的包装)</li>
+<li>根据MethodParameter的类型来查找确认使用哪个HandlerMethodArgumentResolver</li>
+<li>利用支持的HandlerMethodArgumentResolver将请求中所带的参数解析成当前遍历的MethodParameter对应类型的参数。<br>其中包括类型的转化，对Bean类型的参数则需要特殊的处理，比如注入和包装。</li>
+<li>将解析完的方法参数放入Object数组。</li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考:"></a>参考:</h1><p><a href="https://juejin.im/entry/5a8670555188257a5d2b3a50" target="_blank" rel="noopener">SpringMVC源码之参数解析绑定原理</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/SpringMVC/" rel="tag"># SpringMVC</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/18/java-lang-Thread中的几个重要方法解析/" rel="next" title="java.lang,Thread中的几个重要方法解析">
+                <i class="fa fa-chevron-left"></i> java.lang,Thread中的几个重要方法解析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/19/java面试题中的那些i-和-i/" rel="prev" title="java面试题中的那些i++和++i">
+                java面试题中的那些i++和++i <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Ooo0oO0o0oO" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#示例代码"><span class="nav-number">1.</span> <span class="nav-text">示例代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">2.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考:</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

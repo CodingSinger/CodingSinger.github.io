@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Spring," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="在上一章提到过如下的问题，这里再恢复一下场景:对于层次划分清晰的应用来说，我们通常将事务管理放在Service层，而将数据访问逻辑放在Dao层，这样做的目的是不用因为将事务管理代码放在DAO层，而降低数据访问逻辑的重要性，也可以将Service层根据相应逻辑，来决定提交或者回滚事务。一般的Service对象可能需要在同一个业务方法中调用多个数据访问对象的方法。比如：">
+<meta name="keywords" content="Spring">
+<meta property="og:type" content="article">
+<meta property="og:title" content="学习Spring-六-Spring事务管理中的Connection-Passing">
+<meta property="og:url" content="http://yoursite.com/2018/03/12/学习Spring-六-Spring中的Connection-Passing/index.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="在上一章提到过如下的问题，这里再恢复一下场景:对于层次划分清晰的应用来说，我们通常将事务管理放在Service层，而将数据访问逻辑放在Dao层，这样做的目的是不用因为将事务管理代码放在DAO层，而降低数据访问逻辑的重要性，也可以将Service层根据相应逻辑，来决定提交或者回滚事务。一般的Service对象可能需要在同一个业务方法中调用多个数据访问对象的方法。比如：">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-08-14T00:44:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="学习Spring-六-Spring事务管理中的Connection-Passing">
+<meta name="twitter:description" content="在上一章提到过如下的问题，这里再恢复一下场景:对于层次划分清晰的应用来说，我们通常将事务管理放在Service层，而将数据访问逻辑放在Dao层，这样做的目的是不用因为将事务管理代码放在DAO层，而降低数据访问逻辑的重要性，也可以将Service层根据相应逻辑，来决定提交或者回滚事务。一般的Service对象可能需要在同一个业务方法中调用多个数据访问对象的方法。比如：">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/12/学习Spring-六-Spring中的Connection-Passing/"/>
+
+
+
+
+
+  <title>学习Spring-六-Spring事务管理中的Connection-Passing | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/12/学习Spring-六-Spring中的Connection-Passing/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">学习Spring-六-Spring事务管理中的Connection-Passing</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-12T15:46:46+08:00">
+                2018-03-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在上一章提到过如下的问题，这里再恢复一下场景:<br>对于层次划分清晰的应用来说，我们通常将事务管理放在Service层，而将数据访问逻辑放在Dao层，这样做的目的是不用因为将事务管理代码放在DAO层，而降低数据访问逻辑的重要性，也可以将Service层根据相应逻辑，来决定提交或者回滚事务。一般的Service对象可能需要在同一个业务方法中调用多个数据访问对象的方法。比如：<br><a id="more"></a><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">serviceMethod</span><span class="params">()</span></span>&#123;</span><br><span class="line">	dao1.add();</span><br><span class="line">	dao2.delete();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>因为JDBC局部事务是控制是由java.sql.Connection来完成的，要保证两个DAO的数据访问处于一个事务中，我们需要保证他们使用的是同一个java.sql.Connection.<br>通常采用称为connection-passing的方式，即为当前同一个事务的各个dao的数据访问方法传递当前事务对应的同一个Connection。<br>传递java.sql.Connection，最好的办法是整个事务对应的java.sql.Connection实例放到统一的一个地方，但要保证每个业务请求的Connection又能各不干扰。或许你已经想到了ThreadLocal。对该类不理解的可以去看我之前的那篇文章<a href="http://www.woainia.site/2017/10/10/ThreadLocal的一些理解/" target="_blank" rel="noopener">ThreadLocal的一些理解</a>。今天我们看看Spring是如何控制ThreadLocal为其服务的。<br>首先从开始事务进行分析<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">doBegin</span><span class="params">(Object transaction, TransactionDefinition definition)</span> </span>&#123;</span><br><span class="line">        DataSourceTransactionManager.DataSourceTransactionObject txObject = (DataSourceTransactionManager.DataSourceTransactionObject)transaction;</span><br><span class="line">        Connection con = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (txObject.getConnectionHolder() == <span class="keyword">null</span> || txObject.getConnectionHolder().isSynchronizedWithTransaction()) &#123;</span><br><span class="line"><span class="comment">//如果当前事务ConnectionHolder为空或者处在事务同步中</span></span><br><span class="line">                Connection newCon = <span class="keyword">this</span>.dataSource.getConnection();</span><br><span class="line"><span class="comment">//获取数据库连接</span></span><br><span class="line">                <span class="keyword">if</span> (<span class="keyword">this</span>.logger.isDebugEnabled()) &#123;</span><br><span class="line">                    <span class="keyword">this</span>.logger.debug(<span class="string">"Acquired Connection ["</span> + newCon + <span class="string">"] for JDBC transaction"</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                txObject.setConnectionHolder(<span class="keyword">new</span> ConnectionHolder(newCon), <span class="keyword">true</span>);</span><br><span class="line"><span class="comment">//true代表这是新的连接</span></span><br><span class="line"><span class="comment">//2</span></span><br><span class="line">            &#125;</span><br><span class="line">            txObject.getConnectionHolder().setSynchronizedWithTransaction(<span class="keyword">true</span>);</span><br><span class="line">            con = txObject.getConnectionHolder().getConnection();</span><br><span class="line">            Integer previousIsolationLevel = DataSourceUtils.prepareConnectionForTransaction(con, definition);</span><br><span class="line">            txObject.setPreviousIsolationLevel(previousIsolationLevel);</span><br><span class="line">            <span class="keyword">if</span> (con.getAutoCommit()) &#123;</span><br><span class="line">                txObject.setMustRestoreAutoCommit(<span class="keyword">true</span>);</span><br><span class="line">                <span class="keyword">if</span> (<span class="keyword">this</span>.logger.isDebugEnabled()) &#123;</span><br><span class="line">                    <span class="keyword">this</span>.logger.debug(<span class="string">"Switching JDBC Connection ["</span> + con + <span class="string">"] to manual commit"</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                con.setAutoCommit(<span class="keyword">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            txObject.getConnectionHolder().setTransactionActive(<span class="keyword">true</span>);</span><br><span class="line"><span class="comment">//激活事务</span></span><br><span class="line">            <span class="keyword">int</span> timeout = <span class="keyword">this</span>.determineTimeout(definition);</span><br><span class="line">            <span class="keyword">if</span> (timeout != -<span class="number">1</span>) &#123;</span><br><span class="line">                txObject.getConnectionHolder().setTimeoutInSeconds(timeout);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (txObject.isNewConnectionHolder()) &#123;</span><br><span class="line"><span class="comment">//如果是本次是新的连接</span></span><br><span class="line">                TransactionSynchronizationManager.bindResource(<span class="keyword">this</span>.getDataSource(), txObject.getConnectionHolder());</span><br><span class="line"><span class="comment">//将该ConnectionHolder绑定到当前线程 下面详细讲解</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable var7) &#123;</span><br><span class="line">            <span class="keyword">if</span> (txObject.isNewConnectionHolder()) &#123;</span><br><span class="line">                DataSourceUtils.releaseConnection(con, <span class="keyword">this</span>.dataSource);</span><br><span class="line">                txObject.setConnectionHolder((ConnectionHolder)<span class="keyword">null</span>, <span class="keyword">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> CannotCreateTransactionException(<span class="string">"Could not open JDBC Connection for transaction"</span>, var7);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面方法主要就是获取连接并设置事务的各种属性信息，关键的是将DataSource和txObject.getConnectionHolder()传入了bindResource中，ConnectionHolder对象就包装着本次事务所获取的连接。我们来看看<code>bindResource</code>方法</p>
+<p>##该方法在TransactionSynchronizationManager类中##</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> ThreadLocal&lt;Map&lt;Object, Object&gt;&gt; resources = <span class="keyword">new</span> NamedThreadLocal(<span class="string">"Transactional resources"</span>);</span><br><span class="line">... <span class="comment">//省略部分代码</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">bindResource</span><span class="params">(Object key, Object value)</span> <span class="keyword">throws</span> IllegalStateException </span>&#123;</span><br><span class="line">        Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);</span><br><span class="line">        Assert.notNull(value, <span class="string">"Value must not be null"</span>);</span><br><span class="line">        Map&lt;Object, Object&gt; map = (Map)resources.get();</span><br><span class="line">        <span class="keyword">if</span> (map == <span class="keyword">null</span>) &#123;</span><br><span class="line">            map = <span class="keyword">new</span> HashMap();</span><br><span class="line">            resources.set(map);</span><br><span class="line">        &#125;</span><br><span class="line">        Object oldValue = ((Map)map).put(actualKey, value);</span><br><span class="line">        <span class="keyword">if</span> (oldValue <span class="keyword">instanceof</span> ResourceHolder &amp;&amp; ((ResourceHolder)oldValue).isVoid()) &#123;</span><br><span class="line">            oldValue = <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (oldValue != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Already value ["</span> + oldValue + <span class="string">"] for key ["</span> + actualKey + <span class="string">"] bound to thread ["</span> + Thread.currentThread().getName() + <span class="string">"]"</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (logger.isTraceEnabled()) &#123;</span><br><span class="line">                logger.trace(<span class="string">"Bound value ["</span> + value + <span class="string">"] for key ["</span> + actualKey + <span class="string">"] to thread ["</span> + Thread.currentThread().getName() + <span class="string">"]"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>该方法我就不逐步分析了，如果熟悉ThreadLocal机制的同学一定也会很快理解。总的来说，该方法就是将传进来的key和value作为键值对存储在HashMap中，再把HashMap存到ThreadLocal中。此后每个线程从该ThreadLocal中get到的一定是属于自己线程的HashMap，从而取值。</p>
+<hr>
+<p>ok，现在我们知道了Connection是如何绑定线程并放在Spring容器中，继续看是在何时需要获取该Connection的吧，我们给TransactionSynchronizationManager类中的getResource方法打上断点。</p>
+<hr>
+<p>调用getResource方法来获取ConnectionHandler的时间点有下面这些：</p>
+<ol>
+<li>执行sql的时候，会通过DataSourceUtils#doGetConnection方法调用getResource的连接，这里就不放代码了。</li>
+<li>事务开启、提交或者回滚。</li>
+<li>连接的释放</li>
+<li>在获取DataSourceTransactionObject时，代码如下。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">protected</span> Object <span class="title">doGetTransaction</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        DataSourceTransactionManager.DataSourceTransactionObject txObject = <span class="keyword">new</span> DataSourceTransactionManager.DataSourceTransactionObject();</span><br><span class="line">        txObject.setSavepointAllowed(<span class="keyword">this</span>.isNestedTransactionAllowed());</span><br><span class="line">        ConnectionHolder conHolder = (ConnectionHolder)TransactionSynchronizationManager.getResource(<span class="keyword">this</span>.dataSource);</span><br><span class="line"><span class="comment">//跟踪可以发现其实从ThreadLocal中获得了与该线程绑定的Resource，而该Resource就是之前doBegin中bindResource的ConnectionHolder实例。</span></span><br><span class="line">        txObject.setConnectionHolder(conHolder, <span class="keyword">false</span>);</span><br><span class="line"><span class="comment">//将该ConnectionHolder实例注入到txObject</span></span><br><span class="line">        <span class="keyword">return</span> txObject;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>返回的DataSourceTransactionObject将作为判断是否存在当前事务的主要依据。代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">boolean</span> <span class="title">isExistingTransaction</span><span class="params">(Object transaction)</span> </span>&#123;</span><br><span class="line">      DataSourceTransactionManager.DataSourceTransactionObject txObject = (DataSourceTransactionManager.DataSourceTransactionObject)transaction;</span><br><span class="line">      <span class="keyword">return</span> txObject.getConnectionHolder() != <span class="keyword">null</span> &amp;&amp; txObject.getConnectionHolder().isTransactionActive();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>DataSourceTransactionManager判断是否存在当前事务的两个标准就是ConnectionHolder是否为空和TransactionActive是否为true，如果之前该连接上调用了doBegin创建事务，则这里肯定会返回true。<br>完成本次事务的所有业务逻辑之后则会在提交事务完成后，调用<code>TransactionSynchronizationManager</code>类的<code>doUnbindResource</code>方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Object <span class="title">doUnbindResource</span><span class="params">(Object actualKey)</span> </span>&#123;</span><br><span class="line">        Map&lt;Object, Object&gt; map = (Map)resources.get();</span><br><span class="line">        <span class="keyword">if</span> (map == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            Object value = map.remove(actualKey);</span><br><span class="line">            <span class="keyword">if</span> (map.isEmpty()) &#123;</span><br><span class="line">                resources.remove();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (value <span class="keyword">instanceof</span> ResourceHolder &amp;&amp; ((ResourceHolder)value).isVoid()) &#123;</span><br><span class="line">                value = <span class="keyword">null</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (value != <span class="keyword">null</span> &amp;&amp; logger.isTraceEnabled()) &#123;</span><br><span class="line">                logger.trace(<span class="string">"Removed value ["</span> + value + <span class="string">"] for key ["</span> + actualKey + <span class="string">"] from thread ["</span> + Thread.currentThread().getName() + <span class="string">"]"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> value;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>该方法就是移除指定资源或者Map。<br>总结:<br>因为代理的原因，Spring的Connection-Passing机制确保每个被代理事务管理的方法中所有同一个线程(为什么要强调这个，因为事务过程的Connection就是用ThreadLocal管理的)<br>的对数据库操作都在同一个Connection(Session会话)中执行，因为提交和回滚都以Connection为单位。即不同的Connection提交和回滚不会影响另一个Connection的执行过程。<br>以上就是Spring利用ThreadLocal来保证每个线程调用的每个业务方法中使用的是同一个Connection，以确保事务的控制。</p>
+<h1 id="思考一下"><a href="#思考一下" class="headerlink" title="思考一下"></a>思考一下</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transfer</span><span class="params">(<span class="keyword">final</span> String inUser, <span class="keyword">final</span> String outUser, <span class="keyword">final</span> <span class="keyword">int</span> money)</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">			<span class="meta">@Override</span></span><br><span class="line">			<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span></span><br><span class="line"><span class="function">			</span>&#123;</span><br><span class="line">				manager.out(outUser, money); <span class="comment">//1</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;).start();</span><br><span class="line">		<span class="keyword">int</span> i=<span class="number">1</span>/<span class="number">0</span>;<span class="comment">//拟突发断电</span></span><br><span class="line">		accountDao.in(inUser, money);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<p>如上会回滚注释1处的执行代码吗？</p>
+<p>答案是不会。前面我们说过Connection是绑定在线程的。transfer方法是一个事务方法。Spring事务管理器在事务方法和事务结束<br>过程中都会获得绑定在该线程的Connection，因此事务的提交和回滚只针对该Connection有效，也就是说其他线程调用的数据访问方法<br>不会由当前事务方法的Connection管理。因此如上所示，注释1处的代码在另一个线程中执行，其Connection和当前transfer方法的事务<br>Connection大概率不是同一个。*(也有可能是同一个，有可能事务rollback之后释放连接，刚好轮到该线程获取上次释放的连接，我们可以设置执行延迟，<br>但无论如何已经是两个事务边界了。)因此，在断电之后，注释1处的代码并没有回滚。</p>
+<p>理解Spring事务管理是由JDBC的Connection来确定事务边界的有助于理解后续的Spring事务处理分布式事务的局限性。因此分布式情况下，可能有多个操作<br>都运行在不同机器上的服务方法组合,因为我们需要知道所有方法的结果，并且进行全部提交和全部回滚，以确保一致性，而普通的事务管理无法做到这些，<br>如何有效地确保这些方法执行的正确性，当然这就属于分布式事务的范畴了,我们这里不做讨论。</p>
+<p>面试题：</p>
+<p>一个Controller调用两个Service，这两Service又都分别调用两个Dao，问其中用到了几个数据库连接池的连接？<br>分情况讨论：</p>
+<ul>
+<li>如果这两个service，每个Service调用的两个dao都是在同一个线程同一个数据源并且开启了事务管理，则每个service都会使用一个Connection。</li>
+<li>如果不在Spring事务管理下，则无论在不在同一个数据源在不在同一个线程，每次调用Dao执行sql，都会使用DataSourceUtils.doGetConnection获取一个连接，执行完之后释放。<br>所以该题目应该是用到2-4个数据库连接。<blockquote>
+<p>数据源就是我们配置的DataSource。（即便一个数据源使用了多个Mysql数据库也是在一个连接中,url不指定Database，sql语句中指定Database,<br>例如<code>spring.datasource.url=jdbc:mysql://localhost:3306</code>,此时就可以sql操作多个数据库，通过database.table,此时在同一个事务管理下的service，即便使用了两个Dao，<br>操作两个完全不同的数据库，d1.t1,d2.t2，但是因为在同一个数据源中，同一个线程中，则也会共用一个数据库连接，事务也会生效）</p>
+</blockquote>
+</li>
+</ul>
+<p>(分布式事务初了解)[<a href="http://www.importnew.com/26349.html]" target="_blank" rel="noopener">http://www.importnew.com/26349.html]</a><br>(浅谈事务和一致性：刚性or柔性？)[<a href="https://juejin.im/post/5aa8b8636fb9a028c67567c6]" target="_blank" rel="noopener">https://juejin.im/post/5aa8b8636fb9a028c67567c6]</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spring/" rel="tag"># Spring</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/11/学习Tomcat-一-Tomcat启动做了什么/" rel="next" title="学习Tomcat(一)Tomcat启动做了什么">
+                <i class="fa fa-chevron-left"></i> 学习Tomcat(一)Tomcat启动做了什么
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/13/CGLIB代理-1/" rel="prev" title="CGLIB代理">
+                CGLIB代理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Ooo0oO0o0oO" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#思考一下"><span class="nav-number">1.</span> <span class="nav-text">思考一下</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

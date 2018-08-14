@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Tomcat," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="我们深入request.getSession(true)  主要看doGetSession方法我们跟随源码一步一步分析 我们先贴出doGetSession方法的全部源码，并先大致分析下，往后我们会着重分析要点">
+<meta name="keywords" content="Tomcat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="学习Tomcat-十-session和Cookie机制源码解读">
+<meta property="og:url" content="http://yoursite.com/2018/03/20/学习Tomcat-十-session和Cookie机制源码解读/index.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="我们深入request.getSession(true)  主要看doGetSession方法我们跟随源码一步一步分析 我们先贴出doGetSession方法的全部源码，并先大致分析下，往后我们会着重分析要点">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/df.png">
+<meta property="og:updated_time" content="2018-08-14T00:44:54.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="学习Tomcat-十-session和Cookie机制源码解读">
+<meta name="twitter:description" content="我们深入request.getSession(true)  主要看doGetSession方法我们跟随源码一步一步分析 我们先贴出doGetSession方法的全部源码，并先大致分析下，往后我们会着重分析要点">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/df.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/20/学习Tomcat-十-session和Cookie机制源码解读/"/>
+
+
+
+
+
+  <title>学习Tomcat-十-session和Cookie机制源码解读 | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/20/学习Tomcat-十-session和Cookie机制源码解读/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">学习Tomcat-十-session和Cookie机制源码解读</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-20T12:37:18+08:00">
+                2018-03-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>我们深入request.getSession(true)</p>
+<p><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/df.png" alt="dsd"></p>
+<p>主要看doGetSession方法<br>我们跟随源码一步一步分析</p>
+<p>我们先贴出doGetSession方法的全部源码，并先大致分析下，往后我们会着重分析要点</p>
+<a id="more"></a>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">protected</span> Session <span class="title">doGetSession</span><span class="params">(<span class="keyword">boolean</span> create)</span> </span>&#123;</span><br><span class="line">       <span class="comment">// There cannot be a session if no context has been assigned yet</span></span><br><span class="line">       Context context = getContext(); <span class="comment">//得到当前访问的应用上下文</span></span><br><span class="line">       <span class="keyword">if</span> (context == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">return</span> (<span class="keyword">null</span>);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// Return the current session if it exists and is valid</span></span><br><span class="line">       <span class="keyword">if</span> ((session != <span class="keyword">null</span>) &amp;&amp; !session.isValid()) &#123; <span class="comment">//如果session不为空并且有效</span></span><br><span class="line">           session = <span class="keyword">null</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span> (session != <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">return</span> (session);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// Return the requested session if it exists and is valid</span></span><br><span class="line">       Manager manager = context.getManager(); <span class="comment">//获取StandardManager</span></span><br><span class="line">       <span class="keyword">if</span> (manager == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">return</span> (<span class="keyword">null</span>);      <span class="comment">// Sessions are not supported  不支持Session功能</span></span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span> (requestedSessionId != <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">try</span> &#123;</span><br><span class="line">               <span class="comment">//// 从session管理器维护的map缓存中寻找是否有对于该sessionId的Sesson SessionId会在解析request的时候从Cookie中获取，默认是JSESSIONID这个cookie</span></span><br><span class="line">               session = manager.findSession(requestedSessionId); </span><br><span class="line">           &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">               session = <span class="keyword">null</span>;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">if</span> ((session != <span class="keyword">null</span>) &amp;&amp; !session.isValid()) &#123;</span><br><span class="line">               session = <span class="keyword">null</span>;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">if</span> (session != <span class="keyword">null</span>) &#123; <span class="comment">// 如果session不为空 则返回找到的session</span></span><br><span class="line">               session.access();</span><br><span class="line">               <span class="keyword">return</span> (session);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// Create a new session if requested and the response is not committed</span></span><br><span class="line">       <span class="keyword">if</span> (!create) &#123; <span class="comment">//如果并没找到对应SessionId的Session并且create参数为false 则不会创建新session</span></span><br><span class="line">           <span class="keyword">return</span> (<span class="keyword">null</span>);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span> (response != <span class="keyword">null</span></span><br><span class="line">               &amp;&amp; context.getServletContext()</span><br><span class="line">                       .getEffectiveSessionTrackingModes()</span><br><span class="line">                       .contains(SessionTrackingMode.COOKIE)</span><br><span class="line">               &amp;&amp; response.getResponse().isCommitted()) &#123;</span><br><span class="line">           <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(</span><br><span class="line">                   sm.getString(<span class="string">"coyoteRequest.sessionCreateCommitted"</span>));</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// Re-use session IDs provided by the client in very limited</span></span><br><span class="line">       <span class="comment">// circumstances.</span></span><br><span class="line">       String sessionId = getRequestedSessionId(); <span class="comment">//其实就是requestedSessionId字段</span></span><br><span class="line">       <span class="keyword">if</span> (requestedSessionSSL) &#123;</span><br><span class="line">           <span class="comment">// If the session ID has been obtained from the SSL handshake then</span></span><br><span class="line">           <span class="comment">// use it.</span></span><br><span class="line">       &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((<span class="string">"/"</span>.equals(context.getSessionCookiePath())</span><br><span class="line">               &amp;&amp; isRequestedSessionIdFromCookie())) &#123;</span><br><span class="line">           <span class="keyword">if</span> (context.getValidateClientProvidedNewSessionId()) &#123;</span><br><span class="line">               <span class="keyword">boolean</span> found = <span class="keyword">false</span>;</span><br><span class="line">               <span class="keyword">for</span> (Container container : getHost().findChildren()) &#123;</span><br><span class="line">                   Manager m = ((Context) container).getManager();</span><br><span class="line">                   <span class="keyword">if</span> (m != <span class="keyword">null</span>) &#123;</span><br><span class="line">                       <span class="keyword">try</span> &#123;</span><br><span class="line">                           <span class="keyword">if</span> (m.findSession(sessionId) != <span class="keyword">null</span>) &#123;</span><br><span class="line">                               found = <span class="keyword">true</span>;</span><br><span class="line">                               <span class="keyword">break</span>;</span><br><span class="line">                           &#125;</span><br><span class="line">                       &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                           <span class="comment">// Ignore. Problems with this manager will be</span></span><br><span class="line">                           <span class="comment">// handled elsewhere.</span></span><br><span class="line">                       &#125;</span><br><span class="line">                   &#125;</span><br><span class="line">               &#125;</span><br><span class="line">               <span class="keyword">if</span> (!found) &#123;</span><br><span class="line">                   sessionId = <span class="keyword">null</span>;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">           sessionId = <span class="keyword">null</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       session = manager.createSession(sessionId); <span class="comment">//创新新的Session并且带有独一无二的sessionId</span></span><br><span class="line">       <span class="comment">// Creating a new session cookie based on that session</span></span><br><span class="line">       <span class="keyword">if</span> (session != <span class="keyword">null</span></span><br><span class="line">               &amp;&amp; context.getServletContext()</span><br><span class="line">                       .getEffectiveSessionTrackingModes()</span><br><span class="line">                       .contains(SessionTrackingMode.COOKIE)) &#123;<span class="comment">//如果session创建成功并且支持cookie</span></span><br><span class="line">           Cookie cookie =</span><br><span class="line">               ApplicationSessionCookieConfig.createSessionCookie(</span><br><span class="line">                       context, session.getIdInternal(), isSecure());</span><br><span class="line">           response.addSessionCookieInternal(cookie);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span> (session == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       session.access();</span><br><span class="line">       <span class="keyword">return</span> session;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="function"><span class="keyword">protected</span> String <span class="title">unescape</span><span class="params">(String s)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">if</span> (s==<span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span> (s.indexOf(<span class="string">'\\'</span>) == -<span class="number">1</span>) &#123;</span><br><span class="line">           <span class="keyword">return</span> s;</span><br><span class="line">       &#125;</span><br><span class="line">       StringBuilder buf = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">       <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;s.length(); i++) &#123;</span><br><span class="line">           <span class="keyword">char</span> c = s.charAt(i);</span><br><span class="line">           <span class="keyword">if</span> (c!=<span class="string">'\\'</span>) &#123;</span><br><span class="line">               buf.append(c);</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               <span class="keyword">if</span> (++i &gt;= s.length())</span><br><span class="line">                &#123;</span><br><span class="line">                   <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException();<span class="comment">//invalid escape, hence invalid cookie</span></span><br><span class="line">               &#125;</span><br><span class="line">               c = s.charAt(i);</span><br><span class="line">               buf.append(c);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">return</span> buf.toString();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>需要注意的是以上获得的session并不是你在代码中所写的request.getSession所需要的session,通过调用getSession()方法获得我们实际需要的HttpSession对象</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> HttpSession <span class="title">getSession</span><span class="params">(<span class="keyword">boolean</span> create)</span> </span>&#123;</span><br><span class="line">    Session session = doGetSession(create);</span><br><span class="line">    <span class="keyword">if</span> (session == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> session.getSession();<span class="comment">//此时获得的才是HttpSession</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到上面代码一个名为requestedSessionId 的字段，该字段在访问的开始的时候解析客户端请求的时候，对客户端发来的cookie进行了解析<br>贴出解析cookie并且设置该次请求Request对象的requestedSessionId字段的值的栈信息 有兴趣的可以深入源码</p>
+<p>详细的解析代码请看在CoyoteAdapter的parseSessionCookiesId方法中<br>这里只截取其中一部分</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">           ServerCookie scookie = serverCookies.getCookie(i);</span><br><span class="line">           <span class="keyword">if</span> (scookie.getName().equals(sessionCookieName)) &#123; <span class="comment">//如果cookie的键对应JSESSIONID</span></span><br><span class="line">               <span class="comment">// Override anything requested in the URL</span></span><br><span class="line">               <span class="keyword">if</span> (!request.isRequestedSessionIdFromCookie()) &#123;</span><br><span class="line">                   <span class="comment">// Accept only the first session id cookie</span></span><br><span class="line">                   convertMB(scookie.getValue());</span><br><span class="line">                   request.setRequestedSessionId</span><br><span class="line">                       (scookie.getValue().toString());<span class="comment">//设置上面所说的requestedSessionId</span></span><br><span class="line">                   request.setRequestedSessionCookie(<span class="keyword">true</span>);</span><br><span class="line">                   request.setRequestedSessionURL(<span class="keyword">false</span>);</span><br><span class="line">                   <span class="keyword">if</span> (log.isDebugEnabled()) &#123;</span><br><span class="line">                       log.debug(<span class="string">" Requested cookie session id is "</span> +</span><br><span class="line">                           request.getRequestedSessionId());</span><br><span class="line">                   &#125;</span><br><span class="line">               &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                   <span class="keyword">if</span> (!request.isRequestedSessionIdValid()) &#123;</span><br><span class="line">                       <span class="comment">// Replace the session id until one is valid</span></span><br><span class="line">                       convertMB(scookie.getValue());</span><br><span class="line">                       request.setRequestedSessionId</span><br><span class="line">                           (scookie.getValue().toString());</span><br><span class="line">                   &#125;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br></pre></td></tr></table></figure>
+<p>在解析cookie之后。无论是否有JSESSIONID的键值对包含在cookie当中。都会进行Request对象关于session的绑定</p>
+<p>如果不存在JSESSIONID或者该JSESSIONID的session并不存在，则Request对象的session字段暂时为空。</p>
+<p>在这里我用流程图来解析这个过程<br>以下都假设某用户在同一个浏览器窗口访问某个servlet:</p>
+<p>第二次访问服务器的时候，将上次请求服务器发送过来的cookie也一起传过去，在1处肯定检测到JSESSIONID的值，并且在2处也找到了对应该JSESSIONID的缓存session。<br>通过代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (requestedSessionId != <span class="keyword">null</span>) &#123;</span><br><span class="line">          <span class="keyword">try</span> &#123;</span><br><span class="line">              session = manager.findSession(requestedSessionId); <span class="comment">// 从session管理器维护的map缓存中寻找是否有对于该sessionId的Sesson</span></span><br><span class="line">          &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">              session = <span class="keyword">null</span>;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">if</span> ((session != <span class="keyword">null</span>) &amp;&amp; !session.isValid()) &#123;</span><br><span class="line">              session = <span class="keyword">null</span>;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">if</span> (session != <span class="keyword">null</span>) &#123; <span class="comment">// 如果session不为空 则返回找到的session</span></span><br><span class="line">              session.access();</span><br><span class="line">              <span class="keyword">return</span> (session);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<p>从而将此request的session赋值。<br>当此时再你执行你代码中的request.getSession(true)时，通过检测到session不为空并且返回了该session。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (session != <span class="keyword">null</span>) &#123;</span><br><span class="line">         <span class="keyword">return</span> (session);</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure>
+<p>由此可以看出，要想在关闭浏览器之后重开浏览器还能得到session，则必须将cookie持久化在本地，将JSESSIONID键值对保存到cookie，从而在访问服务器时自动带上cookie</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Tomcat/" rel="tag"># Tomcat</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/20/我的MacOS快捷键记录/" rel="next" title="我的MacOS快捷键记录">
+                <i class="fa fa-chevron-left"></i> 我的MacOS快捷键记录
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/20/学习Tomcat-十一-Tomcat热加载机制和类加载器/" rel="prev" title="学习Tomcat-十一-Tomcat热加载机制和类加载器">
+                学习Tomcat-十一-Tomcat热加载机制和类加载器 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://img0.imgtn.bdimg.com/it/u=3294860913,683851251&fm=200&gp=0.jpg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/Ooo0oO0o0oO" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
