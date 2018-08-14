@@ -92,7 +92,7 @@
 
 
 
-  <meta name="keywords" content="c," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -103,18 +103,17 @@
 
 
 
-<meta name="description" content="C语言中，结构体是一篇连续的内存空间，使用=赋值操作，底层用到的就是memcpy；如果结构体中有指针变量；操作后。两个指针指向的同一块区域，而不会分配新的区域；">
-<meta name="keywords" content="c">
+<meta name="description" content="少看看别人，多提升自己。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="c语言结构体用=号赋值">
-<meta property="og:url" content="http://yoursite.com/2018/03/20/c语言结构体用-号复制/index.html">
+<meta property="og:title" content="kkk">
+<meta property="og:url" content="http://yoursite.com/2018/08/14/kkk/index.html">
 <meta property="og:site_name" content="看风人Z">
-<meta property="og:description" content="C语言中，结构体是一篇连续的内存空间，使用=赋值操作，底层用到的就是memcpy；如果结构体中有指针变量；操作后。两个指针指向的同一块区域，而不会分配新的区域；">
+<meta property="og:description" content="少看看别人，多提升自己。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-08-14T00:44:54.000Z">
+<meta property="og:updated_time" content="2018-08-14T01:09:57.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="c语言结构体用=号赋值">
-<meta name="twitter:description" content="C语言中，结构体是一篇连续的内存空间，使用=赋值操作，底层用到的就是memcpy；如果结构体中有指针变量；操作后。两个指针指向的同一块区域，而不会分配新的区域；">
+<meta name="twitter:title" content="kkk">
+<meta name="twitter:description" content="少看看别人，多提升自己。">
 
 
 
@@ -144,13 +143,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/03/20/c语言结构体用-号复制/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/08/14/kkk/"/>
 
 
 
 
 
-  <title>c语言结构体用=号赋值 | 看风人Z</title>
+  <title>kkk | 看风人Z</title>
   
 
 
@@ -307,7 +306,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/20/c语言结构体用-号复制/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/14/kkk/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="看风人Z">
@@ -324,7 +323,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">c语言结构体用=号赋值</h1>
+          <h1 class="post-title" itemprop="name headline">kkk</h1>
         
 
         <div class="post-meta">
@@ -336,8 +335,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-20T20:54:04+08:00">
-                2018-03-20
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-14T09:09:57+08:00">
+                2018-08-14
               </time>
             
 
@@ -346,28 +345,6 @@
             
           </span>
 
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/c/" itemprop="url" rel="index">
-                    <span itemprop="name">c</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
           
 
           
@@ -396,13 +373,7 @@
       
 
       
-        <p>C语言中，结构体是一篇连续的内存空间，使用=赋值操作，底层用到的就是memcpy；<br>如果结构体中有指针变量；操作后。两个指针指向的同一块区域，而不会分配新的区域；</p>
-<a id="more"></a>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line"></span><br><span class="line">#include&lt;stdlib.h&gt;</span><br><span class="line"></span><br><span class="line">typedef struct S</span><br><span class="line"></span><br><span class="line">&#123;	int a;	char * b;</span><br><span class="line"></span><br><span class="line">&#125;S;</span><br><span class="line"></span><br><span class="line">int main()&#123;</span><br><span class="line"></span><br><span class="line">S s1;</span><br><span class="line"></span><br><span class="line">char c[5]=&#123;&apos;h&apos;,&apos;e&apos;,&apos;l&apos;,&apos;l&apos;&#125;;</span><br><span class="line"></span><br><span class="line">s1.b = c;</span><br><span class="line"></span><br><span class="line">s1.a = 5;</span><br><span class="line"></span><br><span class="line">S s2;</span><br><span class="line"></span><br><span class="line">s2 = s1;</span><br><span class="line"></span><br><span class="line">printf(&quot;s1地址:%p s2地址:%p s1.b:%s ,s1.a:%d \n s2.b:%s,s2.a:%d\n&quot; ,&amp;s1,&amp;s2,s1.b,s1.a,s2.b,s2.a);</span><br><span class="line"></span><br><span class="line">return 0;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>输出</p>
-<p>s1地址:0x7fff529bf8d8 s2地址:0x7fff529bf8c0 s1.b:hell ,s1.a:5</p>
-<p> s2.b:hell,s2.a:5</p>
-
+        
       
     </div>
     
@@ -417,12 +388,6 @@
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/c/" rel="tag"># c</a>
-          
-        </div>
-      
 
       
       
@@ -432,8 +397,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/03/20/2018-03-14再读-深入Java虚拟机-一小时/" rel="next" title="2018/03/14再读<<深入Java虚拟机>>一小时">
-                <i class="fa fa-chevron-left"></i> 2018/03/14再读<<深入Java虚拟机>>一小时
+              <a href="/2018/04/25/装饰模式/" rel="next" title="装饰模式">
+                <i class="fa fa-chevron-left"></i> 装饰模式
               </a>
             
           </div>
@@ -441,10 +406,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/03/20/编程范式-第三集/" rel="prev" title="编程范式-3">
-                编程范式-3 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
