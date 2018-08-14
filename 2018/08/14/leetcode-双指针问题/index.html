@@ -92,7 +92,7 @@
 
 
 
-  <meta name="keywords" content="JVM," />
+  <meta name="keywords" content="算法," />
 
 
 
@@ -103,20 +103,18 @@
 
 
 
-<meta name="description" content="本章主要是针对java常量池信息的解析 在winhex下用十六进制查看Java程序编译后的class文件如下">
-<meta name="keywords" content="JVM">
+<meta name="description" content="双指针问题双指针，顾名思义，就是利用两个指针去遍历数组，一般来说，遍历数组采用的是单指针（index)去遍历，两个指针一般是在有序数组中使用，一个放首，一个放尾，同时向中间遍历，直到两个指针相交，完成遍历，时间复杂度也是O(n)。 用法一般会有两个指针front,tail。分别指向开始和结束位置。12345678  front = 0;  tail = A.length()-1一般循环结束条件采用">
+<meta name="keywords" content="算法">
 <meta property="og:type" content="article">
-<meta property="og:title" content="自己动手写虚拟机(3)----Java常量池的解析">
-<meta property="og:url" content="http://yoursite.com/2017/10/09/自己动手写虚拟机-3-Java常量池的解析/index.html">
+<meta property="og:title" content="leetcode-指针问题">
+<meta property="og:url" content="http://yoursite.com/2018/08/14/leetcode-双指针问题/index.html">
 <meta property="og:site_name" content="看风人Z">
-<meta property="og:description" content="本章主要是针对java常量池信息的解析 在winhex下用十六进制查看Java程序编译后的class文件如下">
+<meta property="og:description" content="双指针问题双指针，顾名思义，就是利用两个指针去遍历数组，一般来说，遍历数组采用的是单指针（index)去遍历，两个指针一般是在有序数组中使用，一个放首，一个放尾，同时向中间遍历，直到两个指针相交，完成遍历，时间复杂度也是O(n)。 用法一般会有两个指针front,tail。分别指向开始和结束位置。12345678  front = 0;  tail = A.length()-1一般循环结束条件采用">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://note.wiz.cn/api/document/files/unzip/52e6de0f-5edc-4ae5-bddb-bdc158019917/b7b57dc4-d4c2-99f5-5fce-a8dfa42d07cb.1478/index_files/4b18675ec63f728d5eb513636ae122a3.png">
-<meta property="og:updated_time" content="2018-08-14T00:44:54.000Z">
+<meta property="og:updated_time" content="2018-08-14T03:52:34.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="自己动手写虚拟机(3)----Java常量池的解析">
-<meta name="twitter:description" content="本章主要是针对java常量池信息的解析 在winhex下用十六进制查看Java程序编译后的class文件如下">
-<meta name="twitter:image" content="https://note.wiz.cn/api/document/files/unzip/52e6de0f-5edc-4ae5-bddb-bdc158019917/b7b57dc4-d4c2-99f5-5fce-a8dfa42d07cb.1478/index_files/4b18675ec63f728d5eb513636ae122a3.png">
+<meta name="twitter:title" content="leetcode-指针问题">
+<meta name="twitter:description" content="双指针问题双指针，顾名思义，就是利用两个指针去遍历数组，一般来说，遍历数组采用的是单指针（index)去遍历，两个指针一般是在有序数组中使用，一个放首，一个放尾，同时向中间遍历，直到两个指针相交，完成遍历，时间复杂度也是O(n)。 用法一般会有两个指针front,tail。分别指向开始和结束位置。12345678  front = 0;  tail = A.length()-1一般循环结束条件采用">
 
 
 
@@ -146,13 +144,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/10/09/自己动手写虚拟机-3-Java常量池的解析/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/08/14/leetcode-双指针问题/"/>
 
 
 
 
 
-  <title>自己动手写虚拟机(3)----Java常量池的解析 | 看风人Z</title>
+  <title>leetcode-指针问题 | 看风人Z</title>
   
 
 
@@ -309,7 +307,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/09/自己动手写虚拟机-3-Java常量池的解析/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/08/14/leetcode-双指针问题/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="看风人Z">
@@ -326,7 +324,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">自己动手写虚拟机(3)----Java常量池的解析</h1>
+          <h1 class="post-title" itemprop="name headline">leetcode-指针问题</h1>
         
 
         <div class="post-meta">
@@ -338,8 +336,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-09T17:59:13+08:00">
-                2017-10-09
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-14T10:10:37+08:00">
+                2018-08-14
               </time>
             
 
@@ -361,8 +359,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/java/" itemprop="url" rel="index">
-                    <span itemprop="name">java</span>
+                  <a href="/categories/算法/" itemprop="url" rel="index">
+                    <span itemprop="name">算法</span>
                   </a>
                 </span>
 
@@ -398,21 +396,32 @@
       
 
       
-        <p>本章主要是针对java常量池信息的解析</p>
-<p>在winhex下用十六进制查看Java程序编译后的class文件如下<br> <img src="https://note.wiz.cn/api/document/files/unzip/52e6de0f-5edc-4ae5-bddb-bdc158019917/b7b57dc4-d4c2-99f5-5fce-a8dfa42d07cb.1478/index_files/4b18675ec63f728d5eb513636ae122a3.png" alt=""></p>
-<a id="more"></a> 
-<p>根据java虚拟机规范<br>跟在魔数与class文件版本之后的便是常量池，如上图第0x0022便是该class文件中的常量信息项数。因为第0项是空出的，所以常量池中有33项常量，常量池索引范围为1-33。</p>
-<h1 id="java8中，常量池的项目类型如下"><a href="#java8中，常量池的项目类型如下" class="headerlink" title="java8中，常量池的项目类型如下"></a>java8中，常量池的项目类型如下</h1><p>查看<a href="http://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.4" target="_blank" rel="noopener">java虚拟机规范第4章</a></p>
-<p>所有常量池项格式都大致相同，如下</p>
-<blockquote>
-<p>All constant_pool table entries have the following general format:<br>cp_info {<br>    u1 tag;<br>    u1 info[];<br>}<br>Each item in the constant_pool table must begin with a 1-byte tag indicating the kind of cp_info entry. The contents of the info array vary with the value of tag.</p>
-</blockquote>
-<h1 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h1><p>因此在书中，作者巧妙地通过go语言接口实现ConstantInfo，并由此引申出所有的常量池结构。<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ConstantInfo <span class="keyword">interface</span>&#123;</span><br><span class="line">	readInfo(reader *ClassReader)   <span class="comment">//表示读取常量池内容的方法</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>以CONSTANT_Utf8_info为例<br>根据<a href="http://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.4" target="_blank" rel="noopener">java虚拟机规范第4章</a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">CONSTANT_Utf8_info &#123;</span><br><span class="line">    u1 tag;</span><br><span class="line">    u2 length;</span><br><span class="line">    u1 bytes[length];</span><br><span class="line">&#125;</span><br><span class="line">The items of the CONSTANT_Utf8_info structure are as follows:</span><br><span class="line">tag</span><br><span class="line">The tag item of the CONSTANT_Utf8_info structure has the value CONSTANT_Utf8 (1).</span><br><span class="line">length</span><br><span class="line">The value of the length item gives the number of bytes in the bytes array (not the length of the resulting string).</span><br><span class="line">bytes[]</span><br><span class="line">The bytes array contains the bytes of the string.</span><br><span class="line">No byte may have the value (byte)0.</span><br><span class="line">No byte may lie in the range (byte)0xf0 to (byte)0xff</span><br></pre></td></tr></table></figure>
-<p>该常量池在Go语言中的实现方法如下:</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> ConstantUtf8Info <span class="keyword">struct</span>&#123;</span><br><span class="line">	str <span class="keyword">string</span>   <span class="comment">//存储字符串</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//该结构体的readInfo方法</span></span><br><span class="line"><span class="function"><span class="keyword">func</span>  <span class="params">(self *ConstantUtf8Info)</span>  <span class="title">readInfo</span><span class="params">()</span></span>&#123;</span><br><span class="line">	length := <span class="keyword">uint32</span>(reader.readUint16) <span class="comment">//顺序读取一个16位的无符号整数</span></span><br><span class="line">	bytes := reader.readBytes(length) <span class="comment">//顺序读取length个字符串</span></span><br><span class="line">	self.str = decideMUTF8(bytes) <span class="comment">//讲字节转化成UTF8的字符串</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>由上可知常量池的实现是根据tag解析出来常量池的类型，并通过readInfo方法在不同常量池项的不同实现依次读取class文件并解析数据出存放在结构体字段中。</p>
+        <h1 id="双指针问题"><a href="#双指针问题" class="headerlink" title="双指针问题"></a>双指针问题</h1><p>双指针，顾名思义，就是利用两个指针去遍历数组，一般来说，遍历数组采用的是单指针（index)去遍历，两个指针一般是在有序数组中使用，一个放首，一个放尾，同时向中间遍历，直到两个指针相交，完成遍历，时间复杂度也是O(n)。</p>
+<p>用法<br>一般会有两个指针front,tail。分别指向开始和结束位置。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">  front = <span class="number">0</span>;</span><br><span class="line">  tail = A.length()-<span class="number">1</span></span><br><span class="line">一般循环结束条件采用的是判断两指针是否相遇</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span>(fron &lt; tail)</span><br><span class="line">  &#123;</span><br><span class="line">  ……</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>对于in place交换的问题，循环结束条件一般就是其中一个指针遍历完成。</p>
+<p>使用范围<br>一般双指针在有序数组中使用的特别多。（部分情况下，未排序数组也有应用） 一般用来解决下列问题（陆续补充中）：</p>
+<ol>
+<li>两数求和<br>一般这种问题是问，寻找两个数的和为一个特定的值（比如后面的N SUM问题），这时候，如果数组有序，我们采用两个指针，分别从前和后往中间遍历，front移动和增大，tail移动和减小，通过特定的判断，可以求出特定的和。</li>
+</ol>
+<p>时间复杂度为O(n),如果用双重循环则要O(n^2)。</p>
+<ol start="2">
+<li>in place交换<br>数组的in place(就地)交换一般得用双指针，不然数组中添加或删除一个元素，需要移动大量元素。</li>
+</ol>
+<p>这时候，一般是一个指针遍历，一个指针去找可以用来交换的元素。</p>
+<p>详情可见<a href="http://webcache.googleusercontent.com/search?q=cache:5JlILx5GjLkJ:smwlover.github.io/blog/2016/06/09/two-pointers/+&amp;cd=7&amp;hl=zh-CN&amp;ct=clnk&amp;gl=us" target="_blank" rel="noopener">面试常见问题盘点：双指针</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">给定一个包含红色、白色和蓝色，一共 n 个元素的数组，原地对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。</span><br><span class="line"></span><br><span class="line">此题中，我们使用整数 0、 1 和 2 分别表示红色、白色和蓝色。</span><br><span class="line"></span><br><span class="line">注意:</span><br><span class="line">不能使用代码库中的排序函数来解决这道题。</span><br><span class="line"></span><br><span class="line">示例:</span><br><span class="line"></span><br><span class="line">输入: [2,0,2,1,1,0]</span><br><span class="line">输出: [0,0,1,1,2,2]</span><br><span class="line">进阶：</span><br><span class="line"></span><br><span class="line">一个直观的解决方案是使用计数排序的两趟扫描算法。</span><br><span class="line">首先，迭代计算出0、1 和 2 元素的个数，然后按照0、1、2的排序，重写当前数组。</span><br><span class="line">你能想出一个仅使用常数空间的一趟扫描算法吗？</span><br></pre></td></tr></table></figure>
+<p>思路：</p>
+<p>申请两枚指针，head 和 tail，用 i 进行遍历，当 num[i] == 0时，交换当前位置和头指针处值，当 nums[i] == 2时，交换当前位置和尾指针处值，当 nums[i] == 1时，不进行交换：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">helper</span><span class="params">(<span class="keyword">int</span>[] nums)</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> head = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> tail = nums.length-<span class="number">1</span>; <span class="comment">//tail之后的都是已经排序好的2</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> k = <span class="number">0</span>; k &lt; nums.length &amp;&amp; k&lt;=tail; k++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (nums[k] == <span class="number">2</span>)&#123;</span><br><span class="line">           swap(nums,tail,k);</span><br><span class="line">           tail--;</span><br><span class="line">           k--; <span class="comment">//为啥这里要k-- </span></span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span>(nums[k] == <span class="number">0</span>)&#123;</span><br><span class="line">            swap(nums,head,k);</span><br><span class="line">            head++;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="comment">//pass</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">swap</span><span class="params">(<span class="keyword">int</span>[] nums,<span class="keyword">int</span> i,<span class="keyword">int</span> j)</span></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> temp = nums[j];</span><br><span class="line">    nums[j] = nums[i];</span><br><span class="line">    nums[i] = temp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>需要注意的是k–，为啥要k–，防止1 2 0这样的 交换了2和0之后 0并没有真正的归位，所以需要再次遍历一下，那为啥nums[k] == 0的情况<br>不需要k–呢，因为head之前的k肯定都已经遍历过了。所以不存在k之前还有个2需要归位。</p>
+<h1 id="快慢指针问题"><a href="#快慢指针问题" class="headerlink" title="快慢指针问题"></a>快慢指针问题</h1><p>快慢指针中的快慢指的是移动的步长，即每次向前移动速度的快慢。例如可以让快指针每次沿链表向前移动2，慢指针每次向前移动1次。<br>或者指一个先移动n步的快指针，和一个n步之后才移动的慢指针。</p>
+<p>常见应用题：</p>
+<ol>
+<li>判断链表是否成环？链表的环形入口？</li>
+<li>寻找链表中的中位数？双指针可以一次遍历就找到。</li>
+<li>求链表的倒数第N位？一次遍历就找到。也可以用双指针。</li>
+</ol>
+<p><a href="http://liuyang1.github.io/2016/04/02/fast-slow-pointer/" target="_blank" rel="noopener">Leetcode 141、142、148、202、234、287</a></p>
 
       
     </div>
@@ -430,7 +439,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/JVM/" rel="tag"># JVM</a>
+            <a href="/tags/算法/" rel="tag"># 算法</a>
           
         </div>
       
@@ -443,8 +452,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/10/08/Git命令基本操作/" rel="next" title="Git命令基本操作">
-                <i class="fa fa-chevron-left"></i> Git命令基本操作
+              <a href="/2018/04/25/装饰模式/" rel="next" title="装饰模式">
+                <i class="fa fa-chevron-left"></i> 装饰模式
               </a>
             
           </div>
@@ -453,8 +462,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/10/09/从CountDownLatch看AQS/" rel="prev" title="从CountDownLatch看AQS">
-                从CountDownLatch看AQS <i class="fa fa-chevron-right"></i>
+              <a href="/2018/08/14/SpringMVC-doDispatch过程组件和分析/" rel="prev" title="SpringMVC-doDispatch过程组件和分析">
+                SpringMVC-doDispatch过程组件和分析 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -650,7 +659,7 @@ var jiathis_config={
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#java8中，常量池的项目类型如下"><span class="nav-number">1.</span> <span class="nav-text">java8中，常量池的项目类型如下</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#代码实现"><span class="nav-number">2.</span> <span class="nav-text">代码实现</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#双指针问题"><span class="nav-number">1.</span> <span class="nav-text">双指针问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#快慢指针问题"><span class="nav-number">2.</span> <span class="nav-text">快慢指针问题</span></a></li></ol></div>
             
 
           </div>
