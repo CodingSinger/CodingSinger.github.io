@@ -112,7 +112,7 @@
 <meta property="og:description" content="Java异常类型 Throwable、Error、Exception、RuntimeException区别 Throwable是异常和错误的父类 ErrorError类一般是指与虚拟机相关的问题，如系统崩溃，虚拟机错误，内存空间不足，方法调用栈溢出等。如java.lang.StackOverFlowError和Java.lang.OutOfMemoryError。非检查异常，和RTExceptio">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/WX20180906-222609@2x.png">
-<meta property="og:updated_time" content="2018-09-06T14:27:52.000Z">
+<meta property="og:updated_time" content="2018-09-06T14:30:06.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java异常表">
 <meta name="twitter:description" content="Java异常类型 Throwable、Error、Exception、RuntimeException区别 Throwable是异常和错误的父类 ErrorError类一般是指与虚拟机相关的问题，如系统崩溃，虚拟机错误，内存空间不足，方法调用栈溢出等。如java.lang.StackOverFlowError和Java.lang.OutOfMemoryError。非检查异常，和RTExceptio">
@@ -407,6 +407,7 @@
 </ul>
 </li>
 </ul>
+<a id="more"></a>
 <h1 id="Java异常处理"><a href="#Java异常处理" class="headerlink" title="Java异常处理"></a>Java异常处理</h1><p>Java 在代码中通过使用 try{}catch(){}finally{} 块来对异常进行捕获或者处理。但是对于 JVM 来说，是如何处理 try/catch 代码块与异常的呢。<br>实际上 Java 编译后，会在代码后附加异常表的形式来实现 Java 的异常处理及 finally 机制（在 JDK1.4.2之前，javac 编译器使用 jsr 和 ret 指令来实现 finally 语句，但是1.4.2之后自动在每段可能的分支路径后将 finally 语句块内容冗余生成一遍来实现。JDK1.7及之后版本，则完全禁止在 Class 文件中使用 jsr 和 ret 指令）。</p>
 <ol>
 <li><p>异常表<br> 属性表（attribute_info）可以存在于 Class 文件、字段表、方法表中，用于描述某些场景的专有信息。属性表中有个 Code 属性，该属性在方法表中使用，Java 程序方法体中的代码被编译成的字节码指令存储在 Code 属性中。而异常表（exception_table）则是存储在 Code 属性表中的一个结构，这个结构是可选的。</p>
@@ -478,6 +479,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/06/SpringMVC-doDispatch过程组件和分析/" rel="prev" title="SpringMVC-doDispatch过程组件和分析">
+                SpringMVC-doDispatch过程组件和分析 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -589,7 +594,7 @@ var jiathis_config={
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">48</span>
+                  <span class="site-state-item-count">49</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -600,7 +605,7 @@ var jiathis_config={
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
