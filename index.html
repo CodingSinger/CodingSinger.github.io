@@ -306,6 +306,472 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/06/Java异常表/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/09/06/Java异常表/" itemprop="url">Java异常表</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-06T22:21:29+08:00">
+                2018-09-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Java异常类型"><a href="#Java异常类型" class="headerlink" title="Java异常类型"></a>Java异常类型</h1><ul>
+<li>Throwable、Error、Exception、RuntimeException区别<ul>
+<li>Throwable是异常和错误的父类</li>
+<li>ErrorError类一般是指与虚拟机相关的问题，如系统崩溃，虚拟机错误，内存空间不足，方法调用栈溢出等。如java.lang.StackOverFlowError和Java.lang.OutOfMemoryError。非检查异常，和RTException一样，虽然可以捕捉，但是一般不建议捕捉，因为这样的异常往往需要用别的方法进行</li>
+<li>Exception分为受检查异常和运行时异常，受检查异常需要捕捉或者抛出去给上层，否则无法编译成功，IOException、SQLException</li>
+<li>RuntimeException 运行时异常，不强制捕捉，但也可以捕捉，运行时才会知道是否异常，比如空指针、数组越界。</li>
+</ul>
+</li>
+</ul>
+<h1 id="Java异常处理"><a href="#Java异常处理" class="headerlink" title="Java异常处理"></a>Java异常处理</h1><p>Java 在代码中通过使用 try{}catch(){}finally{} 块来对异常进行捕获或者处理。但是对于 JVM 来说，是如何处理 try/catch 代码块与异常的呢。<br>实际上 Java 编译后，会在代码后附加异常表的形式来实现 Java 的异常处理及 finally 机制（在 JDK1.4.2之前，javac 编译器使用 jsr 和 ret 指令来实现 finally 语句，但是1.4.2之后自动在每段可能的分支路径后将 finally 语句块内容冗余生成一遍来实现。JDK1.7及之后版本，则完全禁止在 Class 文件中使用 jsr 和 ret 指令）。</p>
+<ol>
+<li><p>异常表<br> 属性表（attribute_info）可以存在于 Class 文件、字段表、方法表中，用于描述某些场景的专有信息。属性表中有个 Code 属性，该属性在方法表中使用，Java 程序方法体中的代码被编译成的字节码指令存储在 Code 属性中。而异常表（exception_table）则是存储在 Code 属性表中的一个结构，这个结构是可选的。</p>
+</li>
+<li><p>异常表结构<br> 异常表结构如下表所示。它包含四个字段：如果当字节码在第 start_pc 行到 end_pc 行之间（即[start_pc, end_pc)）出现了类型为 catch_type 或者其子类的异常（catch_type 为指向一个 CONSTANT_Class_info 型常量的索引），则跳转到第 handler_pc 行执行。如果 catch_type 为0，表示任意异常情况都需要转到 handler_pc 处进行处理。<br><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/WX20180906-222609@2x.png" alt="WX20180906-222609@2x.png"></p>
+</li>
+</ol>
+<ol start="3">
+<li>处理异常机制<br> 如上面所说，每个类编译后，都会跟随一个异常表，如果发生异常，首先在异常表中查找对应的行（即代码中相应的 try{}catch(){} 代码块），如果找到，则跳转到异常处理代码执行，如果没有找到，则返回（执行 finally 之后），并 copy 异常的应用给父调用者，接着查询父调用的异常表，以此类推。</li>
+</ol>
+<blockquote>
+<p>直接上代码实例分析</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">       System.out.println(<span class="string">"hello"</span>);</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">           <span class="keyword">int</span> i = <span class="number">1</span> / <span class="number">0</span>;</span><br><span class="line">       &#125; <span class="keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">           System.out.println(<span class="string">"catch1"</span>);</span><br><span class="line">       &#125; <span class="keyword">catch</span> (IllegalAccessError e) &#123;</span><br><span class="line">           System.out.println(<span class="string">"catch2"</span>);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>我们看main的字节码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"> 0: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line"> 3: ldc           #3                  // String hello</span><br><span class="line"> 5: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line"> <span class="number">8</span>: iconst_1</span><br><span class="line"> <span class="number">9</span>: iconst_0</span><br><span class="line"><span class="number">10</span>: idiv</span><br><span class="line"><span class="number">11</span>: istore_1</span><br><span class="line"><span class="number">12</span>: goto          <span class="number">36</span></span><br><span class="line"><span class="number">15</span>: astore_1</span><br><span class="line">16: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">19: ldc           #6                  // String catch1</span><br><span class="line">21: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line"><span class="number">24</span>: goto          <span class="number">36</span></span><br><span class="line"><span class="number">27</span>: astore_1</span><br><span class="line">28: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">31: ldc           #8                  // String catch2</span><br><span class="line">33: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line"><span class="number">36</span>: <span class="keyword">return</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>小知识：</p>
+</blockquote>
+<p>Throwable包含了错误(Error)和异常(Excetion两类)<br>Exception又包含了运行时异常(RuntimeException, 又叫非检查异常)和非运行时异常(又叫检查异常)<br>(1) Error是程序无法处理了, 如果OutOfMemoryError、StackOverflowError等等, 这些异常发生时, java虚拟机一般会终止线程 .<br>(2) 运行时异常都是RuntimeException类及其子类,如 NullPointerException、IndexOutOfBoundsException等, 这些异常是不检查的异常, 是在程序运行的时候可能会发生的, 所以程序可以捕捉, 也可以不捕捉. 这些错误一般是由程序的逻辑错误引起的,<br>程序应该从逻辑角度去尽量避免。<strong><em>但是运行时异常也能被catch捕捉到。</em></strong><br>(3) 检查异常是运行时异常以外的异常, 也是Exception及其子类, 这些异常从程序的角度来说是必须经过捕捉或者抛出处理的, 否则不能通过编译.<br>如IOException、SQLException等</p>
+<hr>
+<p>异常表如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Exception table:</span><br><span class="line">    from    to  target type</span><br><span class="line">      8    12    15   Class java/lang/RuntimeException</span><br><span class="line">      8    12    27   Class java/lang/IllegalAccessError</span><br></pre></td></tr></table></figure></p>
+<p>异常表表示在有try catch的情况下出现的抛出异常之后的代码运行路径转移情况</p>
+<p>每一行表示在 from -&gt; to之间的字节码运行出异常的话 并且异常类型满足type或者type子类 则跳到target处继续执行</p>
+<p>每一个target表示catch块捕捉的一种异常 type就是该catch块里捕捉的异常种类。是该type或者该type的子类都会被捕捉<br>target表示被该type捕捉到的异常将跳转到下标为15的字节码处继续运行<br>第二行也一样。</p>
+<p>可以看到无论是否正常执行或者被捕捉到异常执行catch块的内容最终都会goto 跳出try catch块</p>
+<blockquote>
+<p>如果我们加上finally块会怎样呢？</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">       System.out.println(<span class="string">"hello"</span>);</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">           <span class="keyword">int</span> i = <span class="number">1</span> / <span class="number">0</span>;</span><br><span class="line">       &#125; <span class="keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">           System.out.println(<span class="string">"catch1"</span>);</span><br><span class="line">       &#125; <span class="keyword">catch</span> (IllegalAccessError e) &#123;</span><br><span class="line">           System.out.println(<span class="string">"catch2"</span>);</span><br><span class="line">       &#125;<span class="keyword">finally</span> &#123;</span><br><span class="line">           System.out.println(<span class="string">"finally"</span>);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>再看字节码和异常表：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line">        0: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">        3: ldc           #3                  // String hello</span><br><span class="line">        5: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">        <span class="number">8</span>: iconst_1</span><br><span class="line">        <span class="number">9</span>: iconst_0</span><br><span class="line">       <span class="number">10</span>: idiv</span><br><span class="line">       <span class="number">11</span>: istore_1</span><br><span class="line">       12: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       15: ldc           #5                  // String finally</span><br><span class="line">       17: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">       <span class="number">20</span>: goto          <span class="number">74</span></span><br><span class="line">       <span class="number">23</span>: astore_1</span><br><span class="line">       24: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       27: ldc           #7                  // String catch1</span><br><span class="line">       29: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">       32: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       35: ldc           #5                  // String finally</span><br><span class="line">       37: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">       <span class="number">40</span>: goto          <span class="number">74</span></span><br><span class="line">       <span class="number">43</span>: astore_1</span><br><span class="line">       44: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       47: ldc           #9                  // String catch2</span><br><span class="line">       49: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">       52: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       55: ldc           #5                  // String finally</span><br><span class="line">       57: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">       <span class="number">60</span>: goto          <span class="number">74</span></span><br><span class="line">       <span class="number">63</span>: astore_2</span><br><span class="line">       64: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br><span class="line">       67: ldc           #5                  // String finally</span><br><span class="line">       69: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br><span class="line">       <span class="number">72</span>: aload_2</span><br><span class="line">       <span class="number">73</span>: athrow</span><br><span class="line">       <span class="number">74</span>: <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">Exception table:</span><br><span class="line">        from    to  target type</span><br><span class="line">            <span class="number">8</span>    <span class="number">12</span>    <span class="number">23</span>   Class java/lang/RuntimeException</span><br><span class="line">            <span class="number">8</span>    <span class="number">12</span>    <span class="number">43</span>   Class java/lang/IllegalAccessError</span><br><span class="line">            <span class="number">8</span>    <span class="number">12</span>    <span class="number">63</span>   any</span><br><span class="line">           <span class="number">23</span>    <span class="number">32</span>    <span class="number">63</span>   any</span><br><span class="line">           <span class="number">43</span>    <span class="number">52</span>    <span class="number">63</span>   any</span><br></pre></td></tr></table></figure></p>
+<p>可以看到竟然在异常表加上了后面3行包含any的路径转移情况， 即8-12间字节码执行出现无法被catch捕捉的异常则跳到63、8-12之间出现异常被第一个catch捕捉并且第一个catch执行间也出现了异常、<br>8-12之间出现异常被第二个catch捕捉但是catch执行期间抛出异常的三种情况最后都跳到63行。即执行最后的finally块。<br>并且可以看到，跟在我们try或者catch块的字节码之后编译器都自动加上了finally块的字节码。这就说明了无论是正常运行还是出现异常，finally块始终会运行。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/06/Java深浅拷贝/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/09/06/Java深浅拷贝/" itemprop="url">Java深浅拷贝</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-06T22:19:16+08:00">
+                2018-09-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> CloneNotSupportedException </span>&#123;</span><br><span class="line">        B b = <span class="keyword">new</span> B();</span><br><span class="line">        b.a = <span class="string">"sas"</span>;</span><br><span class="line">        b.c = <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">final</span> B clone =(B) b.clone();</span><br><span class="line">        System.out.println(b.a == clone.a);</span><br><span class="line">        <span class="comment">//为什么String这个引用类型改变了不会影响到b上String类型的值，因为String是不可变的，改变只是将该引用重新指向新的字符串，b.a并没变化 类似于</span></span><br><span class="line">        <span class="comment">//String a = "asa";String b = a; b +="assas"; 此时a仍然指向“asa";  clone是浅拷贝</span></span><br><span class="line">        <span class="comment">//基本原理是 先赋值一块一样大的内存，再用原对象的属性去填充该内存，对于基本类型是用值填充，引用类型则是直接复制引用填充 所以这叫做浅拷贝</span></span><br><span class="line">        <span class="comment">//实现深拷贝的方法如果用clone的话可以递归拷贝每个对象所有的引用类型 但当对象层级高时这比较复杂 可以看HashMap的clone方法</span></span><br><span class="line">        <span class="comment">//其他方法的话 序列化或者第三方库 可以实现 例如json序列化、Java Object 序列化，因为序列化往往需要跨网络组装对象 所以不可能指向同一个地址  https://blog.csdn.net/hzycaicai2012/article/details/45564443</span></span><br><span class="line">        <span class="comment">//https://blog.csdn.net/zhangjg_blog/article/details/18369201</span></span><br><span class="line">        clone.a += <span class="string">"sasas"</span>;</span><br><span class="line">        System.out.println(clone.o == b.o);</span><br><span class="line">        System.out.println(b.a);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * 输出：</span></span><br><span class="line"><span class="comment">         * true</span></span><br><span class="line"><span class="comment">         * true</span></span><br><span class="line"><span class="comment">         * sas</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">a</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">B</span> <span class="keyword">extends</span> <span class="title">A</span> <span class="keyword">implements</span> <span class="title">Cloneable</span></span>&#123;</span><br><span class="line">        <span class="keyword">public</span> String a;</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">int</span> c;</span><br><span class="line">        <span class="keyword">public</span> Object o;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">protected</span> Object <span class="title">clone</span><span class="params">()</span> <span class="keyword">throws</span> CloneNotSupportedException </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">super</span>.clone();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/04/磁盘调度算法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/09/04/磁盘调度算法/" itemprop="url">磁盘调度算法</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-04T14:21:05+08:00">
+                2018-09-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>磁盘调度在多道程序设计的计算机系统中，各个进程可能会不断提出不同的对磁盘进行读/写操作的请求。由于有时候这些进程的发送请求的速度比磁盘响应的还要快，因此我们有必要为每个磁盘设备建立一个等待队列，常用的磁盘调度算法有以下四种：</p>
+<ul>
+<li>先来先服务算法（FCFS），</li>
+<li>最短寻道时间优先算法（SSTF），</li>
+<li>扫描算法（SCAN），</li>
+<li>循环扫描算法（CSCAN）</li>
+</ul>
+<p>例:假定某磁盘共有200个柱面，编号为0-199，如果在为访问143号柱面的请求者服务后，当前正在为访问125号柱面的请求服务，同时有若干请求者在等待服务，它们每次要访问的柱面号为 86，147，91，177，94，150，102，175，130</p>
+<ol>
+<li>先来先服务算法（FCFS）First Come First Service<br>这是一种比较简单的磁盘调度算法。它==根据进程请求访问磁盘的先后次序进行调度==。此算法的优点是公平、简单，且每个进程的请求都能依次得到处理，不会出现某一进程的请求长期得不到满足的情况。此算法由于未对寻道进行优化，在对磁盘的访问请求比较多的情况下，此算法将降低设备服务的吞吐量，致使平均寻道时间可能较长，但各进程得到服务的响应时间的变化幅度较小。</li>
+</ol>
+<p>先来先服务 （125）86.147.91.177.94.150.102.175.130</p>
+<ol start="2">
+<li>最短寻道时间优先算法（SSTF） Shortest Seek Time First<br>该算法选择这样的进程，其要求访问的磁道与当前磁头所在的磁道距离最近，以使每次的寻道时间最短==，该算法可以得到比较好的吞吐量，但却不能保证平均寻道时间最短。其缺点是对用户的服务请求的响应机会不是均等的，因而导致响应时间的变化幅度很大。在服务请求很多的情况下，对内外边缘磁道的请求将会无限期的被延迟，有些请求的响应时间将不可预期。</li>
+</ol>
+<p>最短寻道时间优先（125）130.147.150.175.177.102.94.91.86</p>
+<p>3.扫描算法（SCAN）电梯调度<br>扫描算法不仅考虑到欲访问的磁道与当前磁道的距离，更优先考虑的是磁头的当前移动方向==。例如，当磁头正在自里向外移动时，扫描算法所选择的下一个访问对象应是其欲访问的磁道既在当前磁道之外，又是距离最近的。这样自里向外地访问，直到再无更外的磁道需要访问才将磁臂换向，自外向里移动。这时，同样也是每次选择这样的进程来调度，即其要访问的磁道，在当前磁道之内，从而避免了饥饿现象的出现。由于这种算法中磁头移动的规律颇似电梯的运行，故又称为电梯调度算法。此算法基本上克服了最短寻道时间优先算法的服务集中于中间磁道和响应时间变化比较大的缺点，而具有最短寻道时间优先算法的优点即吞吐量较大，平均响应时间较小，但由于是摆动式的扫描方法，两侧磁道被访问的频率仍低于中间磁道。</p>
+<p>电梯调度（125）102.94.91.86.130.147.150.175.177</p>
+<ol start="4">
+<li>循环扫描算法（CSCAN）<br>循环扫描算法是对扫描算法的改进。如果对磁道的访问请求是均匀分布的，当磁头到达磁盘的一端，并反向运动时落在磁头之后的访问请求相对较少。这是由于这些磁道刚被处理，而磁盘另一端的请求密度相当高，且这些访问请求等待的时间较长，为了解决这种情况，循环扫描算法规定磁头单向移动。例如，只自里向外移动，当磁头移到最外的被访问磁道时，磁头立即返回到最里的欲访磁道，即将最小磁道号紧接着最大磁道号构成循环，进行扫描。</li>
+</ol>
+<p>循环扫描 （125）130.147.150.175.177.86.91.94.102</p>
+<p>（本文转载自：<a href="http://blog.csdn.net/kennyrose/article/details/7532651，http://gengning938.blog.163.com/blog/static/128225381201161884614990/）" target="_blank" rel="noopener">http://blog.csdn.net/kennyrose/article/details/7532651，http://gengning938.blog.163.com/blog/static/128225381201161884614990/）</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/25/装饰模式/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1282,445 +1748,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/25/学习Tomcat-五-Connector组件介绍/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="看风人Z">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="看风人Z">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/03/25/学习Tomcat-五-Connector组件介绍/" itemprop="url">学习Tomcat-五-Tomcat Connector组件</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-25T19:20:42+08:00">
-                2018-03-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/java/" itemprop="url" rel="index">
-                    <span itemprop="name">java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>本文Tomcat版本为tomcat9</p>
-<h1 id="何为Connector"><a href="#何为Connector" class="headerlink" title="何为Connector?"></a>何为Connector?</h1><p>先看一张图:<br><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/tomcat_structure.jpg" alt="sd"><br>连接器(Connector) 将Service和Container连接起来，首先它需要注册到一个Service，它的作用就是把来自客户端的请求转发到Container(容器)，这就是它为什么称作连接器的原因。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/03/25/学习Tomcat-五-Connector组件介绍/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/24/学会Go语言的Channel-md/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="看风人Z">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="看风人Z">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/03/24/学会Go语言的Channel-md/" itemprop="url">学会Go语言的Channel</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-24T14:55:15+08:00">
-                2018-03-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Golang/" itemprop="url" rel="index">
-                    <span itemprop="name">Golang</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="channel的声明和初始化"><a href="#channel的声明和初始化" class="headerlink" title="channel的声明和初始化"></a>channel的声明和初始化</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">//declare a channel</span><br><span class="line">var c chan int</span><br><span class="line"></span><br><span class="line">// initialize</span><br><span class="line">c = make(chan int,0)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">//c := make(chan int)</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/03/24/学会Go语言的Channel-md/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/23/java并发-CyclicBarrier/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="看风人Z">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="看风人Z">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/03/23/java并发-CyclicBarrier/" itemprop="url">Java并发-CyclicBarrier</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-23T19:03:38+08:00">
-                2018-03-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/java/" itemprop="url" rel="index">
-                    <span itemprop="name">java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>我们上次讲过CountDownLatch，今天我们继续来看CyclicBarrier，这两个类的用法很容器混在一起。<br>还是以体育课为例，所有同学必须站在起跑线上了，才能一起开始跑，不能说还有几个同学还没准备好，其他人就一起跑，这样的成绩是无法登记的。<br>CyclicBarrier就相当于这个作用，内部也维护了一个计数器，每当一个线程”站上了起跑线”,就将计数器减1然后等待，一旦计数器为0，则之前等待的线程都<br>一起开始”跑步”。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/03/23/java并发-CyclicBarrier/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1775,7 +1802,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-count">48</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

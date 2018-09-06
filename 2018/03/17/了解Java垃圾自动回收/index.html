@@ -112,7 +112,7 @@
 <meta property="og:description" content="在虚拟机中，释放那些不再被使用的对象所占用空间的的过程称作垃圾回收，简称GC。 垃圾回收的三个难题：  如何确定哪些对象不再被使用？ 什么时候进行回收？ 如何回收？  如何确定对象无用 引用计数算法  引用计数算法简单的说就是在给对象添加一个引用计数器，每次被引用则该计数器加1，当引用失效时，计数器减1，计数器值为0的表示该对象不再被使用。该算法被Python等许多脚本语言采用来管理内存，但jav">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171127-200422@2x.png">
-<meta property="og:updated_time" content="2018-08-26T03:11:36.000Z">
+<meta property="og:updated_time" content="2018-09-03T10:53:09.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="了解Java垃圾自动回收">
 <meta name="twitter:description" content="在虚拟机中，释放那些不再被使用的对象所占用空间的的过程称作垃圾回收，简称GC。 垃圾回收的三个难题：  如何确定哪些对象不再被使用？ 什么时候进行回收？ 如何回收？  如何确定对象无用 引用计数算法  引用计数算法简单的说就是在给对象添加一个引用计数器，每次被引用则该计数器加1，当引用失效时，计数器减1，计数器值为0的表示该对象不再被使用。该算法被Python等许多脚本语言采用来管理内存，但jav">
@@ -459,13 +459,8 @@
 <li>老年代</li>
 <li>永久代(在java8之后已经被移除，取而代之的是元空间Metaspace)<br><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171127-200422@2x.png" alt="33"></li>
 </ul>
-<h3 id="新生代收集：Minor-Collection"><a href="#新生代收集：Minor-Collection" class="headerlink" title="新生代收集：Minor Collection"></a>新生代收集：Minor Collection</h3><p>一般情况下，Eden区是新生代分配空间的主要区域，新对象都分配在这里，当Eden区内存消耗殆尽时，无法满足对象分配请求，则触发<br>Minor Collection。<br>第一次Minor Collection扫描Eden区将存活对象复制到其中一块空闲的Suvivor区，清除Eden区，并且存活对象的年龄加1，第二次Minor Collection时，<br>则扫描Eden区和该Suvivor区，将存活对象复制到另一块Suvivor区，并且清除Eden区和Suvivor区。反复如此，当第N次Minor Collection时，某存活对象的<br>年龄足够时，则将该对象晋升到老年代。</p>
+<h3 id="新生代收集：Minor-Collection"><a href="#新生代收集：Minor-Collection" class="headerlink" title="新生代收集：Minor Collection"></a>新生代收集：Minor Collection</h3><p>一般情况下，Eden区是新生代分配空间的主要区域，新对象都分配在这里，当Eden区内存消耗殆尽时，无法满足对象分配请求，则触发<br>Minor Collection。<br>第一次Minor Collection扫描Eden区将存活对象复制到其中一块空闲的Suvivor区,例如S-from，清除Eden区，并且存活对象的年龄加1，第二次Minor Collection时，<br>会对Eden和S-from中的对象进行回收，Eden中的存活对象被复制到S-to，S-from中的存活对象如果达到了晋升年龄，则进入Old Gen，否则也被复制到S-to，接下来清空Eden和S-from，将S-from和S-to的身份互换，结束。</p>
 <p>另一种晋升老年代的可能是，但是Survivor内存区域中没有足够的空间来容纳从Eden升级过来的对象时，也会有部分对象直接升级到Tenured内存区域中。</p>
-<p>总结来说，晋升老年代有两种可能：</p>
-<ol>
-<li>年龄足够大</li>
-<li>Survivor区无法存放下某存活对象时。</li>
-</ol>
 <p>我们可以通过VM选项 -XX:InitialTenuringThreshold来设置晋升老年代的对象年龄阈值</p>
 <h3 id="老年代收集：Full-Collection"><a href="#老年代收集：Full-Collection" class="headerlink" title="老年代收集：Full Collection"></a>老年代收集：Full Collection</h3><p>当老年代无法容纳新生代晋升过来的对象时，则触发Full Collection，将对整个堆进行回收,包括young gen、old gen、perm gen（如果存在的话）等所有部分的模式。（CMS收集器除外，CMS老年代收集算法不会对新生代进行收集）。</p>
 <blockquote>
@@ -473,9 +468,18 @@
 </blockquote>
 <p>既然提到了永久代，那就说说永久代和元空间Metaspace。<br>java8之后永久代被移除了，替换其的是元空间区域。元空间被放在本地内存中，我们可以通过-XX:MaxMetaspaceSize来指定元空间的大小，但是它会自动增长，增长的最大限额由机器的内存大小决定。<br>而永久代通常有一个固定的最大值，而永久代的收集又并不效率，所以我们经常会见到那令人厌恶的java.lang.OutOfMemoryError: PermGen space。<br>那么元空间也需要GC吗？答案是肯定的，当元空间越来越大接近MaxMetaspaceSize时。则会进行垃圾回收。</p>
 <p>更多Metaspace的知识请看<a href="http://www.sczyh30.com/posts/Java/jvm-metaspace" target="_blank" rel="noopener">揭秘Metaspace</a></p>
+<h3 id="年轻代对象何时进入老年代"><a href="#年轻代对象何时进入老年代" class="headerlink" title="年轻代对象何时进入老年代"></a>年轻代对象何时进入老年代</h3><ol>
+<li>通过年龄计数器判断一个对象是否需要转移。对象每经过一个GC 仍然活着，年龄计数器加1。当年龄超过设定的值，则将其通过担保机制转移到老年代。</li>
+<li>也可以动态判定，当Survivor 中 年龄相同的对象超半数，则年龄大于该年龄的对象转移到老年代，无需等待到达设置的最大年龄值。</li>
+<li>大对象直接进入老年代。</li>
+<li>minor gc Suvivor区无法存放下通过动态担保到老年代。</li>
+</ol>
 <h3 id="什么情况触发年轻代回收"><a href="#什么情况触发年轻代回收" class="headerlink" title="什么情况触发年轻代回收"></a>什么情况触发年轻代回收</h3><p>当young gen中的eden区分配满或者无法容纳下新分配对象的时候触发。注意young GC中有部分存活对象会晋升到old gen，所以young GC后old gen的占用量通常会有所升高。</p>
 <h3 id="什么情况触发老年代回收？"><a href="#什么情况触发老年代回收？" class="headerlink" title="什么情况触发老年代回收？"></a>什么情况触发老年代回收？</h3><p>老年代回收发生在剩余内存无法装载新生代存活的对象的时候和无法装载大对象的时候（大对象直接进入老年代）。</p>
 <h3 id="老年代为何比年轻代收集慢？"><a href="#老年代为何比年轻代收集慢？" class="headerlink" title="老年代为何比年轻代收集慢？"></a>老年代为何比年轻代收集慢？</h3><p>首先使用的回收算法不同，年轻代的复制算法直接将存活对象进行拷贝到survivor区，并且只有少部分对象会存活需要拷贝，而老年代通常使用标记-整理算法。<br>并且老年代对象存活率高，需要移动整理的内存也多。所以比较慢。</p>
+<h3 id="垃圾回收调优"><a href="#垃圾回收调优" class="headerlink" title="垃圾回收调优"></a>垃圾回收调优</h3><h4 id="频繁的minor-gc"><a href="#频繁的minor-gc" class="headerlink" title="频繁的minor gc"></a>频繁的minor gc</h4><p>Eden区太小。增大年轻代的比例。</p>
+<h4 id="频繁的full-gc"><a href="#频繁的full-gc" class="headerlink" title="频繁的full gc"></a>频繁的full gc</h4><p>如果是一次fullgc后，剩余对象不多。那么说明你young区设置太小，导致短生命周期的对象进入了old区。<br>如果一次fullgc后，old区回收率不大，那么说明old区太小。<br>如果应用存在大量的临时对象，应该选择更大的年轻代,否则会被动态年龄判定到进入老年代，导致full gc；如果存在相对较多的持久对象，年老代应该适当增大。</p>
+<p><a href="https://tech.meituan.com/jvm_optimize.html" target="_blank" rel="noopener">从实际案例聊聊Java应用的GC优化</a><br><a href="http://132.232.9.157:8080/articles/2018/08/26/1535245026109.html" target="_blank" rel="noopener">JVM 调优实战-JVM参数 防止对象提前晋升至老年代</a></p>
 <h1 id="各类垃圾收集器的优缺点"><a href="#各类垃圾收集器的优缺点" class="headerlink" title="各类垃圾收集器的优缺点"></a>各类垃圾收集器的优缺点</h1><h2 id="CMS收集器"><a href="#CMS收集器" class="headerlink" title="CMS收集器"></a>CMS收集器</h2><p>CMS(concurrent Mark Sweep)收集器，以获取最短回收停顿时间为目标的收集器，适用于对交互响应速度敏感，希望系统停顿时间短的应用程序。</p>
 <p>CMS是基于“标记-清楚”的算法实现的，完整的收集过程如下：</p>
 <ol>
@@ -681,7 +685,7 @@ var jiathis_config={
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-count">48</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -764,7 +768,7 @@ var jiathis_config={
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#如何确定对象无用"><span class="nav-number">1.</span> <span class="nav-text">如何确定对象无用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#生存还是死亡–finalize方法解析"><span class="nav-number">2.</span> <span class="nav-text">生存还是死亡–finalize方法解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#不可靠的finalize"><span class="nav-number">2.1.</span> <span class="nav-text">不可靠的finalize</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#垃圾收集"><span class="nav-number">3.</span> <span class="nav-text">垃圾收集</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#垃圾收集算法"><span class="nav-number">3.1.</span> <span class="nav-text">垃圾收集算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分代收集（HotSpot虚拟机）"><span class="nav-number">3.2.</span> <span class="nav-text">分代收集（HotSpot虚拟机）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#新生代收集：Minor-Collection"><span class="nav-number">3.2.1.</span> <span class="nav-text">新生代收集：Minor Collection</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#老年代收集：Full-Collection"><span class="nav-number">3.2.2.</span> <span class="nav-text">老年代收集：Full Collection</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么情况触发年轻代回收"><span class="nav-number">3.2.3.</span> <span class="nav-text">什么情况触发年轻代回收</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么情况触发老年代回收？"><span class="nav-number">3.2.4.</span> <span class="nav-text">什么情况触发老年代回收？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#老年代为何比年轻代收集慢？"><span class="nav-number">3.2.5.</span> <span class="nav-text">老年代为何比年轻代收集慢？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#各类垃圾收集器的优缺点"><span class="nav-number">4.</span> <span class="nav-text">各类垃圾收集器的优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CMS收集器"><span class="nav-number">4.1.</span> <span class="nav-text">CMS收集器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#G1收集器"><span class="nav-number">4.2.</span> <span class="nav-text">G1收集器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#G1收集器的优势"><span class="nav-number">4.2.1.</span> <span class="nav-text">G1收集器的优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#何时使用G1"><span class="nav-number">4.2.2.</span> <span class="nav-text">何时使用G1:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#G1的工作过程"><span class="nav-number">4.2.3.</span> <span class="nav-text">G1的工作过程</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#如何确定对象无用"><span class="nav-number">1.</span> <span class="nav-text">如何确定对象无用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#生存还是死亡–finalize方法解析"><span class="nav-number">2.</span> <span class="nav-text">生存还是死亡–finalize方法解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#不可靠的finalize"><span class="nav-number">2.1.</span> <span class="nav-text">不可靠的finalize</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#垃圾收集"><span class="nav-number">3.</span> <span class="nav-text">垃圾收集</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#垃圾收集算法"><span class="nav-number">3.1.</span> <span class="nav-text">垃圾收集算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分代收集（HotSpot虚拟机）"><span class="nav-number">3.2.</span> <span class="nav-text">分代收集（HotSpot虚拟机）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#新生代收集：Minor-Collection"><span class="nav-number">3.2.1.</span> <span class="nav-text">新生代收集：Minor Collection</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#老年代收集：Full-Collection"><span class="nav-number">3.2.2.</span> <span class="nav-text">老年代收集：Full Collection</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#年轻代对象何时进入老年代"><span class="nav-number">3.2.3.</span> <span class="nav-text">年轻代对象何时进入老年代</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么情况触发年轻代回收"><span class="nav-number">3.2.4.</span> <span class="nav-text">什么情况触发年轻代回收</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么情况触发老年代回收？"><span class="nav-number">3.2.5.</span> <span class="nav-text">什么情况触发老年代回收？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#老年代为何比年轻代收集慢？"><span class="nav-number">3.2.6.</span> <span class="nav-text">老年代为何比年轻代收集慢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#垃圾回收调优"><span class="nav-number">3.2.7.</span> <span class="nav-text">垃圾回收调优</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#频繁的minor-gc"><span class="nav-number">3.2.7.1.</span> <span class="nav-text">频繁的minor gc</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#频繁的full-gc"><span class="nav-number">3.2.7.2.</span> <span class="nav-text">频繁的full gc</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#各类垃圾收集器的优缺点"><span class="nav-number">4.</span> <span class="nav-text">各类垃圾收集器的优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CMS收集器"><span class="nav-number">4.1.</span> <span class="nav-text">CMS收集器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#G1收集器"><span class="nav-number">4.2.</span> <span class="nav-text">G1收集器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#G1收集器的优势"><span class="nav-number">4.2.1.</span> <span class="nav-text">G1收集器的优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#何时使用G1"><span class="nav-number">4.2.2.</span> <span class="nav-text">何时使用G1:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#G1的工作过程"><span class="nav-number">4.2.3.</span> <span class="nav-text">G1的工作过程</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
