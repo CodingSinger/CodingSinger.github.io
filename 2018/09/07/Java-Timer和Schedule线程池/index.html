@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="java," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Java中的定时任务JDK中主要原生提供两个定时任务API，一个是Timer类配合TimerTask使用，另一个就是ScheduleThreadPoolExecutor，下面我们从代码分析两种方法的差别和基本原理。">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java Timer和Schedule线程池">
+<meta property="og:url" content="http://yoursite.com/2018/09/07/Java-Timer和Schedule线程池/index.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="Java中的定时任务JDK中主要原生提供两个定时任务API，一个是Timer类配合TimerTask使用，另一个就是ScheduleThreadPoolExecutor，下面我们从代码分析两种方法的差别和基本原理。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-09-07T01:42:32.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java Timer和Schedule线程池">
+<meta name="twitter:description" content="Java中的定时任务JDK中主要原生提供两个定时任务API，一个是Timer类配合TimerTask使用，另一个就是ScheduleThreadPoolExecutor，下面我们从代码分析两种方法的差别和基本原理。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/09/07/Java-Timer和Schedule线程池/"/>
+
+
+
+
+
+  <title>Java Timer和Schedule线程池 | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/09/07/Java-Timer和Schedule线程池/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java Timer和Schedule线程池</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-07T09:38:39+08:00">
+                2018-09-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Java中的定时任务"><a href="#Java中的定时任务" class="headerlink" title="Java中的定时任务"></a>Java中的定时任务</h1><p>JDK中主要原生提供两个定时任务API，一个是Timer类配合TimerTask使用，另一个就是ScheduleThreadPoolExecutor，下面我们从代码分析两种方法的差别<br>和基本原理。</p>
+<a id="more"></a>
+<h1 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h1><p>TimerThread#mainLoop方法:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">mainLoop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                TimerTask task;</span><br><span class="line">                <span class="keyword">boolean</span> taskFired;</span><br><span class="line">                <span class="keyword">synchronized</span>(queue) &#123;</span><br><span class="line">                    <span class="comment">// Wait for queue to become non-empty</span></span><br><span class="line">                    <span class="keyword">while</span> (queue.isEmpty() &amp;&amp; newTasksMayBeScheduled)</span><br><span class="line">                        queue.wait();</span><br><span class="line">                    <span class="keyword">if</span> (queue.isEmpty())</span><br><span class="line">                        <span class="keyword">break</span>; <span class="comment">// Queue is empty and will forever remain; die</span></span><br><span class="line"></span><br><span class="line">                    <span class="comment">// Queue nonempty; look at first evt and do the right thing</span></span><br><span class="line">                    <span class="keyword">long</span> currentTime, executionTime;</span><br><span class="line">                    task = queue.getMin();</span><br><span class="line">                    <span class="keyword">synchronized</span>(task.lock) &#123; <span class="comment">//获取该任务上的锁</span></span><br><span class="line">                        <span class="keyword">if</span> (task.state == TimerTask.CANCELLED) &#123; <span class="comment">//如果任务已经取消了</span></span><br><span class="line">                            queue.removeMin();</span><br><span class="line">                            <span class="keyword">continue</span>;  <span class="comment">// No action required, poll queue again</span></span><br><span class="line">                        &#125;</span><br><span class="line">                        currentTime = System.currentTimeMillis();</span><br><span class="line">                        executionTime = task.nextExecutionTime;</span><br><span class="line">                        <span class="keyword">if</span> (taskFired = (executionTime&lt;=currentTime)) &#123; <span class="comment">//如果执行执行小于等于当前时间 则taskFired为true</span></span><br><span class="line">                            <span class="keyword">if</span> (task.period == <span class="number">0</span>) &#123; <span class="comment">// 如果不是重复执行的任务 则直接移除</span></span><br><span class="line">                                queue.removeMin();</span><br><span class="line">                                task.state = TimerTask.EXECUTED;</span><br><span class="line">                            &#125; <span class="keyword">else</span> &#123; <span class="comment">// 如果是重复执行的任务 则计算下一次执行的事件</span></span><br><span class="line">                                queue.rescheduleMin(</span><br><span class="line">                                  task.period&lt;<span class="number">0</span> ? currentTime   - task.period</span><br><span class="line">                                                : executionTime + task.period);</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span> (!taskFired) /如果还没可以执行，则等待对应的时间</span><br><span class="line">                        queue.wait(executionTime - currentTime);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (taskFired)  <span class="comment">// 可以执行了，则调用执行方法 调用run方法执行task任务</span></span><br><span class="line">                    task.run();</span><br><span class="line">            &#125; <span class="keyword">catch</span>(InterruptedException e) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到mainLoop中对于已经就绪的任务是直接执行task任务的run方法，那这就是说所有的就绪任务都是串行执行的。<br>让我们看看Timer的构造方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Timer</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">      thread.setName(name);</span><br><span class="line">      thread.start();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></p>
+<p>的确对于每一个Timer实例都只会使用一个线程来执行所有队列中就绪的任务，这样的话一个已经在执行的任务<br>使得另一个已经超过了定时时间的任务无法及时执行。这也就是推荐使用ScheduledThreadPoolExecutor的原因之一。</p>
+<p>好奇为什么每次都getMin来获取最前端的任务来检测是否到了执行时间？万一后面的任务已经到了执行时间不就推迟执行了吗？<br>第一时间想到这个queue可能是按照执行时间先后顺序来排列的<br>。于是去看了TaskQueue的add方法，差不太多，TaskQueue并没有将所有任务按执行时间进行排序，而是构造了一个小顶堆，以保证第一个任务的是接下来最先执行的。<br>因为这个规则，后续我们只需要观察第一个任务是否允许执行即可。第一个任务没有就绪，后续的肯定也没有就绪。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">add</span><span class="params">(TimerTask task)</span> </span>&#123;</span><br><span class="line">       <span class="comment">// Grow backing store if necessary</span></span><br><span class="line">       <span class="keyword">if</span> (size + <span class="number">1</span> == queue.length)</span><br><span class="line">           queue = Arrays.copyOf(queue, <span class="number">2</span>*queue.length);</span><br><span class="line"></span><br><span class="line">       queue[++size] = task;</span><br><span class="line">       fixUp(size);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>每一次add方法，都会调整整个数组，fixUp方法调整queue以满足上面说的规则。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">fixUp</span><span class="params">(<span class="keyword">int</span> k)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (k &gt; <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">int</span> j = k &gt;&gt; <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (queue[j].nextExecutionTime &lt;= queue[k].nextExecutionTime)</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        TimerTask tmp = queue[j];  queue[j] = queue[k]; queue[k] = tmp;</span><br><span class="line">        k = j;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该方法其实相当于构建一个小顶堆，queue[1]为最小nextExecutionTime的任务，在queue从下标为1开始存储的情况下,假设1为父节点，<br>则2和3都是其子节点，4，5为2的子节点，子节点下标x和其父节点下标y满足 x&gt;&gt;1 = y,则每一次新加入节点的时候都判断和父节点哪个大，<br>如果比父节点小，则交换位置。为什么不需要判断另一个节点，因为要么就是父节点的第一个子节点，要么另一个子节点一定比父节点大，<br>因为每个节点加入的时候都会fixUp满足该关系。</p>
+<p>同理当删除一个节点时，也会调用fixDown方法调整整个队列使其继续满足TaskQueue的规则。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">removeMin</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     queue[<span class="number">1</span>] = queue[size];</span><br><span class="line">     queue[size--] = <span class="keyword">null</span>;  <span class="comment">// Drop extra reference to prevent memory leak</span></span><br><span class="line">     fixDown(<span class="number">1</span>);</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>把最后一个任务移到第一个，并置空最后一个位置，调用fixDown方法来调整整个数组继续满足小顶堆关系。从上往下调整。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">fixDown</span><span class="params">(<span class="keyword">int</span> k)</span> </span>&#123;</span><br><span class="line">     <span class="keyword">int</span> j;</span><br><span class="line">     <span class="keyword">while</span> ((j = k &lt;&lt; <span class="number">1</span>) &lt;= size &amp;&amp; j &gt; <span class="number">0</span>) &#123;</span><br><span class="line">         <span class="keyword">if</span> (j &lt; size &amp;&amp;</span><br><span class="line">             queue[j].nextExecutionTime &gt; queue[j+<span class="number">1</span>].nextExecutionTime)</span><br><span class="line">             j++; <span class="comment">// j indexes smallest kid</span></span><br><span class="line">         <span class="keyword">if</span> (queue[k].nextExecutionTime &lt;= queue[j].nextExecutionTime)</span><br><span class="line">             <span class="keyword">break</span>;</span><br><span class="line">         TimerTask tmp = queue[j];  queue[j] = queue[k]; queue[k] = tmp;</span><br><span class="line">         k = j;</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>TimerTask是根据wait方法来满足定时执行任务的，<code>wait(long time)</code>方法使当前线程等待直到其他一个线程唤醒自己或者超出了time时间则自动被唤醒。<br>被唤醒之后(超时)只是进入了锁池等待拥有锁的线程释放锁。</p>
+<h1 id="ScheduledThreadPoolExecutor-定时执行任务"><a href="#ScheduledThreadPoolExecutor-定时执行任务" class="headerlink" title="ScheduledThreadPoolExecutor 定时执行任务"></a>ScheduledThreadPoolExecutor 定时执行任务</h1><p>为什么推荐使用ScheduledThreadPoolExecutor而不是Timer的原因主要有三点：</p>
+<ul>
+<li>Timer类是通过单线程来执行所有的TimerTask任务的，如果一个任务的执行过程非常耗时，将会导致其他任务的时效性出现问题。而ScheduledThreadPoolExecutor是基于线程池的多线程执行任务，不会存在这样的问题。</li>
+<li>Timer线程不捕获异常Timer类中是不捕获异常的，假如一个TimerTask中抛出未检查异常（P.S：java中异常分为两类:checked exception(检查异常)和unchecked exception(未检查异常),对于未检查异常也叫RuntimeException(运行时异常). ），Timer类将不会处理这个异常而产生无法预料的错误。这样一个任务抛出异常将会导致整个Timer中的线程都退出，<br>此时已安排但未执行的TimerTask也永远不会执行了，新的任务也不能被调度（所谓的“线程泄漏”现象）。</li>
+<li>基于绝对时间Timer类的调度是基于绝对的时间的(System.currentTimeMillis)，而不是相对的时间，因此Timer类对系统时钟的变化是敏感的，举个例子，加入你希望任务1每个10秒执行一次，某个时刻，你将系统时间提前了6秒，那么任务1就会在4秒后执行，而不是10秒后。在ScheduledThreadPoolExecutor，<br>任务的调度是基于相对时间的，原因是它在存储了基于某一个时刻开始的该任务下次调度的时间（使用的是基于System#nanoTime实现的相对时间，不会因为系统时间改变而改变),如每10s调度一次，则我们只需要保存某个时间点的固定时间A+10为执行开始时间，每次都通过System.nanoTime的值是否大于计划开始时间A+10,<br>大于则代表可以调度。通过System.nanoTime的随机时间不依赖系统时钟。</li>
+</ul>
+<p>基于以上3个弊端，在JDK1.5或以上版本中，我们几乎没有理由继续使用Timer类，ScheduledThreadPoolExecutor可以很好的去替代Timer类来完成延迟周期性任务。</p>
+<p>关于这三个弊端的演示看<a href="https://blog.csdn.net/diaorenxiang/article/details/38827409" target="_blank" rel="noopener">Timer与ScheduledThreadPoolExecutor</a></p>
+<p>ScheduledThreadPoolExecutor调度线程池大部分都和普通的线程池代码差不多。如何去实现定时调度？基本原理也和Timer的实现原理差不多<br>那就是工作线程向某个容器申请已经就绪的任务拿来执行。在Timer中根据getMin方法来检查最先执行的任务是否已经就绪。<br>那ScheduledThreadPoolExecutor是否有自己重写了工作线程的方法，使其不断循环一个队列里获取就绪任务呢？</p>
+<p>有必要继续温习下ThreadPoolExecutor中的核心方法<code>runWorker</code>,该方法会在工作线程启动后调用执行。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">runWorker</span><span class="params">(Worker w)</span> </span>&#123;</span><br><span class="line">        Thread wt = Thread.currentThread();</span><br><span class="line">        Runnable task = w.firstTask;</span><br><span class="line">        w.firstTask = <span class="keyword">null</span>;</span><br><span class="line">        w.unlock(); <span class="comment">// allow interrupts</span></span><br><span class="line">        <span class="keyword">boolean</span> completedAbruptly = <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">while</span> (task != <span class="keyword">null</span> || (task = getTask()) != <span class="keyword">null</span>) &#123;</span><br><span class="line">                w.lock();</span><br><span class="line">                <span class="comment">// If pool is stopping, ensure thread is interrupted;</span></span><br><span class="line">                <span class="comment">// if not, ensure thread is not interrupted.  This</span></span><br><span class="line">                <span class="comment">// requires a recheck in second case to deal with</span></span><br><span class="line">                <span class="comment">// shutdownNow race while clearing interrupt</span></span><br><span class="line">                <span class="keyword">if</span> ((runStateAtLeast(ctl.get(), STOP) ||</span><br><span class="line">                     (Thread.interrupted() &amp;&amp;</span><br><span class="line">                      runStateAtLeast(ctl.get(), STOP))) &amp;&amp;</span><br><span class="line">                    !wt.isInterrupted())</span><br><span class="line">                    wt.interrupt();</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    beforeExecute(wt, task);</span><br><span class="line">                    Throwable thrown = <span class="keyword">null</span>;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        task.run();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (RuntimeException x) &#123;</span><br><span class="line">                        thrown = x; <span class="keyword">throw</span> x;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Error x) &#123;</span><br><span class="line">                        thrown = x; <span class="keyword">throw</span> x;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Throwable x) &#123;</span><br><span class="line">                        thrown = x; <span class="keyword">throw</span> <span class="keyword">new</span> Error(x);</span><br><span class="line">                    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                        afterExecute(task, thrown);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                    task = <span class="keyword">null</span>;</span><br><span class="line">                    w.completedTasks++;</span><br><span class="line">                    w.unlock();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            completedAbruptly = <span class="keyword">false</span>;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            processWorkerExit(w, completedAbruptly);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>ScheduledThreadPoolExecutor通过getTask方法来引入自己的获取就绪任务的逻辑来执行以此实现定时线程池的功能。</p>
+<p>来看看ScheduledThreadPoolExecutor其中的一个构造方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ScheduledThreadPoolExecutor</span><span class="params">(<span class="keyword">int</span> corePoolSize,</span></span></span><br><span class="line"><span class="function"><span class="params">                                      RejectedExecutionHandler handler)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">super</span>(corePoolSize, Integer.MAX_VALUE, <span class="number">0</span>, NANOSECONDS,</span><br><span class="line">             <span class="keyword">new</span> DelayedWorkQueue(), handler);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure></p>
+<p>其实ScheduledThreadPoolExecutor所有的构造方法都使用DelayedWorkQueue来充当暂存任务的队列。<br>其大致原理和Timer中的TaskQueue其实差不多，包括队列调整方法，以保证第一个任务永远是接下来最先执行的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">public RunnableScheduledFuture&lt;?&gt; take() throws InterruptedException &#123;</span><br><span class="line">           final ReentrantLock lock = this.lock;</span><br><span class="line">           lock.lockInterruptibly();</span><br><span class="line">           try &#123;</span><br><span class="line">               for (;;) &#123;</span><br><span class="line">                   RunnableScheduledFuture&lt;?&gt; first = queue[0];</span><br><span class="line">                   if (first == null)</span><br><span class="line">                       available.await();</span><br><span class="line">                   else &#123;</span><br><span class="line">                       long delay = first.getDelay(NANOSECONDS);</span><br><span class="line">                       if (delay &lt;= 0)</span><br><span class="line">                           return finishPoll(first);</span><br><span class="line">                       first = null; // don&apos;t retain ref while waiting</span><br><span class="line">                       if (leader != null)</span><br><span class="line">                           available.await();</span><br><span class="line">                       else &#123;</span><br><span class="line">                           Thread thisThread = Thread.currentThread();</span><br><span class="line">                           leader = thisThread;</span><br><span class="line">                           try &#123;</span><br><span class="line">                               available.awaitNanos(delay);</span><br><span class="line">                           &#125; finally &#123;</span><br><span class="line">                               if (leader == thisThread)</span><br><span class="line">                                   leader = null;</span><br><span class="line">                           &#125;</span><br><span class="line">                       &#125;</span><br><span class="line">                   &#125;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125; finally &#123;</span><br><span class="line">               if (leader == null &amp;&amp; queue[0] != null)</span><br><span class="line">                   available.signal();</span><br><span class="line">               lock.unlock();</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/java/" rel="tag"># java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/06/SpringMVC-doDispatch过程组件和分析/" rel="next" title="SpringMVC-doDispatch过程组件和分析">
+                <i class="fa fa-chevron-left"></i> SpringMVC-doDispatch过程组件和分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">50</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/CodingSinger" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java中的定时任务"><span class="nav-number">1.</span> <span class="nav-text">Java中的定时任务</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#代码分析"><span class="nav-number">2.</span> <span class="nav-text">代码分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ScheduledThreadPoolExecutor-定时执行任务"><span class="nav-number">3.</span> <span class="nav-text">ScheduledThreadPoolExecutor 定时执行任务</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
