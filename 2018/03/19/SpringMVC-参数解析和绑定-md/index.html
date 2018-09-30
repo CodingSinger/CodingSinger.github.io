@@ -111,7 +111,7 @@
 <meta property="og:site_name" content="看风人Z">
 <meta property="og:description" content="示例代码以如下示例代码为例进行讲解： 1234567891011121314151617181920212223242526public class Person &amp;#123;    private Integer id;    private String name;    public Person() &amp;#123;    &amp;#125;    public Integer getId() &amp;#">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-08-14T00:44:54.000Z">
+<meta property="og:updated_time" content="2018-09-20T02:09:31.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SpringMVC-参数解析和绑定">
 <meta name="twitter:description" content="示例代码以如下示例代码为例进行讲解： 1234567891011121314151617181920212223242526public class Person &amp;#123;    private Integer id;    private String name;    public Person() &amp;#123;    &amp;#125;    public Integer getId() &amp;#">
@@ -437,7 +437,7 @@
 </ol>
 <p>可以看到在注入时，需要去对应的bean类查找是否有相同name的属性，则会利用反射方法<code>getDeclaredFields()</code>(只会获取自己类中定义的<br> public, protected, default (package) access, and private属性),并且通过<code>getSuperclass</code>方法获得父类进行层层查找。详情请看下面<br> 代码。</p>
 <p><code>ReflectionUtils</code>中的<code>findField</code>方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Field <span class="title">findField</span><span class="params">(Class&lt;?&gt; clazz, @Nullable String name, @Nullable Class&lt;?&gt; type)</span> </span>&#123;</span><br><span class="line">		Assert.notNull(clazz, <span class="string">"Class must not be null"</span>);</span><br><span class="line">		Assert.isTrue(name != <span class="keyword">null</span> || type != <span class="keyword">null</span>, <span class="string">"Either name or type of the field must be specified"</span>);</span><br><span class="line">		Class&lt;?&gt; searchType = clazz;</span><br><span class="line">		<span class="keyword">while</span> (Object.class != searchType &amp;&amp; searchType != <span class="keyword">null</span>) &#123;</span><br><span class="line">			Field[] fields = getDeclaredFields(searchType);</span><br><span class="line">			<span class="keyword">for</span> (Field field : fields) &#123;</span><br><span class="line">				<span class="keyword">if</span> ((name == <span class="keyword">null</span> || name.equals(field.getName())) &amp;&amp;</span><br><span class="line">						(type == <span class="keyword">null</span> || type.equals(field.getType()))) &#123;</span><br><span class="line">					<span class="keyword">return</span> field;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">			searchType = searchType.getSuperclass();</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure></p>
-<p>关于复杂对象的注入这里就暂时不讨论。</p>
+<p>关于复杂对象的注入这里就只提一点，例如嵌套bean的参数注入是通过<code>AbstractNestablePropertyAccessor#getPropertyAccessorForPropertyPath</code>类进行<br>递归处理的。</p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>为了解析请求的参数到对应方法参数，步骤如下：</p>
 <ol>
 <li>SpringMVC初始化时，RequestMappingHandlerAdapter类会把一些默认的参数解析器添加到argumentResolvers中。当SpringMVC接收到请求后首先根据url查找对应的HandlerMethod。</li>
@@ -445,6 +445,16 @@
 <li>根据MethodParameter的类型来查找确认使用哪个HandlerMethodArgumentResolver</li>
 <li>利用支持的HandlerMethodArgumentResolver将请求中所带的参数解析成当前遍历的MethodParameter对应类型的参数。<br>其中包括类型的转化，对Bean类型的参数则需要特殊的处理，比如注入和包装。</li>
 <li>将解析完的方法参数放入Object数组。</li>
+</ol>
+<blockquote>
+<p>这里额外提一下，上面的参数绑定都通过了参数名称绑定。那SpringMVC是如何获得参数名称的呢?</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="meta">@Nullable</span></span><br><span class="line"><span class="keyword">public</span> String[] getParameterNames(Method method) &#123;</span><br><span class="line">	<span class="keyword">for</span> (ParameterNameDiscoverer pnd : <span class="keyword">this</span>.parameterNameDiscoverers) &#123;</span><br><span class="line">		String[] result = pnd.getParameterNames(method);</span><br><span class="line">		<span class="keyword">if</span> (result != <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="keyword">return</span> result;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p><code>this.parameterNameDiscoverers</code>主要包含<code>LocalVariableTableParameterNameDiscoverer</code>和<code>StandardReflectionParameterNameDiscovere</code></p>
+<ol>
+<li>通过Parameter.getName()，但是编译时需要指定参数javac -parameters，不然得到的名称仍然是arg0,arg1…</li>
+<li>LocalVariableTableParameterNameDiscoverer 类中是用 ASM 字节码操纵框架读取字节码文件获取真实在 java 代码中定义的真实参数名<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Parameter[] parameters = method.getParameters();</span><br><span class="line">for (Parameter parameter : parameters) &#123;</span><br><span class="line">    System.out.println(parameter.getName());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
 </ol>
 <h1 id="参考"><a href="#参考" class="headerlink" title="参考:"></a>参考:</h1><p><a href="https://juejin.im/entry/5a8670555188257a5d2b3a50" target="_blank" rel="noopener">SpringMVC源码之参数解析绑定原理</a></p>
 
@@ -601,7 +611,7 @@ var jiathis_config={
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">50</span>
+                  <span class="site-state-item-count">51</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

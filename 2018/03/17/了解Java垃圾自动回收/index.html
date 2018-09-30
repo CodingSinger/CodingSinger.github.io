@@ -112,7 +112,7 @@
 <meta property="og:description" content="在虚拟机中，释放那些不再被使用的对象所占用空间的的过程称作垃圾回收，简称GC。 垃圾回收的三个难题：  如何确定哪些对象不再被使用？ 什么时候进行回收？ 如何回收？  如何确定对象无用 引用计数算法  引用计数算法简单的说就是在给对象添加一个引用计数器，每次被引用则该计数器加1，当引用失效时，计数器减1，计数器值为0的表示该对象不再被使用。该算法被Python等许多脚本语言采用来管理内存，但jav">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171127-200422@2x.png">
-<meta property="og:updated_time" content="2018-09-03T10:53:09.000Z">
+<meta property="og:updated_time" content="2018-09-29T05:06:46.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="了解Java垃圾自动回收">
 <meta name="twitter:description" content="在虚拟机中，释放那些不再被使用的对象所占用空间的的过程称作垃圾回收，简称GC。 垃圾回收的三个难题：  如何确定哪些对象不再被使用？ 什么时候进行回收？ 如何回收？  如何确定对象无用 引用计数算法  引用计数算法简单的说就是在给对象添加一个引用计数器，每次被引用则该计数器加1，当引用失效时，计数器减1，计数器值为0的表示该对象不再被使用。该算法被Python等许多脚本语言采用来管理内存，但jav">
@@ -475,7 +475,14 @@
 <li>minor gc Suvivor区无法存放下通过动态担保到老年代。</li>
 </ol>
 <h3 id="什么情况触发年轻代回收"><a href="#什么情况触发年轻代回收" class="headerlink" title="什么情况触发年轻代回收"></a>什么情况触发年轻代回收</h3><p>当young gen中的eden区分配满或者无法容纳下新分配对象的时候触发。注意young GC中有部分存活对象会晋升到old gen，所以young GC后old gen的占用量通常会有所升高。</p>
-<h3 id="什么情况触发老年代回收？"><a href="#什么情况触发老年代回收？" class="headerlink" title="什么情况触发老年代回收？"></a>什么情况触发老年代回收？</h3><p>老年代回收发生在剩余内存无法装载新生代存活的对象的时候和无法装载大对象的时候（大对象直接进入老年代）。</p>
+<h3 id="什么情况触发老年代回收？"><a href="#什么情况触发老年代回收？" class="headerlink" title="什么情况触发老年代回收？"></a>什么情况触发老年代回收？</h3><ul>
+<li>老年代回收发生在剩余内存无法装载新生代动态年龄判定存活的Suvivor区对象的时候和无法装载大对象的时候（大对象直接进入老年代）。</li>
+<li>minor gc之前，如果设置为不允许进行分配担保，则进行转变为full gc。</li>
+<li>如果允许分配担保，但是老年代最大连续可用空间小于之前历次晋升到老年代对象的平均大小，则也会转为full gc</li>
+<li>如果允许分配担保，并且老年代最大连续可用空间大于之前历代晋升到老年代对象的平均大小，于是会进行一次冒风险的minor gc，风险就是可能本次minor gc之后年轻代存活的对象<br>远大于之前的平均值，此时会将Suvivor无法存放的对象分配到老年代，但是老年代可能存不下，就会引发一次full gc。</li>
+<li>Metaspace内存不够也会引起full gc。</li>
+<li>System.gc() 也可能会触发full gc。</li>
+</ul>
 <h3 id="老年代为何比年轻代收集慢？"><a href="#老年代为何比年轻代收集慢？" class="headerlink" title="老年代为何比年轻代收集慢？"></a>老年代为何比年轻代收集慢？</h3><p>首先使用的回收算法不同，年轻代的复制算法直接将存活对象进行拷贝到survivor区，并且只有少部分对象会存活需要拷贝，而老年代通常使用标记-整理算法。<br>并且老年代对象存活率高，需要移动整理的内存也多。所以比较慢。</p>
 <h3 id="垃圾回收调优"><a href="#垃圾回收调优" class="headerlink" title="垃圾回收调优"></a>垃圾回收调优</h3><h4 id="频繁的minor-gc"><a href="#频繁的minor-gc" class="headerlink" title="频繁的minor gc"></a>频繁的minor gc</h4><p>Eden区太小。增大年轻代的比例。</p>
 <h4 id="频繁的full-gc"><a href="#频繁的full-gc" class="headerlink" title="频繁的full gc"></a>频繁的full gc</h4><p>如果是一次fullgc后，剩余对象不多。那么说明你young区设置太小，导致短生命周期的对象进入了old区。<br>如果一次fullgc后，old区回收率不大，那么说明old区太小。<br>如果应用存在大量的临时对象，应该选择更大的年轻代,否则会被动态年龄判定到进入老年代，导致full gc；如果存在相对较多的持久对象，年老代应该适当增大。</p>
@@ -530,7 +537,7 @@
 <li>清理</li>
 <li>复制</li>
 </ol>
-<p>建议大家阅读Oracle官网的文章,清晰明了的图解<a href="http://www.oracle.com/technetwork/tutorials/tutorials-1876574.html" target="_blank" rel="noopener">Get Started With G1</a></p>
+<p><a href="http://www.importnew.com/27793.html" target="_blank" rel="noopener">G1 垃圾收集器介绍</a><br>建议大家阅读Oracle官网的文章,清晰明了的图解<a href="http://www.oracle.com/technetwork/tutorials/tutorials-1876574.html" target="_blank" rel="noopener">Get Started With G1</a></p>
 
       
     </div>
@@ -685,7 +692,7 @@ var jiathis_config={
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">50</span>
+                  <span class="site-state-item-count">51</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
