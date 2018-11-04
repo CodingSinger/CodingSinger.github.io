@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Spring," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Spring Bean生命周期 容器寻找Bean的定义信息，并将其实例化。会对scope为singleton且非懒加载的bean进行实例化 使用依赖注入，Spring按照Bean定义信息配置Bean的所有属性。(populateBean) ,该方法会调用对应的的BeanPostProcessor来进行一些属性的注入。例如@Autowire和@Value属性。 如果Bean实现了BeanNameAw">
+<meta name="keywords" content="Spring">
+<meta property="og:type" content="article">
+<meta property="og:title" content="学习Spring-七-Spring中Bean的生命周期">
+<meta property="og:url" content="http://yoursite.com/2018/11/04/学习Spring-七-Spring中Bean的生命周期/index.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="Spring Bean生命周期 容器寻找Bean的定义信息，并将其实例化。会对scope为singleton且非懒加载的bean进行实例化 使用依赖注入，Spring按照Bean定义信息配置Bean的所有属性。(populateBean) ,该方法会调用对应的的BeanPostProcessor来进行一些属性的注入。例如@Autowire和@Value属性。 如果Bean实现了BeanNameAw">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-11-04T10:02:32.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="学习Spring-七-Spring中Bean的生命周期">
+<meta name="twitter:description" content="Spring Bean生命周期 容器寻找Bean的定义信息，并将其实例化。会对scope为singleton且非懒加载的bean进行实例化 使用依赖注入，Spring按照Bean定义信息配置Bean的所有属性。(populateBean) ,该方法会调用对应的的BeanPostProcessor来进行一些属性的注入。例如@Autowire和@Value属性。 如果Bean实现了BeanNameAw">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/11/04/学习Spring-七-Spring中Bean的生命周期/"/>
+
+
+
+
+
+  <title>学习Spring-七-Spring中Bean的生命周期 | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/04/学习Spring-七-Spring中Bean的生命周期/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">学习Spring-七-Spring中Bean的生命周期</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-04T18:01:50+08:00">
+                2018-11-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Spring-Bean生命周期"><a href="#Spring-Bean生命周期" class="headerlink" title="Spring Bean生命周期"></a>Spring Bean生命周期</h1><ol>
+<li>容器寻找Bean的定义信息，并将其实例化。会对scope为singleton且非懒加载的bean进行实例化</li>
+<li>使用依赖注入，Spring按照Bean定义信息配置Bean的所有属性。(populateBean) ,该方法会调用对应的的BeanPostProcessor来进行一些属性的注入。例如@Autowire和@Value属性。</li>
+<li>如果Bean实现了BeanNameAware接口，工厂调用Bean的setBeanName()方法传递Bean的id。(initializeBean)</li>
+<li>如果实现了BeanFactoryAware接口，工厂调用setBeanFactory()方法传入工厂自身。(initializeBean)<br>&lt;! – more –&gt;</li>
+<li>如果实现了ApplicationContextAware接口，会调用该接口的setApplicationContext()方法，传入该Bean的ApplicationContext，这样该Bean就获得了自己所在<br>的ApplicationContext。(initializeBean)</li>
+<li>调用postProcessBeforeInitialization()方法。(initializeBean)<ul>
+<li>该过程会调用一个InitDestroyAnnotationBeanPostProcessor实现类，执行@PostConstruct注解方法的执行。</li>
+</ul>
+</li>
+<li>如果Bean实现了InitializingBean接口，则会回调该接口的afterPropertiesSet()方法。(initializeBean)</li>
+<li>如果Bean制定了init-method方法，就会调用init-method方法。(initializeBean)</li>
+<li>调用BeanPostProcessor的postProcessAfterInitialization()方法。(initializeBean)</li>
+<li>现在Bean已经可以使用了。</li>
+<li>scope为singleton的Bean缓存在Spring IOC容器中。</li>
+<li>scope为prototype的Bean生命周期交给客户端。</li>
+<li>销毁。<ol>
+<li>会执行所有的DestructionAwareBeanPostProcessor实现类的postProcessBeforeDestruction方法，如果Bean配置了@PreDestroy注解，则会执行该注解所在方法，<br>该方法也是由InitDestroyAnnotationBeanPostProcessor调用postProcessBeforeDestruction方法对所有带@PreDestroy的Bean进行调用。</li>
+<li>如果Bean实现了DisposableBean接口，destory()方法将会被调用。</li>
+<li>如果配置了destory-method方法，就调用这个方法。</li>
+</ol>
+</li>
+</ol>
+<h1 id="Springl懒加载"><a href="#Springl懒加载" class="headerlink" title="Springl懒加载"></a>Springl懒加载</h1><p>默认情况下，容器初始化的时候便会把所有非懒加载的单例bean实例化，通常这样做可以让一些配置或者bean实例化的异常在容器启动的时候就发现，而不是在N久之后。但有时候，我们希望某个可能不会用到但又不是100%不用的bean能够在我们用的时候才实例化，<br>这样可以节省系统资源。所以万能的Spring为我们提供了xml中lazy-init属性。或者@Lazy注解，该注解通常用在Spring管理的类上或者配合@Bean一起用，标志的单例对象不会在Spring容器启动的时候被初始化，只会在我们getBean调用的时候才会初始化，或者<br>当某个非懒加载单例对象对该懒加载对象有依赖的时候才会在Spring容器启动的时候进行初始化。(依赖注入会去getBean)</p>
+<h1 id="Spring单例和非单例Bean"><a href="#Spring单例和非单例Bean" class="headerlink" title="Spring单例和非单例Bean"></a>Spring单例和非单例Bean</h1><p>Spring默认Bean都是单例的。并且我们也应该尽量做到让Spring只管理我们的单例Bean。<br>Spring中的单例Bean生命周期和Spring容器的生命周期绑定，非懒加载的单例Bean会在启动的时候就开始进行Bean的初始化。而非单例Bean例如Scope为prototype类型的，并不会在Spring启动的时候就进行初始化，除非该对象被某个在初始化的类依赖。<br>prototype模式Bean每次getBean都会去初始化一个新的对象，(不同于单例的如果已经初始化过则直接拿)，但是和单例的一样，每次初始化对象都会走上述生命周期里说到的这些方法。还有一点不同的是并不会走单例bean生命周期中销毁的那些步骤，即便<br>是实现了DisposableBean接口或者是配置了destroy-method方法。至于原因，大家可以看AbstractApplicationContext#registerShutdownHook注册的JVM关闭钩子调用的doClose方法，doClose方法对JVM关闭或者Spring容器销毁后的一些资源进行了处理，其<br>中有调用<code>destroyBeans</code>，该方法是Spring Bean生命周期销毁步骤的主要方法，但是该方法只会去执行单例对象的销毁过程。</p>
+<h1 id="Spring初始化和销毁的方法和执行顺序"><a href="#Spring初始化和销毁的方法和执行顺序" class="headerlink" title="Spring初始化和销毁的方法和执行顺序"></a>Spring初始化和销毁的方法和执行顺序</h1><p>Spring 允许 Bean 在初始化完成后以及销毁前执行特定的操作。下面是常用的三种指定特定操作的方法：</p>
+<p>通过实现InitializingBean/DisposableBean 接口来定制初始化之后/销毁之前的操作方法；<br>通过<bean> 元素的 init-method/destroy-method属性指定初始化之后 /销毁之前调用的操作方法；<br>在指定方法上加上@PostConstruct或@PreDestroy注解来制定该方法是在初始化之后还是销毁之前调用。</bean></p>
+<p>关于各种初始化方法和销毁方法的调用顺序测试如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InitAndDestroySeqBean</span> <span class="keyword">implements</span> <span class="title">InitializingBean</span>,<span class="title">DisposableBean</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">InitAndDestroySeqBean</span><span class="params">()</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"执行InitAndDestroySeqBean: 构造方法"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@PostConstruct</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">postConstruct</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"执行InitAndDestroySeqBean: postConstruct"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterPropertiesSet</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"执行InitAndDestroySeqBean: afterPropertiesSet"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initMethod</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"执行InitAndDestroySeqBean: init-method"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@PreDestroy</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">preDestroy</span><span class="params">()</span>  </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"执行InitAndDestroySeqBean: preDestroy"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">destroy</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"执行InitAndDestroySeqBean: destroy"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">destroyMethod</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"执行InitAndDestroySeqBean: destroy-method"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@Bean</span>(initMethod = <span class="string">"initMethod"</span>,destroyMethod = <span class="string">"destroyMethod"</span>)</span><br><span class="line"><span class="function"><span class="keyword">public</span> InitAndDestroySeqBean <span class="title">get</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> InitAndDestroySeqBean();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行如果如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">执行InitAndDestroySeqBean: 构造方法</span><br><span class="line">执行InitAndDestroySeqBean: postConstruct</span><br><span class="line">执行InitAndDestroySeqBean: afterPropertiesSet</span><br><span class="line">执行InitAndDestroySeqBean: init-method</span><br><span class="line">...胜率</span><br><span class="line">执行InitAndDestroySeqBean: preDestroy</span><br><span class="line">执行InitAndDestroySeqBean: destroy</span><br><span class="line">执行InitAndDestroySeqBean: destroy-method</span><br></pre></td></tr></table></figure></p>
+<p>执行结果看出：<br>Bean在实例化的过程中：Constructor &gt; @PostConstruct &gt;InitializingBean &gt; init-method</p>
+<p>Bean在销毁的过程中：@PreDestroy &gt; DisposableBean &gt; destroy-method</p>
+<blockquote>
+<p>关于Bean的摧毁方法例如DisposableBean的destroy方法的调用往往是在Spring容器销毁、虚拟机正常退出(例如我们在IDEA中按下绿色三角形停止按钮，如果有钩子的话，此时虚拟机并不会立刻退出，而是会执行完钩子函数才会退出，而非正常<br>退出则会立马停止JVM，例如服务器宕机或者直接用kill -9杀死JVM进程,但是kill也会等待钩子运行完成，关于kill和kill -9 区别自己去了解）,通过之前注册JVM钩子实现,JVM退出的时候会回调注册的钩子,Spring中通过<code>AbstractApplicationContext#registerShutdownHook</code>注册钩子，<br>因为摧毁过程无法进行Debug,那么如何查看具体的调用栈呢？通过new一个异常对象，例如Exception并且打印出调用元素或者调用栈即可。</p>
+</blockquote>
+<blockquote>
+<p>转载自：<br><a href="http://yangbolin.cn/2014/06/19/how-to-aware-jvm-exit/" target="_blank" rel="noopener">JAVA代码中如何感知到JVM退出</a><br>Spring bean具体生命周期看 <a href="https://yemengying.com/2016/07/14/spring-bean-life-cycle/" target="_blank" rel="noopener">Spring Bean生命周期总结</a><br><a href="https://blog.csdn.net/caihaijiang/article/details/8629725" target="_blank" rel="noopener">Spring容器中的Bean几种初始化方法和销毁方法的先后顺序</a></p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spring/" rel="tag"># Spring</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/10/09/工厂模式/" rel="next" title="工厂模式">
+                <i class="fa fa-chevron-left"></i> 工厂模式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/CodingSinger" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring-Bean生命周期"><span class="nav-number">1.</span> <span class="nav-text">Spring Bean生命周期</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Springl懒加载"><span class="nav-number">2.</span> <span class="nav-text">Springl懒加载</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring单例和非单例Bean"><span class="nav-number">3.</span> <span class="nav-text">Spring单例和非单例Bean</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spring初始化和销毁的方法和执行顺序"><span class="nav-number">4.</span> <span class="nav-text">Spring初始化和销毁的方法和执行顺序</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

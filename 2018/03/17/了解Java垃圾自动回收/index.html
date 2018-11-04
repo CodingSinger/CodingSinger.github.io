@@ -112,7 +112,7 @@
 <meta property="og:description" content="在虚拟机中，释放那些不再被使用的对象所占用空间的的过程称作垃圾回收，简称GC。 垃圾回收的三个难题：  如何确定哪些对象不再被使用？ 什么时候进行回收？ 如何回收？  如何确定对象无用 引用计数算法  引用计数算法简单的说就是在给对象添加一个引用计数器，每次被引用则该计数器加1，当引用失效时，计数器减1，计数器值为0的表示该对象不再被使用。该算法被Python等许多脚本语言采用来管理内存，但jav">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/QQ20171127-200422@2x.png">
-<meta property="og:updated_time" content="2018-09-29T05:06:46.000Z">
+<meta property="og:updated_time" content="2018-10-19T14:20:36.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="了解Java垃圾自动回收">
 <meta name="twitter:description" content="在虚拟机中，释放那些不再被使用的对象所占用空间的的过程称作垃圾回收，简称GC。 垃圾回收的三个难题：  如何确定哪些对象不再被使用？ 什么时候进行回收？ 如何回收？  如何确定对象无用 引用计数算法  引用计数算法简单的说就是在给对象添加一个引用计数器，每次被引用则该计数器加1，当引用失效时，计数器减1，计数器值为0的表示该对象不再被使用。该算法被Python等许多脚本语言采用来管理内存，但jav">
@@ -447,6 +447,7 @@
 <ul>
 <li>牺牲少量的内存，简单高效，没有明显碎片。<br>复制算法实现简单，以空间的代价来换取运行时的高效，一般适合新生代的收集，老年代的对象生命周期比较长，如果使用复制算法，则<br>每次复制的代价太高，所以老年代的收集算法多为标记算。</li>
 </ul>
+<p><a href="https://zhuanlan.zhihu.com/p/28197216" target="_blank" rel="noopener">复制算法伪代码实现</a></p>
 <ul>
 <li>标记-压缩算法<br>标记阶段：标记出所有可以回收的对象。<br>压缩阶段：将标记阶段的对象移动到空间的一段,然后释放剩余的空间。</li>
 </ul>
@@ -537,7 +538,7 @@
 <li>清理</li>
 <li>复制</li>
 </ol>
-<p><a href="http://www.importnew.com/27793.html" target="_blank" rel="noopener">G1 垃圾收集器介绍</a><br>建议大家阅读Oracle官网的文章,清晰明了的图解<a href="http://www.oracle.com/technetwork/tutorials/tutorials-1876574.html" target="_blank" rel="noopener">Get Started With G1</a></p>
+<p><a href="http://www.importnew.com/27793.html" target="_blank" rel="noopener">G1 垃圾收集器介绍</a><br>建议大家阅读Oracle官网的文章,清晰明了的图解<a href="http://www.oracle.com/technetwork/tutorials/tutorials-1876574.html" target="_blank" rel="noopener">Get Started With G1</a><br><a href="http://blog.jobbole.com/109170/" target="_blank" rel="noopener">深入了解G1</a><br><a href="https://www.jianshu.com/p/aef0f4765098" target="_blank" rel="noopener">Remember Set的写屏障</a></p>
 
       
     </div>
@@ -692,7 +693,7 @@ var jiathis_config={
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">51</span>
+                  <span class="site-state-item-count">53</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
