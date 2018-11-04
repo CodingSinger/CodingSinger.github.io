@@ -111,7 +111,7 @@
 <meta property="og:site_name" content="看风人Z">
 <meta property="og:description" content="Spring Bean生命周期 容器寻找Bean的定义信息，并将其实例化。会对scope为singleton且非懒加载的bean进行实例化 使用依赖注入，Spring按照Bean定义信息配置Bean的所有属性。(populateBean) ,该方法会调用对应的的BeanPostProcessor来进行一些属性的注入。例如@Autowire和@Value属性。 如果Bean实现了BeanNameAw">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-11-04T10:02:32.000Z">
+<meta property="og:updated_time" content="2018-11-04T10:04:24.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="学习Spring-七-Spring中Bean的生命周期">
 <meta name="twitter:description" content="Spring Bean生命周期 容器寻找Bean的定义信息，并将其实例化。会对scope为singleton且非懒加载的bean进行实例化 使用依赖注入，Spring按照Bean定义信息配置Bean的所有属性。(populateBean) ,该方法会调用对应的的BeanPostProcessor来进行一些属性的注入。例如@Autowire和@Value属性。 如果Bean实现了BeanNameAw">
@@ -400,7 +400,7 @@
 <li>容器寻找Bean的定义信息，并将其实例化。会对scope为singleton且非懒加载的bean进行实例化</li>
 <li>使用依赖注入，Spring按照Bean定义信息配置Bean的所有属性。(populateBean) ,该方法会调用对应的的BeanPostProcessor来进行一些属性的注入。例如@Autowire和@Value属性。</li>
 <li>如果Bean实现了BeanNameAware接口，工厂调用Bean的setBeanName()方法传递Bean的id。(initializeBean)</li>
-<li>如果实现了BeanFactoryAware接口，工厂调用setBeanFactory()方法传入工厂自身。(initializeBean)<br>&lt;! – more –&gt;</li>
+<li>如果实现了BeanFactoryAware接口，工厂调用setBeanFactory()方法传入工厂自身。(initializeBean)<a id="more"></a></li>
 <li>如果实现了ApplicationContextAware接口，会调用该接口的setApplicationContext()方法，传入该Bean的ApplicationContext，这样该Bean就获得了自己所在<br>的ApplicationContext。(initializeBean)</li>
 <li>调用postProcessBeforeInitialization()方法。(initializeBean)<ul>
 <li>该过程会调用一个InitDestroyAnnotationBeanPostProcessor实现类，执行@PostConstruct注解方法的执行。</li>
