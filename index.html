@@ -306,6 +306,153 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/05/18/RPC框架中的反射加速/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="看风人Z">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="看风人Z">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/05/18/RPC框架中的反射加速/" itemprop="url">RPC框架中的反射加速</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-05-18T12:56:44+08:00">
+                2019-05-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="RPC框架中的反射加速"><a href="#RPC框架中的反射加速" class="headerlink" title="RPC框架中的反射加速"></a>RPC框架中的反射加速</h1><p>一般的RPC框架都会在客户端进行动态代理，以屏蔽掉底层的RPC框架和网络通讯细节达到伪装成本地调用的效果，以简化使用者的操作。常见的动态代理技术像JDK动态代理、GGLIB(底层ASM)、Javassist、ASM等其实都是运行时的字节码生成技术。<br>本文我们跳过客户端的动态代理实现，讲的是RPC框架中服务端对请求方法的调用方式：</p>
+<ol>
+<li>一种是在暴露服务的时候，解析并缓存服务接口方法，之后根据<code>serviceName:methodName</code>进行获取对应方法以反射调用，像蚂蚁金服开源的sofa-rpc和微博开源的motan都是类似这么做的。</li>
+<li>生成中间类直接调用，例如一些需要IDL(接口描述语言)的RPC框架，借助编译器为IDL具体的方法抽离出来来避免反射调用，例如GRPC的<code>MethodHandlers</code>和Thrift的<code>ProcessFunction</code>还有Solar基于Pb的编译器插件实现，也是借助<code>ProcedureProcessor</code>进行避免了反射调用。还有是利用Java的字节码生成框架例如ASM、Javassist、Bytebuddy在运行时生成中间类来避免反射调用，典型的是Dubbo。</li>
+</ol>
+<h2 id="几种调用的JMH测试"><a href="#几种调用的JMH测试" class="headerlink" title="几种调用的JMH测试"></a>几种调用的JMH测试</h2><p>这里对FastClass、Javassist、反射调用进行测试。<br>测试Javassist使用直接是从Dubbo提出的Wrapper类。代码比较复杂这里就不贴出来了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@State</span>(Scope.Thread)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InvokeMethod</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Hello</span> </span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">hello</span><span class="params">(Object obj)</span> </span>&#123;</span><br><span class="line">            String s = <span class="string">"hello"</span>;</span><br><span class="line">            <span class="keyword">return</span> s.toUpperCase();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> FastClass fastClass;</span><br><span class="line">    <span class="keyword">private</span>  Method method;</span><br><span class="line">    <span class="keyword">private</span> Wrapper wrapper;</span><br><span class="line">    <span class="keyword">private</span> Hello hello;</span><br><span class="line">    <span class="keyword">private</span> FastMethod fastMethod;</span><br><span class="line">    <span class="meta">@Setup</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"init"</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            hello = <span class="keyword">new</span> Hello();</span><br><span class="line">            fastClass = FastClass.create(Hello.class);</span><br><span class="line">            wrapper = Wrapper.makeWrapper(Hello.class);</span><br><span class="line">            fastMethod = fastClass.getMethod(<span class="string">"hello"</span>,<span class="keyword">new</span> Class[]&#123;Object.class&#125;);</span><br><span class="line">            method = Hello.class.getMethod(<span class="string">"hello"</span>,Object.class);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchMethodException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@TearDown</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">clear</span><span class="params">()</span></span>&#123;</span><br><span class="line">        method = <span class="keyword">null</span>;</span><br><span class="line">        fastClass = <span class="keyword">null</span>;</span><br><span class="line">        fastMethod = <span class="keyword">null</span>;</span><br><span class="line">        hello = <span class="keyword">null</span>;</span><br><span class="line">        wrapper = <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testFastClass</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            fastClass.invoke(<span class="string">"hello"</span>,<span class="keyword">new</span> Class[]&#123;Object.class&#125;,hello,<span class="keyword">new</span> Object[]&#123;<span class="keyword">new</span> Object()&#125;);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InvocationTargetException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testFastMethod</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            fastMethod.invoke(hello,<span class="keyword">new</span> Object[]&#123;<span class="keyword">new</span> Object()&#125;);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InvocationTargetException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testReflect</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            method.invoke(hello,<span class="keyword">new</span> Object());</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IllegalAccessException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InvocationTargetException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Benchmark</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testWrapper</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            wrapper.invokeMethod(hello,<span class="string">"hello"</span>,<span class="keyword">new</span> Class[]&#123;Object.class&#125;,<span class="keyword">new</span> Object[]&#123;<span class="keyword">new</span> Object()&#125;);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchMethodException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InvocationTargetException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RunnerException </span>&#123;</span><br><span class="line">        Options opt = <span class="keyword">new</span> OptionsBuilder()</span><br><span class="line">                .include(InvokeMethod.class.getSimpleName())</span><br><span class="line">                .mode(Mode.Throughput)</span><br><span class="line">                .warmupIterations(<span class="number">3</span>)</span><br><span class="line">                .measurementIterations(<span class="number">5</span>)</span><br><span class="line">                .forks(<span class="number">1</span>)</span><br><span class="line">                .threads(<span class="number">1</span>)</span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> Runner(opt).run();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code>Benchmark                             Mode  Cnt         Score        Error  Units
+Wrapper.InvokeMethod.testFastClass   thrpt    5  21488450.191 ± 239445.248  ops/s
+Wrapper.InvokeMethod.testFastMethod  thrpt    5  24818394.254 ± 625564.192  ops/s
+Wrapper.InvokeMethod.testReflect     thrpt    5  23302668.826 ±  39459.584  ops/s
+Wrapper.InvokeMethod.testWrapper     thrpt    5  25193475.348 ± 564327.238  ops/s
+
+
+Wrapper.InvokeMethod.testFastClass   thrpt    5  22141975.243 ± 580065.302  ops/s
+Wrapper.InvokeMethod.testFastMethod  thrpt    5  24850214.410 ± 227537.302  ops/s
+Wrapper.InvokeMethod.testReflect     thrpt    5  23444903.126 ±  80997.055  ops/s
+Wrapper.InvokeMethod.testWrapper     thrpt    5  25367604.647 ± 165270.721  ops/s
+
+
+Benchmark                             Mode  Cnt         Score         Error  Units
+Wrapper.InvokeMethod.testFastClass   thrpt    5  21928809.393 ±  422849.886  ops/s
+Wrapper.InvokeMethod.testFastMethod  thrpt    5  24760183.538 ±  630083.494  ops/s
+Wrapper.InvokeMethod.testReflect     thrpt    5  22007688.236 ± 2907682.164  ops/s
+Wrapper.InvokeMethod.testWrapper     thrpt    5  24415060.344 ±  691496.075  ops/s
+</code></pre><p>三组测试结果如下：</p>
+<p>大概是<code>javassist &gt;= CGLIB的FastMethod &gt; 反射调用 &gt; CGLIB的FastClass</code>。<br>出乎意料的是直接FastClass调用和反射调用性能竟然相差无几甚至有落后，所以建议在使用FastClass机制的时候，最好先提取出FastMethod进行缓存。</p>
+<p><a href="https://www.cnkirito.moe/rpc-dynamic-proxy/" target="_blank" rel="noopener">深入理解RPC之动态代理篇</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/06/zookeeper-watcher机制/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1694,153 +1841,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/25/装饰模式/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="看风人Z">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="看风人Z">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/25/装饰模式/" itemprop="url">装饰模式</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-25T08:48:50+08:00">
-                2018-04-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/设计模式/" itemprop="url" rel="index">
-                    <span itemprop="name">设计模式</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>本文所有源代码都在我的Github，并且持续更新中…欢迎Star <a href="https://github.com/Ooo0oO0o0oO/DesignPattern" target="_blank" rel="noopener">DesignPattern</a></p>
-<h1 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Clerk</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Clerk</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.id = id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String id ;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setId</span><span class="params">(String id)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.id = id;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">reportWork</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/04/25/装饰模式/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1895,7 +1895,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">54</span>
+                  <span class="site-state-item-count">55</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1917,7 +1917,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-count">15</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -1982,7 +1982,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
     <i class="fa fa-"></i>
   </span>
