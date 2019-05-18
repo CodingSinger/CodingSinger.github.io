@@ -103,20 +103,20 @@
 
 
 
-<meta name="description" content="zookeeper Watcher机制 一个zk的节点可以被监控，包括这个目录中存储的数据的修改，子节点目录的变化，一旦变化可以通知设置监控的客户端，这个功能是zookeeper对于 应用最重要的特性，通过这个特性可以实现的功能包括配置的集中管理，集群管理，分布式锁等等。 zookeeper watcher特性关于Watches有几点：  所有的读操作都可以设置watcher,例如getChild">
+<meta name="description" content="zookeeper Watcher机制 一个zk的节点可以被监控，包括这个目录中存储的数据的修改，子节点目录的变化，一旦变化可以通知设置监控的客户端，这个功能是zookeeper对于 应用最重要的特性，通过这个特性可以实现的功能包括配置的集中管理，集群管理，分布式锁等等。">
 <meta name="keywords" content="zookeeper">
 <meta property="og:type" content="article">
 <meta property="og:title" content="zookeeper-watcher机制">
 <meta property="og:url" content="http://yoursite.com/2018/11/06/zookeeper-watcher机制/index.html">
 <meta property="og:site_name" content="看风人Z">
-<meta property="og:description" content="zookeeper Watcher机制 一个zk的节点可以被监控，包括这个目录中存储的数据的修改，子节点目录的变化，一旦变化可以通知设置监控的客户端，这个功能是zookeeper对于 应用最重要的特性，通过这个特性可以实现的功能包括配置的集中管理，集群管理，分布式锁等等。 zookeeper watcher特性关于Watches有几点：  所有的读操作都可以设置watcher,例如getChild">
+<meta property="og:description" content="zookeeper Watcher机制 一个zk的节点可以被监控，包括这个目录中存储的数据的修改，子节点目录的变化，一旦变化可以通知设置监控的客户端，这个功能是zookeeper对于 应用最重要的特性，通过这个特性可以实现的功能包括配置的集中管理，集群管理，分布式锁等等。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/WX20180722-195648@2x.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/WX20180722-195822@2x.png">
-<meta property="og:updated_time" content="2018-11-06T07:50:43.000Z">
+<meta property="og:updated_time" content="2019-05-18T04:58:49.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="zookeeper-watcher机制">
-<meta name="twitter:description" content="zookeeper Watcher机制 一个zk的节点可以被监控，包括这个目录中存储的数据的修改，子节点目录的变化，一旦变化可以通知设置监控的客户端，这个功能是zookeeper对于 应用最重要的特性，通过这个特性可以实现的功能包括配置的集中管理，集群管理，分布式锁等等。 zookeeper watcher特性关于Watches有几点：  所有的读操作都可以设置watcher,例如getChild">
+<meta name="twitter:description" content="zookeeper Watcher机制 一个zk的节点可以被监控，包括这个目录中存储的数据的修改，子节点目录的变化，一旦变化可以通知设置监控的客户端，这个功能是zookeeper对于 应用最重要的特性，通过这个特性可以实现的功能包括配置的集中管理，集群管理，分布式锁等等。">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/WX20180722-195648@2x.png">
 
 
@@ -400,6 +400,7 @@
 
       
         <h1 id="zookeeper-Watcher机制"><a href="#zookeeper-Watcher机制" class="headerlink" title="zookeeper Watcher机制"></a>zookeeper Watcher机制</h1><p> 一个zk的节点可以被监控，包括这个目录中存储的数据的修改，子节点目录的变化，一旦变化可以通知设置监控的客户端，这个功能是zookeeper对于<br> 应用最重要的特性，通过这个特性可以实现的功能包括配置的集中管理，集群管理，分布式锁等等。</p>
+ <a id="more"></a>
 <h1 id="zookeeper-watcher特性"><a href="#zookeeper-watcher特性" class="headerlink" title="zookeeper watcher特性"></a>zookeeper watcher特性</h1><p>关于Watches有几点：</p>
 <ul>
 <li>所有的读操作都可以设置watcher,例如getChildren,getData,exist。</li>
