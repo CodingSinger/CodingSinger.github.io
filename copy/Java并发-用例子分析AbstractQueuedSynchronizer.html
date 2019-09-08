@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content=",,," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文基于jdk1.8，AQS类中两千多行代码，我们不需要理解每一行代码的作用，所以我们根据ReentrantLock一个案例来了解AQS是如何利用await和signal进行线程之间的同步。">
+<meta name="keywords" content="JUC">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Java并发-用例子分析AbstractQueuedSynchronizer">
+<meta property="og:url" content="http://yoursite.com/copy/Java并发-用例子分析AbstractQueuedSynchronizer.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="本文基于jdk1.8，AQS类中两千多行代码，我们不需要理解每一行代码的作用，所以我们根据ReentrantLock一个案例来了解AQS是如何利用await和signal进行线程之间的同步。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/F915139CABE436F0ABBCDE2BC2B92862.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/p2.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/972854BBD0AF1501ABE0A6FDE63F8F10.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/B62EC29E012A55E5305CB71639D6BF25.png">
+<meta property="og:updated_time" content="2019-05-18T08:30:41.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java并发-用例子分析AbstractQueuedSynchronizer">
+<meta name="twitter:description" content="本文基于jdk1.8，AQS类中两千多行代码，我们不需要理解每一行代码的作用，所以我们根据ReentrantLock一个案例来了解AQS是如何利用await和signal进行线程之间的同步。">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/F915139CABE436F0ABBCDE2BC2B92862.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/copy/Java并发-用例子分析AbstractQueuedSynchronizer.html"/>
+
+
+
+
+
+  <title>Java并发-用例子分析AbstractQueuedSynchronizer | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+	<h1 class="post-title" itemprop="name headline">Java并发-用例子分析AbstractQueuedSynchronizer</h1>
+
+
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <p>本文基于jdk1.8，AQS类中两千多行代码，我们不需要理解每一行代码的作用，所以我们根据ReentrantLock一个案例来了解AQS是如何<br>利用await和signal进行线程之间的同步。</p>
+<a id="more"></a>
+<h1 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> zhengzechao</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2018/4/1</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * A.B两个线程顺序输出ABABABA...</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AandBSeqOutput</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> ReentrantLock lock = <span class="keyword">new</span> ReentrantLock();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> Condition ca  = lock.newCondition();</span><br><span class="line">    <span class="keyword">public</span> Condition cb = lock.newCondition();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        AandBSeqOutput ab = <span class="keyword">new</span> AandBSeqOutput();</span><br><span class="line">        <span class="keyword">new</span> Thread(ab.new A()).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(ab.new B()).start();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">A</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            lock.lock();</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                    cb.signal();</span><br><span class="line">                    System.out.println(<span class="string">"A"</span>);</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        ca.await(); <span class="comment">//只能等到ca.signal以后才能去竞争锁</span></span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                lock.unlock();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">B</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            lock.lock();</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                    ca.signal();</span><br><span class="line">                    System.out.println(<span class="string">"B"</span>);</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        cb.await();</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                lock.unlock();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="从示例深入源码"><a href="#从示例深入源码" class="headerlink" title="从示例深入源码"></a>从示例深入源码</h1><p>代码很简单，就是实现AB线程之间的顺序关系，保证A、B顺序输出。我们根据该例子深入AQS。</p>
+<p>首先假设A线程先获得锁，A执行lock操作，调用了默认的NoFairSync的lock操作。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> </span>&#123;</span><br><span class="line">              <span class="comment">//原子性操作地修改state数值</span></span><br><span class="line">          <span class="keyword">if</span> (compareAndSetState(<span class="number">0</span>, <span class="number">1</span>))</span><br><span class="line">              <span class="comment">//设立当前线程为独占线程</span></span><br><span class="line">              setExclusiveOwnerThread(Thread.currentThread());</span><br><span class="line">          <span class="keyword">else</span></span><br><span class="line">              <span class="comment">//请求锁</span></span><br><span class="line">              acquire(<span class="number">1</span>);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure></p>
+<p><code>compareAndSetState</code>操作就是利用CAS操作原子性地比较state的数值是否为0，如果为0，则修改为1，修改成功返回true,<br>如果之前state不为0，则不进行修改返回false。</p>
+<p>前几篇文章我们讲过，state变量通常用来表示一个当前的锁状态。在ReentrantLock类中，state变量被用来表示所有者线程重复获取<br>该锁的次数。继续，如果修改成功了，则设置当前线程为独占线程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">protected final void setExclusiveOwnerThread(Thread thread) &#123;</span><br><span class="line">       exclusiveOwnerThread = thread;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>于是乎，我们退出了lock方法。获取到锁，继续A线程工作。</p>
+<p>然后此时B线程调用该锁对象的lock方法，我们清楚地知道此时state变量为1了，所以compareAndSetState操作会失败，而执行AQS类中的acquire(1)<br>方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">     <span class="keyword">if</span> (!tryAcquire(arg) &amp;&amp; <span class="comment">//尝试获取失败</span></span><br><span class="line">         acquireQueued(addWaiter(Node.EXCLUSIVE), arg))</span><br><span class="line">         selfInterrupt();</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>tryAcquire是在ReentrantLock类中重写的，所以我们略过先不看，我们直接看B线程尝试获取锁失败，tryAcquire返回false，从而直接<br>执行<code>acquireQueued(addWaiter(Node.EXCLUSIVE),arg)</code>。</p>
+<p>AQS类中有head和tail引用，构建了维护了个锁队列。</p>
+<p><code>addWaiter</code>方法将当前线程包装成Node对象，放在等待锁队列的末尾。mode参数来控制当前节点的锁模式，主要有共享锁和独占锁，在代码中表示为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">//标记当前结点是共享模式</span><br><span class="line">static final Node SHARED = new Node();</span><br><span class="line"></span><br><span class="line">//标记当前结点是独占模式</span><br><span class="line">static final Node EXCLUSIVE = null;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Node <span class="title">addWaiter</span><span class="params">(Node mode)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">      Node node = <span class="keyword">new</span> Node(Thread.currentThread(), mode);</span><br><span class="line">      <span class="comment">// Try the fast path of enq; backup to full enq on failure</span></span><br><span class="line">      Node pred = tail;</span><br><span class="line">      <span class="keyword">if</span> (pred != <span class="keyword">null</span>) &#123;  <span class="comment">//如果尾节点不为空</span></span><br><span class="line">          node.prev = pred;</span><br><span class="line">          <span class="keyword">if</span> (compareAndSetTail(pred, node)) &#123;</span><br><span class="line">              pred.next = node;</span><br><span class="line">              <span class="keyword">return</span> node;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="comment">//如果上面的Node增加操作成功了，则不需要调用enq函数进行Node的入队列操作了。</span></span><br><span class="line">      enq(node);</span><br><span class="line">      <span class="keyword">return</span> node;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>enq其实就是加了个for循环的上面的函数。并且会对如果当前是未初始化队列的情况进行初始化处理，需要注意的是enq返回的是插入节点<br>node的前继节点。虽然此处并未用到。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Node <span class="title">enq</span><span class="params">(<span class="keyword">final</span> Node node)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">          Node t = tail;</span><br><span class="line">          <span class="keyword">if</span> (t == <span class="keyword">null</span>) &#123; <span class="comment">// Must initialize  如果tail为空，则说明当前的队列未初始化，则设置个Node节点，将tail和head都指向该节点</span></span><br><span class="line">              <span class="keyword">if</span> (compareAndSetHead(<span class="keyword">new</span> Node()))</span><br><span class="line">                  tail = head;</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="comment">//如果已经初始化过了，则连接该插入节点node到队列末尾，插入代码和链表插入一致，只不过多了个CAS操作将tail引用指向当前插入的node节点。</span></span><br><span class="line">          <span class="comment">//防止其他线程造成冲突</span></span><br><span class="line">              node.prev = t;</span><br><span class="line">              <span class="keyword">if</span> (compareAndSetTail(t, node)) &#123;</span><br><span class="line">                  t.next = node;</span><br><span class="line">                  <span class="keyword">return</span> t;  <span class="comment">//返回的是之前的尾节点</span></span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>ok，现在我们的B线程在A线程获取独占锁的情况下已经进入等待队列了。然后调用了AQS的acquireQueued方法，该方法真正将该节点的线程置入WAIT状态。<br>如下图所示：</p>
+<p>我们把用Node+数字表示线程的独一无二的Node对象。本例中用Node546表示包装的B线程，用Node408表示默认的head。<br><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/F915139CABE436F0ABBCDE2BC2B92862.png" alt="p1"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">acquireQueued</span><span class="params">(<span class="keyword">final</span> Node node, <span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">      <span class="keyword">boolean</span> failed = <span class="keyword">true</span>;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">          <span class="keyword">boolean</span> interrupted = <span class="keyword">false</span>;</span><br><span class="line">          <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">              <span class="comment">//p节点获取到的是该B节点包装成的node节点的前置节点</span></span><br><span class="line">              <span class="keyword">final</span> Node p = node.predecessor();</span><br><span class="line">              <span class="comment">//如果p节点为head节点，并且此次尝试获取锁成功</span></span><br><span class="line">              <span class="keyword">if</span> (p == head &amp;&amp; tryAcquire(arg)) &#123;</span><br><span class="line">                  setHead(node); <span class="comment">//则将当前节点设置成head节点</span></span><br><span class="line">                  p.next = <span class="keyword">null</span>; <span class="comment">// help GC，断开之前的前置节点</span></span><br><span class="line">                  failed = <span class="keyword">false</span>;</span><br><span class="line">                  <span class="keyword">return</span> interrupted;</span><br><span class="line">              &#125;</span><br><span class="line"></span><br><span class="line">              <span class="comment">// shouldParkAfterFailedAcquire方法主要是检查node节点是否需要被阻塞</span></span><br><span class="line">              <span class="comment">//线程会阻塞在parkAndCheckInterrupt方法中。</span></span><br><span class="line">          <span class="comment">// parkAndCheckInterrupt返回可能是前继unpark或线程被中断。</span></span><br><span class="line">              <span class="keyword">if</span> (shouldParkAfterFailedAcquire(p, node) &amp;&amp;</span><br><span class="line">                  parkAndCheckInterrupt())</span><br><span class="line">                  interrupted = <span class="keyword">true</span>;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">          <span class="keyword">if</span> (failed)</span><br><span class="line">              cancelAcquire(node);</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>acquireQueued方法其实算是置入等待状态的核心方法，我们集合上面的例子来说一下，此时B节点获取其前置节点，其实就是head节点了，<br>于是调用tryAcquire方法，该方法也是在ReentrantLock中重写了，这里我们不去了解，因为A线程拥有着独占锁，这里B去尝试获取锁肯定是<br>失败的，于是返回false,接着执行shouldParkAfterFailedAcquire方法。<br>在将shouldParkAfterFailedAcquire方法之前，我们需要先了解一下node节点的waitStatus属性.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//代表线程已经被取消</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> CANCELLED = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//代表后续节点需要唤醒</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SIGNAL = -<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//代表线程在condition queue中，等待某一条件</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> CONDITION = -<span class="number">2</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//代表后续结点会传播唤醒的操作，共享模式下起作用</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> PROPAGATE = -<span class="number">3</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">volatile</span> <span class="keyword">int</span> waitStatus; <span class="comment">//waitStatus是volatile类型，主要是一个线程的修改对另一个线程立即可见</span></span><br></pre></td></tr></table></figure>
+<p>如果不指定waitStatus的值，则waitStatus刚开始时都是0.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">shouldParkAfterFailedAcquire</span><span class="params">(Node pred, Node node)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> ws = pred.waitStatus;</span><br><span class="line">        <span class="keyword">if</span> (ws == Node.SIGNAL) <span class="comment">//前继节点的waitStatus是SIGNAL，表示后继节点需要unpark，故此状态表示后继节点可以正确进行park了</span></span><br><span class="line">            <span class="comment">/*</span></span><br><span class="line"><span class="comment">             * This node has already set status asking a release</span></span><br><span class="line"><span class="comment">             * to signal it, so it can safely park.</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (ws &gt; <span class="number">0</span>) &#123; <span class="comment">//大于0只有一种情况就是CANCELLED，所以该前继节点需要被跳过，故从队列中把该节点移除，直到有效</span></span><br><span class="line">            <span class="comment">/*</span></span><br><span class="line"><span class="comment">             * Predecessor was cancelled. Skip over predecessors and</span></span><br><span class="line"><span class="comment">             * indicate retry.</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            <span class="keyword">do</span> &#123;</span><br><span class="line">                node.prev = pred = pred.prev;</span><br><span class="line">            &#125; <span class="keyword">while</span> (pred.waitStatus &gt; <span class="number">0</span>);</span><br><span class="line">            pred.next = node;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">//如果为CONDITION和PROPAGATE状态或者默认状态(waitStatus=0)，则将该节点设置为SIGNAL状态，以进行正确地park后继节点</span></span><br><span class="line"></span><br><span class="line">            compareAndSetWaitStatus(pred, ws, Node.SIGNAL);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>ok，还是以我们的代码来讲述，B线程的前置节点的waitStatus一直都没变过，所以默认为0，此时的话是不符合park该B线程的条件的，于是修改前置节点的<br>waitStatus的值为SIGNAL,所以acquireQueued的第一次循环是不会park该B线程，第二次循环则符合了条件，于是进入parkAndCheckInterrupt。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">parkAndCheckInterrupt</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      LockSupport.park(<span class="keyword">this</span>);</span><br><span class="line">      <span class="keyword">return</span> Thread.interrupted();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>于是B线程就可怜地被park了，进入WAIT状态。<br>我们继续来讲A线程，A线程输出完’A’之后调用了ca.await(),我们继续单步。该方法其实调用的是AQS的内部类ConditionObject中的await方法。</p>
+<p>我们先来了解下ConditionObject这个内部类，ReentrantLock上调用newCondition其实返回的就是这个类的实例对象。<br>我们说过AQS上维护了head和tail引用来抽象一个等待队列。<br>ConditionObject类中维护了firstWaiter和lastWaiter引用来构造一个等待在该ConditionObject实例上的等待唤醒队列(就是在该实例上调用了await方法的线程)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">          <span class="keyword">if</span> (Thread.interrupted())</span><br><span class="line">              <span class="keyword">throw</span> <span class="keyword">new</span> InterruptedException();</span><br><span class="line">          Node node = addConditionWaiter();</span><br><span class="line">          <span class="keyword">int</span> savedState = fullyRelease(node);</span><br><span class="line">          <span class="keyword">int</span> interruptMode = <span class="number">0</span>;</span><br><span class="line">          <span class="keyword">while</span> (!isOnSyncQueue(node)) &#123;</span><br><span class="line">              LockSupport.park(<span class="keyword">this</span>);</span><br><span class="line">              <span class="keyword">if</span> ((interruptMode = checkInterruptWhileWaiting(node)) != <span class="number">0</span>)</span><br><span class="line">                  <span class="keyword">break</span>;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">if</span> (acquireQueued(node, savedState) &amp;&amp; interruptMode != THROW_IE)</span><br><span class="line">              interruptMode = REINTERRUPT;</span><br><span class="line">          <span class="keyword">if</span> (node.nextWaiter != <span class="keyword">null</span>) <span class="comment">// clean up if cancelled</span></span><br><span class="line">              unlinkCancelledWaiters();</span><br><span class="line">          <span class="keyword">if</span> (interruptMode != <span class="number">0</span>)</span><br><span class="line">              reportInterruptAfterWait(interruptMode);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<p>addConditionWaiter方法将当前线程包装成Node实例并加入到调用的ConditionObject的等待唤醒队列中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> Node <span class="title">addConditionWaiter</span><span class="params">()</span> </span>&#123;</span><br><span class="line">          Node t = lastWaiter;</span><br><span class="line">          <span class="comment">//如果t不为空并且t的线程状态waitStatus不是CONDITION，则调用unlinkCancelledWaiters移除所有取消唤醒的Node</span></span><br><span class="line">          <span class="keyword">if</span> (t != <span class="keyword">null</span> &amp;&amp; t.waitStatus != Node.CONDITION) &#123;</span><br><span class="line">              unlinkCancelledWaiters();</span><br><span class="line">              t = lastWaiter;</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">          Node node = <span class="keyword">new</span> Node(Thread.currentThread(), Node.CONDITION);</span><br><span class="line">          <span class="keyword">if</span> (t == <span class="keyword">null</span>)</span><br><span class="line">              firstWaiter = node;</span><br><span class="line">          <span class="keyword">else</span></span><br><span class="line">              t.nextWaiter = node;<span class="comment">//连接当前Node</span></span><br><span class="line">          lastWaiter = node;<span class="comment">//更新尾指针</span></span><br><span class="line">          <span class="keyword">return</span> node;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<p>上面的代码很简单，有点链表知识很容易看懂，以例子AandBSeqOutput程序来介绍，如下图所示：<br>因为刚开始ca这个ConditionObject的等待唤醒队列是空的，所以A调用addConditionWaiter之后。firstWaiter和lastWaiter都指向A线程的Node600。如果不是空的话则连接到末尾。<br><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/p2.png" alt="p2"></p>
+<p>继续往下看，fullyRelease方法，看名字就知道该方法肯定是释放了当前线程占有的锁。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">int</span> <span class="title">fullyRelease</span><span class="params">(Node node)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">boolean</span> failed = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">int</span> savedState = getState();</span><br><span class="line">        <span class="keyword">if</span> (release(savedState)) &#123;<span class="comment">//release方法成功释放锁</span></span><br><span class="line">            failed = <span class="keyword">false</span>;</span><br><span class="line">            <span class="keyword">return</span> savedState;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalMonitorStateException();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (failed) <span class="comment">//如果释放锁失败了，则将该Node的状态置为CANCELLED。</span></span><br><span class="line">            node.waitStatus = Node.CANCELLED;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">release</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line"><span class="comment">//调用重写的tryRelease方法</span></span><br><span class="line">    <span class="keyword">if</span> (tryRelease(arg)) &#123;</span><br><span class="line">        Node h = head;</span><br><span class="line">        <span class="comment">//要求h不为空，并且h.waitStatus的值不为0,才能unpark h的后继线程。</span></span><br><span class="line">        <span class="keyword">if</span> (h != <span class="keyword">null</span> &amp;&amp; h.waitStatus != <span class="number">0</span>)</span><br><span class="line">            <span class="comment">//该方法就是唤醒h的后继者中waitStatus正常的线程。</span></span><br><span class="line">            unparkSuccessor(h);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出release方法根据同步器类中重写的tryRelease方法的逻辑，将AbstractQueuedSynchronizer维护的等待锁队列中的一个线程进行<br>unpark来唤醒之前park的线程。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">unparkSuccessor</span><span class="params">(Node node)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       <span class="keyword">int</span> ws = node.waitStatus;</span><br><span class="line">       <span class="comment">//如果node的waitStatus为负数，则其后继节点都可以被唤醒，将node的waitStatus修改成0</span></span><br><span class="line">       <span class="keyword">if</span> (ws &lt; <span class="number">0</span>)</span><br><span class="line">           compareAndSetWaitStatus(node, ws, <span class="number">0</span>);</span><br><span class="line">       <span class="comment">//获取后继节点</span></span><br><span class="line">       Node s = node.next;</span><br><span class="line">       <span class="comment">//如果s.waitStatus&gt;0，则只有一种状态CANCELLED。说明已经被取消了。则跳过该Node,这时会从</span></span><br><span class="line">       <span class="comment">//后往前搜索可以被唤醒的Node</span></span><br><span class="line">       <span class="keyword">if</span> (s == <span class="keyword">null</span> || s.waitStatus &gt; <span class="number">0</span>) &#123;</span><br><span class="line">           s = <span class="keyword">null</span>;</span><br><span class="line">           <span class="keyword">for</span> (Node t = tail; t != <span class="keyword">null</span> &amp;&amp; t != node; t = t.prev)</span><br><span class="line">               <span class="keyword">if</span> (t.waitStatus &lt;= <span class="number">0</span>)</span><br><span class="line">                   s = t;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span> (s != <span class="keyword">null</span>)</span><br><span class="line">           LockSupport.unpark(s.thread);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>回到await方法总，该线程在完成了上诉之后，调用<code>LockSupport.park(this)</code>将当前线程置入等待状态。</p>
+<p>ok,我们已经知道了lock()和await()方法的流程，线程我们来看看signal方法的流程。按我们的程序AandBSeqOutput来看，此时A已经调用<br>完await方法让自己进入WAIT状态了，我们接着看B线程。</p>
+<p>B线程现在从之前的parkAndCheckInterrupt继续执行，回到之前B线程执行到的acquireQueued方法中，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (p == head &amp;&amp; tryAcquire(arg)) &#123;</span><br><span class="line">                  setHead(node);</span><br><span class="line">                  p.next = <span class="keyword">null</span>; <span class="comment">// help GC</span></span><br><span class="line">                  failed = <span class="keyword">false</span>;</span><br><span class="line">                  <span class="keyword">return</span> interrupted;</span><br><span class="line">              &#125;</span><br></pre></td></tr></table></figure>
+<p>此时等待锁队列的转变如下图所示：等待锁队列之前的头结点被移除了并更新了新的头结点。<br><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/972854BBD0AF1501ABE0A6FDE63F8F10.png" alt="p3"></p>
+<p>此时已经满足了p==head和tryAcquire都为真的条件了，故我们调用setHead将node节点设置为头节点，并将p.next置为null以分离p节点，随后返回。<br>此时B线程已经跳过了lock函数。即获取到了锁，进入到了同步区。</p>
+<h2 id="ConditionObject-signal"><a href="#ConditionObject-signal" class="headerlink" title="ConditionObject.signal"></a>ConditionObject.signal</h2><p>首先B调用了ca.signal。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">signal</span><span class="params">()</span> </span>&#123;</span><br><span class="line">             <span class="comment">//如果不持有锁</span></span><br><span class="line">         <span class="keyword">if</span> (!isHeldExclusively())</span><br><span class="line">             <span class="keyword">throw</span> <span class="keyword">new</span> IllegalMonitorStateException();</span><br><span class="line">         <span class="comment">//获取firstWaiter并唤醒</span></span><br><span class="line">         Node first = firstWaiter;</span><br><span class="line">         <span class="keyword">if</span> (first != <span class="keyword">null</span>)</span><br><span class="line">             doSignal(first);</span><br><span class="line">     &#125;</span><br></pre></td></tr></table></figure></p>
+<p>继续看doSignal方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doSignal</span><span class="params">(Node first)</span> </span>&#123;</span><br><span class="line">          <span class="keyword">do</span> &#123;</span><br><span class="line">              <span class="keyword">if</span> ( (firstWaiter = first.nextWaiter) == <span class="keyword">null</span>)</span><br><span class="line">                  lastWaiter = <span class="keyword">null</span>;</span><br><span class="line">              first.nextWaiter = <span class="keyword">null</span>;</span><br><span class="line">          &#125; <span class="keyword">while</span> (!transferForSignal(first) &amp;&amp;</span><br><span class="line">                   (first = firstWaiter) != <span class="keyword">null</span>);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<p>上面的代码其实就是讲first从等待唤醒的链表中分离出来，然后调用transferForSignal方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">transferForSignal</span><span class="params">(Node node)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">       <span class="comment">//将node的状态从CONDITION转变成默认0，如果失败，则说明有线程在这之前已经转变过了，则返回false</span></span><br><span class="line">       <span class="keyword">if</span> (!compareAndSetWaitStatus(node, Node.CONDITION, <span class="number">0</span>))</span><br><span class="line">           <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">       <span class="comment">//将node存放到等待锁队列中，enq返回node插入之前的节点。</span></span><br><span class="line">       Node p = enq(node);</span><br><span class="line">       <span class="keyword">int</span> ws = p.waitStatus;</span><br><span class="line">       <span class="comment">//设置该前置节点的waitStatus为Node.SIGNAL。如果ws为已取消或者compareAndSetWaitStatus失败，则直接unpark(node)</span></span><br><span class="line">       <span class="keyword">if</span> (ws &gt; <span class="number">0</span> || !compareAndSetWaitStatus(p, ws, Node.SIGNAL))</span><br><span class="line">           LockSupport.unpark(node.thread);</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>此时如图等待锁队列如图所示：<br>A线程的Node600被连接到了B线程的Node546的后面了。<br><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/B62EC29E012A55E5305CB71639D6BF25.png" alt="p4"><br>而ca这个ConditionObject上的A线程因为已经被唤醒了从该ConditionObject中的等待唤醒队列中脱离出来了，故此时ca的等待唤醒队列为空。</p>
+<p>结合上述代码，我们已经知道signal方法主要是将等待唤醒队列中的其中一个节点放置到等待获取锁队列，并对前置节点的waitStatus进行设置对应的状态。</p>
+<p>随后B线程调用了cb.await方法，因为前面我们已经分析过了A线程的ca.await方法，所以我们这里就不再详细分析了，即<br>B将自己加入cb这个ConditionObject的等待唤醒队列中，然后修改state的值，以释放锁，然后调用LockSupport.unpark方法从等待锁队列中找到head后继节点进行唤醒。<br>于是B线程自己进入了WAIT状态，而又将A线程从等待锁队列中唤醒。</p>
+<p>我们接着从A之前park()进入等待状态之后的代码分析。也就是await方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">          <span class="keyword">if</span> (Thread.interrupted())</span><br><span class="line">              <span class="keyword">throw</span> <span class="keyword">new</span> InterruptedException();</span><br><span class="line">          Node node = addConditionWaiter();</span><br><span class="line">          <span class="keyword">int</span> savedState = fullyRelease(node);</span><br><span class="line">          <span class="keyword">int</span> interruptMode = <span class="number">0</span>;</span><br><span class="line">          <span class="keyword">while</span> (!isOnSyncQueue(node)) &#123;</span><br><span class="line">              LockSupport.park(<span class="keyword">this</span>);<span class="comment">//1</span></span><br><span class="line">              <span class="comment">//检查是否是中断唤醒</span></span><br><span class="line">              <span class="keyword">if</span> ((interruptMode = checkInterruptWhileWaiting(node)) != <span class="number">0</span>)</span><br><span class="line">                  <span class="keyword">break</span>;</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          <span class="keyword">if</span> (acquireQueued(node, savedState) &amp;&amp; interruptMode != THROW_IE)</span><br><span class="line">              interruptMode = REINTERRUPT;</span><br><span class="line">          <span class="keyword">if</span> (node.nextWaiter != <span class="keyword">null</span>) <span class="comment">// clean up if cancelled</span></span><br><span class="line">              unlinkCancelledWaiters();</span><br><span class="line">          <span class="keyword">if</span> (interruptMode != <span class="number">0</span>)</span><br><span class="line">              reportInterruptAfterWait(interruptMode);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<p>A线程从//1处继续执行，可以看到熟悉的acquireQueued函数，我们也不再分析，该函数在这里主要是重置等待锁队列的头结点。</p>
+<p>ok，循环往复，A线程B线程于是就交叉运行了，输出A,B,A,B….</p>
+<h1 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h1><p>总的来说，wait和signal以及，lock，unlock的实现原理是利用了AQS和ConditionObject中的两个队列，一个是由AQS维护的等待锁队列，<br>另一个则是由ConditionObject维护的该对象实例的等待唤醒队列。然后通过两个队列的元素的进队出队以及用LockSupport的park和unpark方法<br>实现了AQS的核心功能。当然这之间需要考虑到很多问题，例如线程的waitStatus的状态改变检测以及Thread的中断。</p>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">55</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/CodingSinger" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#示例代码"><span class="nav-number">1.</span> <span class="nav-text">示例代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#从示例深入源码"><span class="nav-number">2.</span> <span class="nav-text">从示例深入源码</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ConditionObject-signal"><span class="nav-number">2.1.</span> <span class="nav-text">ConditionObject.signal</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结："><span class="nav-number">3.</span> <span class="nav-text">总结：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

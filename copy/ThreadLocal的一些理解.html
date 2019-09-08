@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content=",,,," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="有关于ThreadLocal的原理的源代码解释在下面已经说的很清楚了 源代码也很清晰易懂ThreadLocal源代码解析 个人对于ThreadLocal类的一些总结,如果有问题的话希望大家提出来一起学习:">
+<meta name="keywords" content="java">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ThreadLocal的一些理解">
+<meta property="og:url" content="http://yoursite.com/copy/ThreadLocal的一些理解.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="有关于ThreadLocal的原理的源代码解释在下面已经说的很清楚了 源代码也很清晰易懂ThreadLocal源代码解析 个人对于ThreadLocal类的一些总结,如果有问题的话希望大家提出来一起学习:">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-05-18T08:30:41.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ThreadLocal的一些理解">
+<meta name="twitter:description" content="有关于ThreadLocal的原理的源代码解释在下面已经说的很清楚了 源代码也很清晰易懂ThreadLocal源代码解析 个人对于ThreadLocal类的一些总结,如果有问题的话希望大家提出来一起学习:">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/copy/ThreadLocal的一些理解.html"/>
+
+
+
+
+
+  <title>ThreadLocal的一些理解 | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+	<h1 class="post-title" itemprop="name headline">ThreadLocal的一些理解</h1>
+
+
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <p>有关于ThreadLocal的原理的源代码解释在下面已经说的很清楚了 源代码也很清晰易懂<br><a href="http://www.cnblogs.com/dolphin0520/p/3920407.html" target="_blank" rel="noopener">ThreadLocal源代码解析</a></p>
+<p>个人对于ThreadLocal类的一些总结,如果有问题的话希望大家提出来一起学习:<br><a id="more"></a></p>
+<ol>
+<li>ThreadLocal类并不是将线程和所存储的对象进行键值保存的和进行取值的(这是我第一反应以为的)<br>而是将存储的值保存到对应Thread对象的ThreadLocalMap里,ThreadLocalMap的实现原理类似于hashMap，<br>内部有一个Entry数组，一个Entry通常至少包括key,value, 查找时通过一定的运算规则运算Key的HASH值，来得到Entry在数组中的位置，进而得到相应的value。<br>但是这个ThreadLocalMap是将当前ThreadLocal对象实例传入当作键值，将set的对象当value值进行存储<br>下面是ThreadLocal的set方法源码<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">      Thread t = Thread.currentThread();</span><br><span class="line">      ThreadLocalMap map = getMap(t);</span><br><span class="line">      <span class="keyword">if</span> (map != <span class="keyword">null</span>)</span><br><span class="line">          map.set(<span class="keyword">this</span>, value);<span class="comment">//将this传入 </span></span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">          createMap(t, value);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>我们进map的set里看看<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(ThreadLocal key, Object value)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">          <span class="comment">// We don't use a fast path as with get() because it is at</span></span><br><span class="line">          <span class="comment">// least as common to use set() to create new entries as</span></span><br><span class="line">          <span class="comment">// it is to replace existing ones, in which case, a fast</span></span><br><span class="line">          <span class="comment">// path would fail more often than not.</span></span><br><span class="line"></span><br><span class="line">          Entry[] tab = table;</span><br><span class="line">          <span class="keyword">int</span> len = tab.length;</span><br><span class="line">          <span class="keyword">int</span> i = key.threadLocalHashCode &amp; (len-<span class="number">1</span>);<span class="comment">//对key进行hash运算 存储</span></span><br><span class="line"></span><br><span class="line">          <span class="keyword">for</span> (Entry e = tab[i];</span><br><span class="line">               e != <span class="keyword">null</span>;</span><br><span class="line">               e = tab[i = nextIndex(i, len)]) &#123; <span class="comment">//如果下面两个if都不满足，则调用nextIndex解决哈希冲突(这里用的是开放定值法)</span></span><br><span class="line">              ThreadLocal k = e.get();</span><br><span class="line"></span><br><span class="line">              <span class="keyword">if</span> (k == key) &#123; <span class="comment">//如果是同一个key，即同一个ThreadLocal，则将覆盖之前放入的值。</span></span><br><span class="line">                  e.value = value;</span><br><span class="line">                  <span class="keyword">return</span>;</span><br><span class="line">              &#125;</span><br><span class="line"></span><br><span class="line">              <span class="keyword">if</span> (k == <span class="keyword">null</span>) &#123;</span><br><span class="line">                  replaceStaleEntry(key, value, i);</span><br><span class="line">                  <span class="keyword">return</span>;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          </span><br><span class="line">          tab[i] = <span class="keyword">new</span> Entry(key, value);</span><br><span class="line">          <span class="keyword">int</span> sz = ++size;</span><br><span class="line">          <span class="keyword">if</span> (!cleanSomeSlots(i, sz) &amp;&amp; sz &gt;= threshold)</span><br><span class="line">              rehash();</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure></p>
+<p>取值时也根据对应的thread对象拿出自己的threadLocalMap，再根据threadLocal的实例为键值得到对应本线程本ThreadLocal的副本<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">     Thread t = Thread.currentThread();</span><br><span class="line">     ThreadLocalMap map = getMap(t);</span><br><span class="line">     <span class="keyword">if</span> (map != <span class="keyword">null</span>) &#123;</span><br><span class="line">         ThreadLocalMap.Entry e = map.getEntry(<span class="keyword">this</span>);</span><br><span class="line">         <span class="keyword">if</span> (e != <span class="keyword">null</span>)</span><br><span class="line">             <span class="keyword">return</span> (T)e.value;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> setInitialValue();</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<ol start="2">
+<li>每个threadLocalMap对应每个线程只能存储一个对象<br>也就是说你set了一个对象A，再放入对象B ，对象B就会把对象A取代 这就跟HashMap一样<br>因为ThreadLocal是键值.。通过以上的代码也能看出来 </li>
+</ol>
+<ol start="3">
+<li>先看一段代码<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">int</span> i = <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">static</span> ThreadLocal&lt;Object&gt; t =  <span class="keyword">new</span> ThreadLocal&lt;Object&gt;();</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">		Test test = <span class="keyword">new</span> Test();</span><br><span class="line">		Test test1 = <span class="keyword">new</span> Test();</span><br><span class="line">		MyThread m1= <span class="keyword">new</span> MyThread(<span class="number">2</span>,test,<span class="keyword">true</span>);</span><br><span class="line">	<span class="comment">//	MyThread m2 = new MyThread(3,test1,false);</span></span><br><span class="line">		MyThread m2 = <span class="keyword">new</span> MyThread(<span class="number">3</span>,test,<span class="keyword">false</span>);</span><br><span class="line">		Thread t1 = <span class="keyword">new</span> Thread(m1);</span><br><span class="line">		Thread t2 = <span class="keyword">new</span> Thread(m2);</span><br><span class="line">		t1.start();</span><br><span class="line">		t2.start();</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyThread</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> obj;</span><br><span class="line">	<span class="keyword">boolean</span>  flag;</span><br><span class="line">	Test t;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">MyThread</span><span class="params">(<span class="keyword">int</span> i,Test t ,<span class="keyword">boolean</span> flag)</span></span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.obj = i;</span><br><span class="line">		<span class="keyword">this</span>.t=t;</span><br><span class="line">		<span class="keyword">this</span>.flag=flag;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span></span><br><span class="line"><span class="function">	</span>&#123;</span><br><span class="line">		Test.t.set(obj);<span class="comment">//该放入的对象被后面的所取代</span></span><br><span class="line">		Test.t.set(t);<span class="comment">//只在run期间threadLocals是保存的 run之后threadLocals置空</span></span><br><span class="line">		<span class="comment">//并不是由threadLocal给你克隆 副本 而是由你自己来设置放进去的副本</span></span><br><span class="line">		</span><br><span class="line">		Test t = (Test) get();</span><br><span class="line">		<span class="keyword">if</span>(flag==<span class="keyword">false</span>)&#123;</span><br><span class="line">			<span class="keyword">try</span></span><br><span class="line">			&#123;</span><br><span class="line">				Thread.sleep(<span class="number">5000</span>);<span class="comment">//睡眠 确保另外一个线程已经操作结束</span></span><br><span class="line">			&#125; <span class="keyword">catch</span> (InterruptedException e)</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="comment">// TODO Auto-generated catch block</span></span><br><span class="line">				e.printStackTrace();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		System.out.println(<span class="string">"线程为"</span>+Thread.currentThread().getId()+<span class="string">"原来的:"</span>+t.i);</span><br><span class="line">		t.i = obj;<span class="comment">//改变值</span></span><br><span class="line">		System.out.println(<span class="string">"线程为"</span>+Thread.currentThread().getId()+<span class="string">"现在的:"</span>+((Test)get()).i);</span><br><span class="line">		System.out.println(<span class="string">"线程为"</span>+Thread.currentThread().getId()+<span class="string">"所存储的对象:"</span>+get());</span><br><span class="line">	</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">get</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">return</span> Test.t.get();</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>此时输出如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">线程为9原来的:1</span><br><span class="line">线程为9现在的:2</span><br><span class="line">线程为9所存储的对象:ThreadLocalTest.Test@65b8b5cd</span><br><span class="line">线程为10原来的:2</span><br><span class="line">线程为10现在的:3</span><br><span class="line">线程为10所存储的对象:ThreadLocalTest.Test@65b8b5cd</span><br></pre></td></tr></table></figure></p>
+<p>我在两个线程放入了同一个Test对象test，当然run方法里也set了这个test<br>像我刚开始以为ThreadLocal会自动为每个线程创建一个副本(好可笑的梦哈)<br>这段代码也证实了并不会,两个线程得到的Test对象是同一个，因此线程9的写行为对线程10也造成了影响，也就是说set进去什么get出来什么。<br>所以并不是由ThreadLocal给你克隆副本，而是由你自己来设置放进去的副本不同才能使得各个线程维护的线程本地变量不同，解决了多个线程共享变量的线程安全问题。</p>
+<p>如果将注释的代码代替下面那行代码，也就是让set的变量不同。<br>则输出如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">线程为9原来的:1</span><br><span class="line">线程为9现在的:2</span><br><span class="line">线程为9所存储的对象:ThreadLocalTest.Test@65b8b5cd</span><br><span class="line">线程为10原来的:1</span><br><span class="line">线程为10现在的:3</span><br><span class="line">线程为10所存储的对象:ThreadLocalTest.Test@72d2ee5d</span><br></pre></td></tr></table></figure>
+<p>可以发现此时不同的对象存储的Test对象也不同<br>上面啰嗦一大堆 就是为了让我自己认识到ThreadLocal需要自己来设置对应每个线程的副本<br>而这就需要执行ThreadLocal的set方法 或者重写ThreadLocal的initialValue方法<br>如同下面这样:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">static ThreadLocal&lt;Object&gt; t =  new ThreadLocal&lt;Object&gt;()&#123;</span><br><span class="line">		public Object initialValue()&#123;</span><br><span class="line">			return new Test();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;;</span><br></pre></td></tr></table></figure></p>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">55</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/CodingSinger" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

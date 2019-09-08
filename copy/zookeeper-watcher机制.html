@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content=",,,,,,,,," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="zookeeper Watcher机制 一个zk的节点可以被监控，包括这个目录中存储的数据的修改，子节点目录的变化，一旦变化可以通知设置监控的客户端，这个功能是zookeeper对于 应用最重要的特性，通过这个特性可以实现的功能包括配置的集中管理，集群管理，分布式锁等等。">
+<meta name="keywords" content="zookeeper">
+<meta property="og:type" content="website">
+<meta property="og:title" content="zookeeper-watcher机制">
+<meta property="og:url" content="http://yoursite.com/copy/zookeeper-watcher机制.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="zookeeper Watcher机制 一个zk的节点可以被监控，包括这个目录中存储的数据的修改，子节点目录的变化，一旦变化可以通知设置监控的客户端，这个功能是zookeeper对于 应用最重要的特性，通过这个特性可以实现的功能包括配置的集中管理，集群管理，分布式锁等等。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/WX20180722-195648@2x.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/WX20180722-195822@2x.png">
+<meta property="og:updated_time" content="2019-05-18T08:30:41.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="zookeeper-watcher机制">
+<meta name="twitter:description" content="zookeeper Watcher机制 一个zk的节点可以被监控，包括这个目录中存储的数据的修改，子节点目录的变化，一旦变化可以通知设置监控的客户端，这个功能是zookeeper对于 应用最重要的特性，通过这个特性可以实现的功能包括配置的集中管理，集群管理，分布式锁等等。">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/WX20180722-195648@2x.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/copy/zookeeper-watcher机制.html"/>
+
+
+
+
+
+  <title>zookeeper-watcher机制 | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+	<h1 class="post-title" itemprop="name headline">zookeeper-watcher机制</h1>
+
+
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <h1 id="zookeeper-Watcher机制"><a href="#zookeeper-Watcher机制" class="headerlink" title="zookeeper Watcher机制"></a>zookeeper Watcher机制</h1><p> 一个zk的节点可以被监控，包括这个目录中存储的数据的修改，子节点目录的变化，一旦变化可以通知设置监控的客户端，这个功能是zookeeper对于<br> 应用最重要的特性，通过这个特性可以实现的功能包括配置的集中管理，集群管理，分布式锁等等。</p>
+ <a id="more"></a>
+<h1 id="zookeeper-watcher特性"><a href="#zookeeper-watcher特性" class="headerlink" title="zookeeper watcher特性"></a>zookeeper watcher特性</h1><p>关于Watches有几点：</p>
+<ul>
+<li>所有的读操作都可以设置watcher,例如getChildren,getData,exist。</li>
+<li>watches是一次性的，这个很重要，当一个节点上watcher被触发一次一次之后，该节点之后的改动将不会触发watcher，除非该节点之后的读操作再次设置watcher。</li>
+<li>一个节点上可以有多个watcher监听。</li>
+<li>并且客户端在没有收到watch的变化事件通知之前是不会看到最新的数据，另外需要注意不要在Watch回调逻辑中阻塞整个客户端的Watch回调。</li>
+<li>Watch是轻量级的，WatchEvent是最小的通信单元，结构上只包含通知状态、事件类型和节点路径。ZooKeeper服务端只会通知客户端发生了什么，并不会告诉具体内容。</li>
+<li>有两种监听模式：<ul>
+<li>数据监听 getData和exist是设置数据监听.</li>
+<li>子节点监听 getChildren是设置子节点监听<br>成功的setData会触发在该节点上设置的数据监听。成功的create操作也会触发该节点上的数据监听并且会触发设置在新创建节点父节点上的子节点监听。<br>同理，delete操作也会触发被删除节点上的数据监听和设置在父节点上的子节点监听。</li>
+</ul>
+</li>
+</ul>
+<p>具体如下：</p>
+<ol>
+<li>Created event:Enabled with a call to exists.</li>
+<li>Deleted event:Enabled with a call to exists, getData, and getChildren.</li>
+<li>Changed event:Enabled with a call to exists and getData.</li>
+<li>Child event:Enabled with a call to getChildren.</li>
+</ol>
+<blockquote>
+<p>注意:并不是所有的Watcher都是一次性的，需要注意的是 Default Watcher 是指我们在创建ZooKeeper时传入的参数<br>ZooKeeper zk = new ZooKeeper(String connectString, int sessionTimeout, Watcher watcher) ;<br>Default Watcher 的生命周期是整个Session对话，换句话说，它并不是一次性的。其次defaultWatcher并不与某一个节点路径相互关联。</p>
+</blockquote>
+<h1 id="客户端如何注册监听"><a href="#客户端如何注册监听" class="headerlink" title="客户端如何注册监听"></a>客户端如何注册监听</h1><p>每个客户端创建Zookeeper成功连接之后都会开启两个后台线程，SendThread和EventThread，<br>SendThread负责处理该客户端和zk服务器的所有通讯。<br>EventThread主要负责处理服务端的通知推送进行的回调。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">byte</span>[] getData(<span class="keyword">final</span> String path, Watcher watcher, Stat stat)</span><br><span class="line">      <span class="keyword">throws</span> KeeperException, InterruptedException</span><br><span class="line">   &#123;</span><br><span class="line">      <span class="keyword">final</span> String clientPath = path;</span><br><span class="line">      PathUtils.validatePath(clientPath);</span><br><span class="line"></span><br><span class="line">      <span class="comment">// the watch contains the un-chroot path</span></span><br><span class="line">      WatchRegistration wcb = <span class="keyword">null</span>;</span><br><span class="line">      <span class="keyword">if</span> (watcher != <span class="keyword">null</span>) &#123;</span><br><span class="line">          wcb = <span class="keyword">new</span> DataWatchRegistration(watcher, clientPath);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">final</span> String serverPath = prependChroot(clientPath);</span><br><span class="line"></span><br><span class="line">      RequestHeader h = <span class="keyword">new</span> RequestHeader();</span><br><span class="line">      h.setType(ZooDefs.OpCode.getData);</span><br><span class="line">      GetDataRequest request = <span class="keyword">new</span> GetDataRequest();</span><br><span class="line">      request.setPath(serverPath);</span><br><span class="line">      request.setWatch(watcher != <span class="keyword">null</span>);</span><br><span class="line">      GetDataResponse response = <span class="keyword">new</span> GetDataResponse();</span><br><span class="line">      ReplyHeader r = cnxn.submitRequest(h, request, response, wcb);</span><br><span class="line">      <span class="keyword">if</span> (r.getErr() != <span class="number">0</span>) &#123;</span><br><span class="line">          <span class="keyword">throw</span> KeeperException.create(KeeperException.Code.get(r.getErr()),</span><br><span class="line">                  clientPath);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (stat != <span class="keyword">null</span>) &#123;</span><br><span class="line">          DataTree.copyStat(response.getStat(), stat);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> response.getData();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>我们忽略掉其他代码，只看和watcher有关的代码，首先将Watcher和需要监视的路径包装到DataWatchRegistration。<br>然后调用submitRequest封装请求发送给Zookeeper服务器。<br>我们知道在Zookeeper中，Packet是最小的通信单元。但是实际上DataWatchRegistration并不会被序列化传输给服务器端，只是<code>request.setWatch</code>设置了标志。<br>在发送了getData请求之后，如果成功收到了响应，SendThread线程会处理这个响应，并且在最后finally块中调用finishPacket方法进行响应之后的操作。<br>包括本地客户端需要注册Watcher。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">readResponse</span><span class="params">(ByteBuffer incomingBuffer)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    ....省略</span><br><span class="line">         <span class="keyword">finally</span> &#123;</span><br><span class="line">                finishPacket(packet);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>finishPacket方法包括判断请求是否包含Watcher的监听。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">finishPacket</span><span class="params">(Packet p)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (p.watchRegistration != <span class="keyword">null</span>) &#123;</span><br><span class="line">            p.watchRegistration.register(p.replyHeader.getErr());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        ...省略</span><br></pre></td></tr></table></figure>
+<p>如果包含了Watcher，则调用register方法进行注册到对应的(path-&gt;Set<watcher>)映射表中。客户端对Watcher的管理主要在<code>ZKWatchManager</code>这个类。</watcher></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ZKWatchManager</span> <span class="keyword">implements</span> <span class="title">ClientWatchManager</span> </span>&#123;</span><br><span class="line">        <span class="comment">//getData注册的Watcher</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, Set&lt;Watcher&gt;&gt; dataWatches =</span><br><span class="line">            <span class="keyword">new</span> HashMap&lt;String, Set&lt;Watcher&gt;&gt;();</span><br><span class="line">        <span class="comment">//exist操作注册的Watcher</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, Set&lt;Watcher&gt;&gt; existWatches =</span><br><span class="line">            <span class="keyword">new</span> HashMap&lt;String, Set&lt;Watcher&gt;&gt;();</span><br><span class="line">        <span class="comment">//getChildren注册的监听</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, Set&lt;Watcher&gt;&gt; childWatches =</span><br><span class="line">            <span class="keyword">new</span> HashMap&lt;String, Set&lt;Watcher&gt;&gt;();</span><br><span class="line"></span><br><span class="line">    ...省略</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>客户端Watcher注册流程：</p>
+<p><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/WX20180722-195648@2x.png" alt="WX20180722-195648@2x.png"></p>
+<h1 id="服务端如何处理监听器的请求"><a href="#服务端如何处理监听器的请求" class="headerlink" title="服务端如何处理监听器的请求"></a>服务端如何处理监听器的请求</h1><p>前面说到客户端并不会把WatchRegistration这个对象序列化到Packet中去，那么服务端是如何完成对客户端Watcher注册的呢？<br>试想，服务端并不需要客户端Watcher对象，因为并不是在服务端进行Watcher的回调的。服务端只需要知道哪些客户端发送过来的读请求进行了Watcher的注册。<br>并且维持这些客户端在读请求上的节点关系就行了。例如A，B客户端对node1的getData请求上注册了Watcher监视。那么服务端只需要保存一个(nodePath-&gt;Set<client>)<br>的一个映射表即可，之后的写操作如果需要触发客户端的Watcher，则可以根据nodePath获取到对应的客户端进行推送通知消息。</client></p>
+<p>服务端接受到客户端的请求之后，FinalRequestProcessor#processRequest方法判断该请求是否要注册Watcher。<br>代码太长，我们还是以接受到getData请求为例，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> OpCode.getData: &#123;</span><br><span class="line">              lastOp = <span class="string">"GETD"</span>;</span><br><span class="line">              GetDataRequest getDataRequest = <span class="keyword">new</span> GetDataRequest();</span><br><span class="line">              ByteBufferInputStream.byteBuffer2Record(request.request,</span><br><span class="line">                      getDataRequest);</span><br><span class="line">              DataNode n = zks.getZKDatabase().getNode(getDataRequest.getPath());</span><br><span class="line">              <span class="keyword">if</span> (n == <span class="keyword">null</span>) &#123;</span><br><span class="line">                  <span class="keyword">throw</span> <span class="keyword">new</span> KeeperException.NoNodeException();</span><br><span class="line">              &#125;</span><br><span class="line">              PrepRequestProcessor.checkACL(zks, zks.getZKDatabase().aclForNode(n),</span><br><span class="line">                      ZooDefs.Perms.READ,</span><br><span class="line">                      request.authInfo);</span><br><span class="line">              Stat stat = <span class="keyword">new</span> Stat();</span><br><span class="line">              <span class="keyword">byte</span> b[] = zks.getZKDatabase().getData(getDataRequest.getPath(), stat,</span><br><span class="line">                      getDataRequest.getWatch() ? cnxn : <span class="keyword">null</span>);</span><br><span class="line">              rsp = <span class="keyword">new</span> GetDataResponse(b, stat);</span><br><span class="line">              <span class="keyword">break</span>;</span><br><span class="line">          &#125;</span><br></pre></td></tr></table></figure>
+<p>上面的getData方法会判断该请求是否需要Watcher。并且需要的话传入了cntx对象引用,cntx引用是当前的 ServerCnxn 对象。ServerCnxn 是一个 ZooKeeper 客户端和服务器之<br>间的连接接口，代表了一个客户端和服务器的连接，并且该接口继承了Watcher接口，所以可以把 ServerCnxn 看作是一个 Watcher 对象。该对象的process方法就是发送给该客户端连接通知信息。</p>
+<p>服务端调用getData方法，除了获取数据之外还注册了监听到指定的WatchManager。例如这里getData会注册监听到dataWatches中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">DataTree中定义了服务端所有节点操作，增删改查等。</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DataTree</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> WatchManager dataWatches = <span class="keyword">new</span> WatchManager();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//对孩子节点的监听</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> WatchManager childWatches = <span class="keyword">new</span> WatchManager();</span><br><span class="line">    ...省略</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">byte</span>[] getData(String path, Stat stat, Watcher watcher)</span><br><span class="line">        <span class="keyword">throws</span> KeeperException.NoNodeException &#123;</span><br><span class="line">    DataNode n = nodes.get(path);</span><br><span class="line">    <span class="keyword">if</span> (n == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> KeeperException.NoNodeException();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">synchronized</span> (n) &#123;</span><br><span class="line">        n.copyStat(stat);</span><br><span class="line">        <span class="keyword">if</span> (watcher != <span class="keyword">null</span>) &#123;</span><br><span class="line">            dataWatches.addWatch(path, watcher); <span class="comment">//对应的路径注册Watcher</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> n.data;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>addWatch方法如下，数据节点的节点路径和ServerCnxn 最终会被存储在 WatchManager 的 watchTable 和 watch2Paths 中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">addWatch</span><span class="params">(String path, Watcher watcher)</span> </span>&#123;</span><br><span class="line">    HashSet&lt;Watcher&gt; list = watchTable.get(path);</span><br><span class="line">    <span class="keyword">if</span> (list == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">// don't waste memory if there are few watches on a node</span></span><br><span class="line">        <span class="comment">// rehash when the 4th entry is added, doubling size thereafter</span></span><br><span class="line">        <span class="comment">// seems like a good compromise</span></span><br><span class="line">        list = <span class="keyword">new</span> HashSet&lt;Watcher&gt;(<span class="number">4</span>);</span><br><span class="line">        watchTable.put(path, list);</span><br><span class="line">    &#125;</span><br><span class="line">    list.add(watcher);</span><br><span class="line"></span><br><span class="line">    HashSet&lt;String&gt; paths = watch2Paths.get(watcher);</span><br><span class="line">    <span class="keyword">if</span> (paths == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="comment">// cnxns typically have many watches, so use default cap here</span></span><br><span class="line">        paths = <span class="keyword">new</span> HashSet&lt;String&gt;();</span><br><span class="line">        watch2Paths.put(watcher, paths);</span><br><span class="line">    &#125;</span><br><span class="line">    paths.add(path);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>服务器端也将Watcher和所有path的注册关系也放到了一起管理。watchTable是节点路径和在该节点路径上监听的Watcher的集合的映射关系。<br>watch2Paths则是从每个Watcher和该Watcher对应监听的节点路径集合的映射关系。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WatchManager</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger LOG = LoggerFactory.getLogger(WatchManager.class);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> HashMap&lt;String, HashSet&lt;Watcher&gt;&gt; watchTable =</span><br><span class="line">        <span class="keyword">new</span> HashMap&lt;String, HashSet&lt;Watcher&gt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> HashMap&lt;Watcher, HashSet&lt;String&gt;&gt; watch2Paths =</span><br><span class="line">        <span class="keyword">new</span> HashMap&lt;Watcher, HashSet&lt;String&gt;&gt;();</span><br><span class="line"></span><br><span class="line">    ...省略</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>服务端注册Watcher的流程图:</p>
+<p><img src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/WX20180722-195822@2x.png" alt=" WX20180722-195822@2x.png"></p>
+<h1 id="服务端如何触发监听"><a href="#服务端如何触发监听" class="headerlink" title="服务端如何触发监听"></a>服务端如何触发监听</h1><p>我们以处理客户端的setData请求为例。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> Stat <span class="title">setData</span><span class="params">(String path, <span class="keyword">byte</span> data[], <span class="keyword">int</span> version, <span class="keyword">long</span> zxid,</span></span></span><br><span class="line"><span class="function"><span class="params">           <span class="keyword">long</span> time)</span> <span class="keyword">throws</span> KeeperException.NoNodeException </span>&#123;</span><br><span class="line">       Stat s = <span class="keyword">new</span> Stat();</span><br><span class="line">       DataNodeV1 n = nodes.get(path);</span><br><span class="line">       <span class="keyword">if</span> (n == <span class="keyword">null</span>) &#123;</span><br><span class="line">           <span class="keyword">throw</span> <span class="keyword">new</span> KeeperException.NoNodeException();</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">synchronized</span> (n) &#123;</span><br><span class="line">           n.data = data;</span><br><span class="line">           n.stat.setMtime(time);</span><br><span class="line">           n.stat.setMzxid(zxid);</span><br><span class="line">           n.stat.setVersion(version);</span><br><span class="line">           n.copyStat(s);</span><br><span class="line">       &#125;</span><br><span class="line">       dataWatches.triggerWatch(path, EventType.NodeDataChanged);</span><br><span class="line">       <span class="keyword">return</span> s;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到在处理完数据更新之后进行了触发监听的操作triggerWatch,不用想都知道，这里面肯定是从之前管理的Watcher映射中得到该路径上的Watcher集合，并一个个<br>调用process方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> Set&lt;Watcher&gt; <span class="title">triggerWatch</span><span class="params">(String path, EventType type, Set&lt;Watcher&gt; supress)</span> </span>&#123;</span><br><span class="line">       WatchedEvent e = <span class="keyword">new</span> WatchedEvent(type,</span><br><span class="line">               KeeperState.SyncConnected, path);</span><br><span class="line">       HashSet&lt;Watcher&gt; watchers;</span><br><span class="line">       <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">           watchers = watchTable.remove(path);</span><br><span class="line">           <span class="keyword">if</span> (watchers == <span class="keyword">null</span> || watchers.isEmpty()) &#123;</span><br><span class="line">               <span class="keyword">if</span> (LOG.isTraceEnabled()) &#123;</span><br><span class="line">                   ZooTrace.logTraceMessage(LOG,</span><br><span class="line">                           ZooTrace.EVENT_DELIVERY_TRACE_MASK,</span><br><span class="line">                           <span class="string">"No watchers for "</span> + path);</span><br><span class="line">               &#125;</span><br><span class="line">               <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="keyword">for</span> (Watcher w : watchers) &#123;</span><br><span class="line">               HashSet&lt;String&gt; paths = watch2Paths.get(w);</span><br><span class="line">               <span class="keyword">if</span> (paths != <span class="keyword">null</span>) &#123;</span><br><span class="line">                   paths.remove(path);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">for</span> (Watcher w : watchers) &#123;</span><br><span class="line">           <span class="keyword">if</span> (supress != <span class="keyword">null</span> &amp;&amp; supress.contains(w)) &#123;</span><br><span class="line">               <span class="keyword">continue</span>;</span><br><span class="line">           &#125;</span><br><span class="line">           w.process(e);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">return</span> watchers;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到该方法和我们所想的一样，获取需要触发的监听，并且可以看到移除了在watchTable中本次触发的监听和在watch2Paths中监听在该路径的作用域。<br>从这里可以看到，Watcher是一次性的。</p>
+<p>服务端监听的process方法其实就是发送通知操作，以NIOServerCnxn类为例，process方法如下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">synchronized</span> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title">process</span><span class="params">(WatchedEvent event)</span> </span>&#123;</span><br><span class="line">       ReplyHeader h = <span class="keyword">new</span> ReplyHeader(-<span class="number">1</span>, -<span class="number">1L</span>, <span class="number">0</span>);</span><br><span class="line">       <span class="keyword">if</span> (LOG.isTraceEnabled()) &#123;</span><br><span class="line">           ZooTrace.logTraceMessage(LOG, ZooTrace.EVENT_DELIVERY_TRACE_MASK,</span><br><span class="line">                                    <span class="string">"Deliver event "</span> + event + <span class="string">" to 0x"</span></span><br><span class="line">                                    + Long.toHexString(<span class="keyword">this</span>.sessionId)</span><br><span class="line">                                    + <span class="string">" through "</span> + <span class="keyword">this</span>);</span><br><span class="line">       &#125;</span><br><span class="line"></span><br><span class="line">       <span class="comment">// Convert WatchedEvent to a type that can be sent over the wire</span></span><br><span class="line">       WatcherEvent e = event.getWrapper();</span><br><span class="line"></span><br><span class="line">       sendResponse(h, e, <span class="string">"notification"</span>);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>服务端触发Watcher监听的操作序列图如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">![WX20180722-<span class="number">200434</span>@<span class="number">2</span>x.png](https:<span class="comment">//raw.githubusercontent.com/Ooo0oO0o0oO/res/master/WX20180722-200434@2x.png)</span></span><br></pre></td></tr></table></figure>
+<p>需要注意的是像create、delte这样的操作，除了触发在该节点的数据监听之外，也要触发在该新建节点父节点上(只有直接父节点)。具体代码看DataTree#createNode方法。</p>
+<h1 id="客户端如何回调监听"><a href="#客户端如何回调监听" class="headerlink" title="客户端如何回调监听"></a>客户端如何回调监听</h1><p>SendThread#readResponse方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"> <span class="function"><span class="keyword">void</span> <span class="title">readResponse</span><span class="params">(ByteBuffer incomingBuffer)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">            ByteBufferInputStream bbis = <span class="keyword">new</span> ByteBufferInputStream(</span><br><span class="line">                    incomingBuffer);</span><br><span class="line">            BinaryInputArchive bbia = BinaryInputArchive.getArchive(bbis);</span><br><span class="line">            ReplyHeader replyHdr = <span class="keyword">new</span> ReplyHeader();</span><br><span class="line"></span><br><span class="line">            replyHdr.deserialize(bbia, <span class="string">"header"</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            <span class="comment">//省略部分代码</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (replyHdr.getXid() == -<span class="number">1</span>) &#123;</span><br><span class="line">                <span class="comment">// -1 means notification</span></span><br><span class="line">                <span class="keyword">if</span> (LOG.isDebugEnabled()) &#123;</span><br><span class="line">                    LOG.debug(<span class="string">"Got notification sessionid:0x"</span></span><br><span class="line">                        + Long.toHexString(sessionId));</span><br><span class="line">                &#125;</span><br><span class="line">                WatcherEvent event = <span class="keyword">new</span> WatcherEvent();</span><br><span class="line">                event.deserialize(bbia, <span class="string">"response"</span>);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// convert from a server path to a client path</span></span><br><span class="line">                <span class="keyword">if</span> (chrootPath != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    String serverPath = event.getPath();</span><br><span class="line">                    <span class="keyword">if</span>(serverPath.compareTo(chrootPath)==<span class="number">0</span>)</span><br><span class="line">                        event.setPath(<span class="string">"/"</span>);</span><br><span class="line">                    <span class="keyword">else</span> <span class="keyword">if</span> (serverPath.length() &gt; chrootPath.length())</span><br><span class="line">                        event.setPath(serverPath.substring(chrootPath.length()));</span><br><span class="line">                    <span class="keyword">else</span> &#123;</span><br><span class="line">                    	LOG.warn(<span class="string">"Got server path "</span> + event.getPath()</span><br><span class="line">                    			+ <span class="string">" which is too short for chroot path "</span></span><br><span class="line">                    			+ chrootPath);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                WatchedEvent we = <span class="keyword">new</span> WatchedEvent(event);</span><br><span class="line">                <span class="keyword">if</span> (LOG.isDebugEnabled()) &#123;</span><br><span class="line">                    LOG.debug(<span class="string">"Got "</span> + we + <span class="string">" for sessionid 0x"</span></span><br><span class="line">                            + Long.toHexString(sessionId));</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                eventThread.queueEvent( we );</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            ...省略</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>接受到响应之后，判断响应头标识中的XID是否为-1，标识这是一个通知类型的响应。则将字节流反序列化成WatcherEvent对象。最后还原成WatchedEvent对象。<br>因为Watcher类型的process方法中的参数就是WatchedEvent类型，之后我们调用<code>queueEvent</code>将本次WatchedEvent放入EventThread的事件队列队列中。</p>
+<p>有必要讲下queueEvent这个方法，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">queueEvent</span><span class="params">(WatchedEvent event)</span> </span>&#123;</span><br><span class="line">          <span class="keyword">if</span> (event.getType() == EventType.None</span><br><span class="line">                  &amp;&amp; sessionState == event.getState()) &#123;</span><br><span class="line">              <span class="keyword">return</span>;</span><br><span class="line">          &#125;</span><br><span class="line">          sessionState = event.getState();</span><br><span class="line"></span><br><span class="line">          <span class="comment">// materialize the watchers based on the event</span></span><br><span class="line">          WatcherSetEventPair pair = <span class="keyword">new</span> WatcherSetEventPair(</span><br><span class="line">                  watcher.materialize(event.getState(), event.getType(),</span><br><span class="line">                          event.getPath()),</span><br><span class="line">                          event);</span><br><span class="line">          <span class="comment">// queue the pair (watch set &amp; event) for later processing</span></span><br><span class="line">          waitingEvents.add(pair);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<p>先构造一个WatcherSetEventPair再放入EventThread的waitingEvents队列。<code>watcher.materialize</code>方法主要是将在客户端维持的(路径-&gt;队列,Set<watcher>)的<br>注册关系找到本次WatchedEvent需要通知的Watcher集合并返回集合，除此之外，和服务器端一样，也需要移除注册关系中被通知的Watcher。</watcher></p>
+<p>EventThread#run方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">         <span class="keyword">try</span> &#123;</span><br><span class="line">            isRunning = <span class="keyword">true</span>;</span><br><span class="line">            <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">               Object event = waitingEvents.take();</span><br><span class="line">               <span class="keyword">if</span> (event == eventOfDeath) &#123;</span><br><span class="line">                  wasKilled = <span class="keyword">true</span>;</span><br><span class="line">               &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                  processEvent(event);</span><br><span class="line">               &#125;</span><br><span class="line">               <span class="keyword">if</span> (wasKilled)</span><br><span class="line">                  <span class="keyword">synchronized</span> (waitingEvents) &#123;</span><br><span class="line">                     <span class="keyword">if</span> (waitingEvents.isEmpty()) &#123;</span><br><span class="line">                        isRunning = <span class="keyword">false</span>;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                     &#125;</span><br><span class="line">                  &#125;</span><br><span class="line">            &#125;</span><br><span class="line">         &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            LOG.error(<span class="string">"Event thread exiting due to interruption"</span>, e);</span><br><span class="line">         &#125;</span><br><span class="line"></span><br><span class="line">          LOG.info(<span class="string">"EventThread shut down for session: 0x&#123;&#125;"</span>,</span><br><span class="line">                   Long.toHexString(getSessionId()));</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<p>该方法很简单，就是不断从waitingEvents中取通知事件。waitingEvents是个<code>LinkedBlockingQueue</code>对象。然后调用processEvent方法处理该事件。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">processEvent</span><span class="params">(Object event)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">try</span> &#123;</span><br><span class="line">           <span class="keyword">if</span> (event <span class="keyword">instanceof</span> WatcherSetEventPair) &#123;</span><br><span class="line">               <span class="comment">// each watcher will process the event</span></span><br><span class="line">               WatcherSetEventPair pair = (WatcherSetEventPair) event;</span><br><span class="line">               <span class="keyword">for</span> (Watcher watcher : pair.watchers) &#123;</span><br><span class="line">                   <span class="keyword">try</span> &#123;</span><br><span class="line">                       watcher.process(pair.event);</span><br><span class="line">                   &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">                       LOG.error(<span class="string">"Error while calling watcher "</span>, t);</span><br><span class="line">                   &#125;</span><br><span class="line">               &#125;</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                 ...省略</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">           &#125;</span><br></pre></td></tr></table></figure>
+<p>processEvent方法取出本次事件需要通知的所有集合，并进行循环调用每个Watcher的process方法。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://juejin.im/post/5b0784ab6fb9a07abf72f098" target="_blank" rel="noopener">ZooKeeper Watcher机制</a><br><a href="https://zookeeper.apache.org/doc/current/zookeeperProgrammers.html#ch_zkWatches" target="_blank" rel="noopener">官方文档-watches</a></p>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">55</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/CodingSinger" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#zookeeper-Watcher机制"><span class="nav-number">1.</span> <span class="nav-text">zookeeper Watcher机制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#zookeeper-watcher特性"><span class="nav-number">2.</span> <span class="nav-text">zookeeper watcher特性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#客户端如何注册监听"><span class="nav-number">3.</span> <span class="nav-text">客户端如何注册监听</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#服务端如何处理监听器的请求"><span class="nav-number">4.</span> <span class="nav-text">服务端如何处理监听器的请求</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#服务端如何触发监听"><span class="nav-number">5.</span> <span class="nav-text">服务端如何触发监听</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#客户端如何回调监听"><span class="nav-number">6.</span> <span class="nav-text">客户端如何回调监听</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

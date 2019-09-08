@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next muse" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.2" color="#222">
+
+
+
+
+
+  <meta name="keywords" content=",,,,,," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="很多人都知道在使用Spring框架开发web应用的时候需要在web.xml中加入下面这一个监听器123&amp;lt;listener&amp;gt;		&amp;lt;listener-class&amp;gt;org.springframework.web.context.ContextLoaderListener&amp;lt;/listener-class&amp;gt;   &amp;lt;/listener&amp;gt; 但是为什么需要加这个呢?">
+<meta name="keywords" content="Spring">
+<meta property="og:type" content="website">
+<meta property="og:title" content="学习Spring(一)之ContextLoaderListener详解">
+<meta property="og:url" content="http://yoursite.com/copy/学习Spring-一-之ContextLoaderListener详解-md.html">
+<meta property="og:site_name" content="看风人Z">
+<meta property="og:description" content="很多人都知道在使用Spring框架开发web应用的时候需要在web.xml中加入下面这一个监听器123&amp;lt;listener&amp;gt;		&amp;lt;listener-class&amp;gt;org.springframework.web.context.ContextLoaderListener&amp;lt;/listener-class&amp;gt;   &amp;lt;/listener&amp;gt; 但是为什么需要加这个呢?">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-05-18T08:30:41.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="学习Spring(一)之ContextLoaderListener详解">
+<meta name="twitter:description" content="很多人都知道在使用Spring框架开发web应用的时候需要在web.xml中加入下面这一个监听器123&amp;lt;listener&amp;gt;		&amp;lt;listener-class&amp;gt;org.springframework.web.context.ContextLoaderListener&amp;lt;/listener-class&amp;gt;   &amp;lt;/listener&amp;gt; 但是为什么需要加这个呢?">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: "",
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/copy/学习Spring-一-之ContextLoaderListener详解-md.html"/>
+
+
+
+
+
+  <title>学习Spring(一)之ContextLoaderListener详解 | 看风人Z</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">看风人Z</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-poems">
+          <a href="/poems/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            poems
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-question-circle"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+    
+    
+    <div class="post-block page">
+      <header class="post-header">
+
+	<h1 class="post-title" itemprop="name headline">学习Spring(一)之ContextLoaderListener详解</h1>
+
+
+
+</header>
+
+      
+      
+      
+      <div class="post-body">
+        
+        
+          <p>很多人都知道在使用Spring框架开发web应用的时候需要在web.xml中加入下面这一个监听器<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">listener</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">listener-class</span>&gt;</span>org.springframework.web.context.ContextLoaderListener<span class="tag">&lt;/<span class="name">listener-class</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;/<span class="name">listener</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>但是为什么需要加这个呢?</p>
+<blockquote>
+<p>ContextLoaderListener的作用就是启动Web容器时，读取在contextConfigLocation中定义的xml文件，自动装配ApplicationContext的配置信息，并产生WebApplicationContext对象，然后将这个对象放置在ServletContext的属性里，这样我们只要得到Servlet就可以得到WebApplicationContext对象，并利用这个对象访问spring容器管理的bean。<br>简单来说，就是上面这段配置为项目提供了spring支持，初始化了Ioc容器。<br><a id="more"></a><br>下面让我们看看ContextLoaderListener是如何整合Spring到web项目中的。<br>ContextLoaderListener<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ContextLoaderListener</span> <span class="keyword">extends</span> <span class="title">ContextLoader</span> <span class="keyword">implements</span> <span class="title">ServletContextListener</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ContextLoaderListener</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ContextLoaderListener</span><span class="params">(WebApplicationContext context)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">contextInitialized</span><span class="params">(ServletContextEvent event)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.initWebApplicationContext(event.getServletContext());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">contextDestroyed</span><span class="params">(ServletContextEvent event)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.closeWebApplicationContext(event.getServletContext());</span><br><span class="line">        ContextCleanupListener.cleanupAttributes(event.getServletContext());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>可以看到该类继承了ServletContextListener</p>
+<blockquote>
+<p>ServletContextListener<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ServletContextListener</span> <span class="keyword">extends</span> <span class="title">EventListener</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">contextInitialized</span><span class="params">(ServletContextEvent var1)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">contextDestroyed</span><span class="params">(ServletContextEvent var1)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<blockquote>
+<p>实现ServletContextListener又有什么作用？<br>ServletContextListener接口里的函数会结合Web容器的生命周期被调用。因为ServletContextListener是ServletContext的监听者，如果ServletContext发生变化，会触发相应的事件，而监听器一直对事件监听，如果接收到了变化，就会做出预先设计好的相应动作。由于ServletContext变化而触发的监听器的响应具体包括：在服务器启动时，ServletContext被创建的时候，服务器关闭时，ServletContext将被销毁的时候等</p>
+</blockquote>
+<hr>
+<p>大家都知道在非web环境下使用Spring框架有一种方式是手动加载xml配置<br>代码如下<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ApplicationContext applicationContext = <span class="keyword">new</span> ClassPathXmlApplicationContext(<span class="string">"Demo2DI/beans.xml"</span>);</span><br><span class="line">BookService bookService = (BookService) applicationContext.getBean(<span class="string">"bookServiceID"</span>);</span><br></pre></td></tr></table></figure></p>
+<p>上面代码其实在构造ApplicationContext的时候装配了配置信息<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ClassPathXmlApplicationContext</span><span class="params">(String[] configLocations, <span class="keyword">boolean</span> refresh, ApplicationContext parent)</span> <span class="keyword">throws</span> BeansException </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>(parent);</span><br><span class="line">    <span class="keyword">this</span>.setConfigLocations(configLocations);</span><br><span class="line">    <span class="keyword">if</span> (refresh) &#123;</span><br><span class="line">        <span class="keyword">this</span>.refresh(); <span class="comment">//该方法完成了大部分Spring框架的初始化过程</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其实ContextLoaderListener的作用就是在Web容器和Spring框架的初始化过程起到一个桥的作用。<br>在Web容器的启动过程中进行了Spring初始化。<br>我们看看这一切是如何实现的。<br>不知道各位是否了解过Tomcat下Web容器的启动过程，不了解的可以暂且记下，过后再去详细了解，在这里为了方便讲解，只需各位知道StandardContext是一个Tomcat这个web容器的组件，一个StandardContext代表一个web应用。StandardContext组件在初始化时会从该web项目下加载web.xml中注册的监听器并初始化。<br>在StandardContext的startInternal方法中，不仅创建了ServletContext而且初始化了监听器，因为startInternal方法过于冗长，这里只贴出其中重要的入口代码句。<br><code>this.postWorkDirectory();</code> 该句创建了SerletContext<br><code>if (ok &amp;&amp; !this.listenerStart()) {</code>如果一切正常则开始<br>这里着重讲解下ListenerStart方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">listenerStart</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (log.isDebugEnabled()) &#123;</span><br><span class="line">        log.debug(<span class="string">"Configuring application event listeners"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    String[] listeners = <span class="keyword">this</span>.findApplicationListeners();<span class="comment">//找到web.xml中注册的listeners</span></span><br><span class="line">    Object[] results = <span class="keyword">new</span> Object[listeners.length];</span><br><span class="line">    <span class="keyword">boolean</span> ok = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; results.length; ++i) &#123; <span class="comment">//遍历listeners并进行监听器的初始化</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.getLogger().isDebugEnabled()) &#123;</span><br><span class="line">            <span class="keyword">this</span>.getLogger().debug(<span class="string">" Configuring event listener class '"</span> + listeners[i] + <span class="string">"'"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            String listener = listeners[i];</span><br><span class="line">            results[i] = <span class="keyword">this</span>.getInstanceManager().newInstance(listener);<span class="comment">//利用反射的方法构造监听器实例</span></span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable var13) &#123;</span><br><span class="line">            Throwable t = ExceptionUtils.unwrapInvocationTargetException(var13);</span><br><span class="line">            ExceptionUtils.handleThrowable(t);</span><br><span class="line">            <span class="keyword">this</span>.getLogger().error(sm.getString(<span class="string">"standardContext.applicationListener"</span>, <span class="keyword">new</span> Object[]&#123;listeners[i]&#125;), t);</span><br><span class="line">            ok = <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!ok) &#123;</span><br><span class="line">        <span class="keyword">this</span>.getLogger().error(sm.getString(<span class="string">"standardContext.applicationSkipped"</span>));</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        List&lt;Object&gt; eventListeners = <span class="keyword">new</span> ArrayList();</span><br><span class="line">        List&lt;Object&gt; lifecycleListeners = <span class="keyword">new</span> ArrayList();<span class="comment">//初始化两个不同类别的监听器列表</span></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; results.length; ++i) &#123;</span><br><span class="line">            <span class="keyword">if</span> (results[i] <span class="keyword">instanceof</span> ServletContextAttributeListener || results[i] <span class="keyword">instanceof</span> ServletRequestAttributeListener || results[i] <span class="keyword">instanceof</span> ServletRequestListener || results[i] <span class="keyword">instanceof</span> HttpSessionIdListener || results[i] <span class="keyword">instanceof</span> HttpSessionAttributeListener) &#123;</span><br><span class="line">                eventListeners.add(results[i]);<span class="comment">//满足以上接口的监听器为事件监听器</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (results[i] <span class="keyword">instanceof</span> ServletContextListener || results[i] <span class="keyword">instanceof</span> HttpSessionListener) &#123;</span><br><span class="line">                lifecycleListeners.add(results[i]);<span class="comment">//为生命周期监听器</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        Object[] instances = <span class="keyword">this</span>.getApplicationEventListeners();</span><br><span class="line">        <span class="keyword">int</span> var7 = instances.length;</span><br><span class="line">        <span class="keyword">int</span> var8;</span><br><span class="line">        Object lifecycleListener;</span><br><span class="line">        <span class="keyword">for</span>(var8 = <span class="number">0</span>; var8 &lt; var7; ++var8) &#123;</span><br><span class="line">            lifecycleListener = instances[var8];</span><br><span class="line">            eventListeners.add(lifecycleListener);</span><br><span class="line">        &#125;<span class="comment">//添加新增的事件监听器</span></span><br><span class="line">        <span class="keyword">this</span>.setApplicationEventListeners(eventListeners.toArray());<span class="comment">//重新设置事件监听器集合</span></span><br><span class="line">        instances = <span class="keyword">this</span>.getApplicationLifecycleListeners();</span><br><span class="line">        var7 = instances.length;</span><br><span class="line">        <span class="keyword">for</span>(var8 = <span class="number">0</span>; var8 &lt; var7; ++var8) &#123;</span><br><span class="line">            lifecycleListener = instances[var8];</span><br><span class="line">            lifecycleListeners.add(lifecycleListener);</span><br><span class="line">            <span class="keyword">if</span> (lifecycleListener <span class="keyword">instanceof</span> ServletContextListener) &#123;</span><br><span class="line">                <span class="keyword">this</span>.noPluggabilityListeners.add(lifecycleListener);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">this</span>.setApplicationLifecycleListeners(lifecycleListeners.toArray());<span class="comment">//添加新增的生命周期监听器并重新设置集合</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.getLogger().isDebugEnabled()) &#123;</span><br><span class="line">            <span class="keyword">this</span>.getLogger().debug(<span class="string">"Sending application start events"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">this</span>.getServletContext();</span><br><span class="line">        <span class="keyword">this</span>.context.setNewServletContextListenerAllowed(<span class="keyword">false</span>);</span><br><span class="line">        instances = <span class="keyword">this</span>.getApplicationLifecycleListeners();</span><br><span class="line">        <span class="keyword">if</span> (instances != <span class="keyword">null</span> &amp;&amp; instances.length != <span class="number">0</span>) &#123;</span><br><span class="line">            ServletContextEvent event = <span class="keyword">new</span> ServletContextEvent(<span class="keyword">this</span>.getServletContext());</span><br><span class="line">            ServletContextEvent tldEvent = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">this</span>.noPluggabilityListeners.size() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">this</span>.noPluggabilityServletContext = <span class="keyword">new</span> StandardContext.NoPluggabilityServletContext(<span class="keyword">this</span>.getServletContext());</span><br><span class="line">                tldEvent = <span class="keyword">new</span> ServletContextEvent(<span class="keyword">this</span>.noPluggabilityServletContext);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; instances.length; ++i) &#123;</span><br><span class="line">                <span class="keyword">if</span> (instances[i] <span class="keyword">instanceof</span> ServletContextListener) &#123;</span><br><span class="line">                    ServletContextListener listener = (ServletContextListener)instances[i];<span class="comment">//** 重点来了  如果是继承了ServletContext的则开始调用监听器的</span></span><br><span class="line">	<span class="comment">//contextInitialized方法  我们所要了解的ContextLoadListener正是在此调用了该方法。</span></span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        <span class="keyword">this</span>.fireContainerEvent(<span class="string">"beforeContextInitialized"</span>, listener);</span><br><span class="line">                        <span class="keyword">if</span> (<span class="keyword">this</span>.noPluggabilityListeners.contains(listener)) &#123;</span><br><span class="line">                            listener.contextInitialized(tldEvent);</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            listener.contextInitialized(event);</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">this</span>.fireContainerEvent(<span class="string">"afterContextInitialized"</span>, listener);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Throwable var12) &#123;</span><br><span class="line">                        ExceptionUtils.handleThrowable(var12);</span><br><span class="line">                        <span class="keyword">this</span>.fireContainerEvent(<span class="string">"afterContextInitialized"</span>, listener);</span><br><span class="line">                        <span class="keyword">this</span>.getLogger().error(sm.getString(<span class="string">"standardContext.listenerStart"</span>, <span class="keyword">new</span> Object[]&#123;instances[i].getClass().getName()&#125;), var12);</span><br><span class="line">                        ok = <span class="keyword">false</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> ok;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> ok;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>** 总结来说上面方法实现了web.xml中监听器的实例化以及原先系统监听器的整理,以及实现了ServletContextListener的监听器的指定方法调用。<br>以下是ContextLoaderListener调用的contextInitialized方法代码<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> WebApplicationContext <span class="title">initWebApplicationContext</span><span class="params">(ServletContext servletContext)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (servletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE) != <span class="keyword">null</span>) &#123;<span class="comment">//如果之前已经初始化了WebApplicationContext</span></span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Cannot initialize context because there is already a root application context present - check whether you have multiple ContextLoader* definitions in your web.xml!"</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        Log logger = LogFactory.getLog(ContextLoader.class);</span><br><span class="line">        servletContext.log(<span class="string">"Initializing Spring root WebApplicationContext"</span>);</span><br><span class="line">        <span class="keyword">if</span> (logger.isInfoEnabled()) &#123;</span><br><span class="line">            logger.info(<span class="string">"Root WebApplicationContext: initialization started"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">long</span> startTime = System.currentTimeMillis();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">this</span>.context == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">this</span>.context = <span class="keyword">this</span>.createWebApplicationContext(servletContext);<span class="comment">//根据servletContext中的初始化参数创建了WebApplicationContext</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">this</span>.context <span class="keyword">instanceof</span> ConfigurableWebApplicationContext) &#123;</span><br><span class="line">                ConfigurableWebApplicationContext cwac = (ConfigurableWebApplicationContext)<span class="keyword">this</span>.context;</span><br><span class="line">                <span class="keyword">if</span> (!cwac.isActive()) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (cwac.getParent() == <span class="keyword">null</span>) &#123;</span><br><span class="line">                        ApplicationContext parent = <span class="keyword">this</span>.loadParentContext(servletContext);</span><br><span class="line">                        cwac.setParent(parent);</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">this</span>.configureAndRefreshWebApplicationContext(cwac, servletContext);<span class="comment">//** 重点方法 放在下面单独讲解**</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, <span class="keyword">this</span>.context);<span class="comment">//设定servlerContext向的WebapplicationContext绑定</span></span><br><span class="line">            ClassLoader ccl = Thread.currentThread().getContextClassLoader();</span><br><span class="line">            <span class="keyword">if</span> (ccl == ContextLoader.class.getClassLoader()) &#123;</span><br><span class="line">                currentContext = <span class="keyword">this</span>.context;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (ccl != <span class="keyword">null</span>) &#123;</span><br><span class="line">                currentContextPerThread.put(ccl, <span class="keyword">this</span>.context);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (logger.isDebugEnabled()) &#123;</span><br><span class="line">                logger.debug(<span class="string">"Published root WebApplicationContext as ServletContext attribute with name ["</span> + WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE + <span class="string">"]"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (logger.isInfoEnabled()) &#123;</span><br><span class="line">                <span class="keyword">long</span> elapsedTime = System.currentTimeMillis() - startTime;</span><br><span class="line">                logger.info(<span class="string">"Root WebApplicationContext: initialization completed in "</span> + elapsedTime + <span class="string">" ms"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.context;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RuntimeException var8) &#123;</span><br><span class="line">            logger.error(<span class="string">"Context initialization failed"</span>, var8);</span><br><span class="line">            servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, var8);</span><br><span class="line">            <span class="keyword">throw</span> var8;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Error var9) &#123;</span><br><span class="line">            logger.error(<span class="string">"Context initialization failed"</span>, var9);</span><br><span class="line">            servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, var9);</span><br><span class="line">            <span class="keyword">throw</span> var9;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">configureAndRefreshWebApplicationContext</span><span class="params">(ConfigurableWebApplicationContext wac, ServletContext sc)</span> </span>&#123;</span><br><span class="line">     String configLocationParam;</span><br><span class="line">     <span class="keyword">if</span> (ObjectUtils.identityToString(wac).equals(wac.getId())) &#123;</span><br><span class="line">         configLocationParam = sc.getInitParameter(<span class="string">"contextId"</span>);</span><br><span class="line">         <span class="keyword">if</span> (configLocationParam != <span class="keyword">null</span>) &#123;</span><br><span class="line">             wac.setId(configLocationParam);</span><br><span class="line">         &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">             wac.setId(ConfigurableWebApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + ObjectUtils.getDisplayString(sc.getContextPath()));</span><br><span class="line">         &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     wac.setServletContext(sc);<span class="comment">//建立WebApplicationContext向的ServletContext的绑定</span></span><br><span class="line">     configLocationParam = sc.getInitParameter(<span class="string">"contextConfigLocation"</span>);<span class="comment">//获取init参数中的Spring配置参数  既	web.xml中的&lt;context-param&gt;中的参数</span></span><br><span class="line">     <span class="keyword">if</span> (configLocationParam != <span class="keyword">null</span>) &#123;</span><br><span class="line">         wac.setConfigLocation(configLocationParam);<span class="comment">//设定配置文件</span></span><br><span class="line">     &#125;</span><br><span class="line">     ConfigurableEnvironment env = wac.getEnvironment();</span><br><span class="line">     <span class="keyword">if</span> (env <span class="keyword">instanceof</span> ConfigurableWebEnvironment) &#123;</span><br><span class="line">         ((ConfigurableWebEnvironment)env).initPropertySources(sc, (ServletConfig)<span class="keyword">null</span>);</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">this</span>.customizeContext(sc, wac);</span><br><span class="line">     wac.refresh();<span class="comment">//熟悉的refresh方法 调用的还是AbstractApplicationContext的refresh方法</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p><strong> 总结上面两个方法主要实现了WebApplicationContext的初始化并且和ServlceContext设立了双向链接，还有加载Spring配置等功能。所以在Spring的web项目中可以通过得到ServletContext并调用getAttribute方法得到WebApplication。</strong></p>
+<p>到此也许大家知道了ContextLoadListener是如何做到一座桥该有的作用。但是你可能会对ServletContext,ApplicationContext，StandardContext,WebApplicationContext一脸懵逼。</p>
+<ul>
+<li><p>ServletContext<br>ServletContext 是Servlet与Servlet容器之间直接通信的接口，Servlet容器在启动一个web应用时，会为它创建一个ServletContext对 象，每个web应用有唯一的ServletContext对象，同一个web应用的所有Servlet对象共享一个 ServletContext，Servlet对象可以通过它来访问容器中的各种资源</p>
+</li>
+<li><p>ApplicationContext<br>ApplicationContext在Spring和Tomcat中都有，在Tomcat中为实现了ServletContext的类，在Spring中为一个接口。<br>在Tomcat中，ApplicationContext实现了ServletContext接口，由于Tomcat惯用Facade方式，因此在web应用程序中获取到的ServletContext实例实际上是一个ApplicationContextFacade对象，对ApplicationContext实例进行了封装。而ApplicationContext实例中含有Tomcat的Context容器实例（StandardContext实例，也就是在server.xml中配置的Context节点），以此来获取/操作Tomcat容器内部的一些信息，例如获取/注册servlet等。<a href="https://www.zhihu.com/question/36619536" target="_blank" rel="noopener">知乎回答链接</a></p>
+</li>
+<li>StandardContext<br>StandardContext表示一个上下文容器（Context）,代表一个web应用，定义了 Web App 的一些运行参数，每一个上下文包括多个包装器（Wrapper），每个包装器代表一个Servlet<em> </em> WebApplicationContext<br>该类是Spring框架的接口，并且继承了ApplicationContext接口，该接口是XmlWebApplicationContext等类实现的接口。</li>
+</ul>
+
+        
+      </div>
+      
+      
+      
+    </div>
+    
+    
+    
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zNTA0MS8xMTU3Nw=="></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://raw.githubusercontent.com/Ooo0oO0o0oO/res/master/hope.jpeg"
+                alt="看风人Z" />
+            
+              <p class="site-author-name" itemprop="name">看风人Z</p>
+              <p class="site-description motion-element" itemprop="description">少看看别人，多提升自己。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">55</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">15</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/CodingSinger" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.panchengming.com" title="xuwujing" target="_blank">xuwujing</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://kanylife.github.io" title="kenny" target="_blank">kenny</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">看风人Z</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
